@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Utils\DateTimeHelper\**" />
+    <EmbeddedResource Remove="Utils\DateTimeHelper\**" />
+    <None Remove="Utils\DateTimeHelper\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Utils\DataExports\Excel\ExcelFileGenerator.cs" />
+    <Compile Remove="Utils\DataExports\Excel\IEPPlusExcelExportCustomizer.cs" />
+    <Compile Remove="Utils\ENV.cs" />
+    <Compile Remove="Utils\JsonDeserializer.cs" />
+    <Compile Remove="Utils\JsonReplies\DataTableSuccessMessage.cs" />
+    <Compile Remove="Utils\RequestHelper.cs" />
+    <Compile Remove="Utils\RequestValidator.cs" />
+    <Compile Remove="Utils\SessionHelper.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    <PackageReference Include="NPOI" Version="2.5.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\ELibrary\ELibrary.Standard\ELibrary.Standard.csproj" />
+  </ItemGroup>
+
+</Project>
