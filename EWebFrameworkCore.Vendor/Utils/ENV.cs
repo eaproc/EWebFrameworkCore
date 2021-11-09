@@ -2,13 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
-
-
-using EPRO.Library;
-using EPRO.Library.AppConfigurations;
-using EPRO.Library.Objects;
-using static EWebFramework.Vendor.PageHandlers;
-
+using ELibrary.Standard.VB.AppConfigurations;
+using ELibrary.Standard.VB.Objects;
 
 namespace EWebFrameworkCore.Vendor.Utils
 {
@@ -26,7 +21,7 @@ namespace EWebFrameworkCore.Vendor.Utils
         /// <param name="EnvFileLocation"></param>
         public ENV(string EnvFileLocation = null)
         {
-            var pPath = EnvFileLocation == null ? RootPath(".env") : EnvFileLocation;
+            var pPath = EnvFileLocation == null ? PathHandlers.RootPath(".env") : EnvFileLocation;
             if (!System.IO.File.Exists(pPath))
                 throw new Exception("Add .env file to your app!");
 

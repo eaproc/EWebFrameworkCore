@@ -2,10 +2,63 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <IsPackable>true</IsPackable>
+    <EnableDefaultContentItems>false</EnableDefaultContentItems>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\ELibrary\ELibrary.Standard\ELibrary.Standard.csproj" />
+    <Compile Remove="bin\**" />
+
+    <Content Remove="bin\**" />
+
+    <EmbeddedResource Remove="bin\**" />
+
+    <None Remove="bin\**" />
+
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="ISpeaker.cs" />
+    <Compile Remove="PositionOptions.cs" />
+    <Compile Remove="Speaker.cs" />
+    <Compile Remove="TopItemSettings.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove=".env" />
+    <None Remove="appsettings.json" />
+    <None Remove="appsettings.Production.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="DotNetEnv" Version="2.2.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include=".env">
+      <Pack>false</Pack>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToPublishDirectory>Do not copy</CopyToPublishDirectory>
+    </Content>
+    <Content Include="appsettings.Development.json">
+      <Pack>false</Pack>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToPublishDirectory>Do not copy</CopyToPublishDirectory>
+    </Content>
+    <Content Include="appsettings.json">
+      <Pack>true</Pack>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+    </Content>
+    <Content Include="appsettings.Production.json">
+      <Pack>false</Pack>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToPublishDirectory>Do not copy</CopyToPublishDirectory>
+    </Content>
+  </ItemGroup>
+  
+  <ItemGroup>
     <ProjectReference Include="..\EWebFrameworkCore.Vendor\EWebFrameworkCore.Vendor.csproj" />
   </ItemGroup>
 

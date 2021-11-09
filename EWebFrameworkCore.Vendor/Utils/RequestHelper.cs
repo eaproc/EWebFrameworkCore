@@ -1,5 +1,4 @@
-﻿using EPRO.Library;
-using EPRO.Library.Objects;
+﻿using static EWebFrameworkCore.Vendor.PathHandlers;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -7,144 +6,145 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Web;
-using System.Web.Script.Serialization;
-using static EWebFramework.Vendor.PageHandlers;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
+using ELibrary.Standard.VB.Objects;
 
 namespace EWebFrameworkCore.Vendor.Utils
 {
     /// <summary>
     /// Request Helper helps to get request posted
     /// </summary>
-    public class RequestHelper:IJsonable
+    public partial class RequestHelper : IJsonable, IRequestHelper
     {
+        /// <summary>
+        /// Current HttpRequest Object
+        /// </summary>
+        public HttpRequest OriginalRequest { private set; get; }
+
+        public bool IsJsonRequest { private set; get; }
 
 
-        //
-        //
-        //  Treat variable as null if it is empty string if nullable,
-        //  Unless you send it as JSON
-        //
-        //
-
+        /// <summary>
+        /// The string body of the post as string
+        /// </summary>
+        public string RequestBodyContent { private set; get; }
 
 
         /// <summary>
         /// The variables sent
         /// </summary>
-        public Dictionary<string, object> requestVariables;
+        public Dictionary<string, object> RequestVariables { private set; get; }
 
 
-       
-        /// <summary>
-        /// The string body of the post as string
-        /// </summary>
-        public string RequestBodyContent
+        public RequestHelper(IServiceProvider provider)
         {
-            get
-            {
-                try
-                {
-                    Stream req = this.OriginalRequest.InputStream;
-                    req.Seek(0, System.IO.SeekOrigin.Begin);
-                    // Read it without closing the stream. Because once the stream is closed, it is gone.
-                    // 
-                    return new StreamReader(req, Encoding.UTF8, true, 1024, true).ReadToEnd();
-                }
-                catch (Exception ex)
-                {
-                    Logger.Print("Error reading Request.Input String of Header: " + this.OriginalRequest.ContentType, ex);
-                }
+            this.OriginalRequest = provider.GetService<IHttpContextAccessor>().HttpContext.Request;
 
-                return string.Empty;
-            }
+            this.IsJsonRequest = this.OriginalRequest.HasJsonContentType();
+            this.RequestVariables = new Dictionary<string, object>();
+
+            this.SetBodyContent();
+
+            this.LoadData();
+
         }
 
 
         /// <summary>
-        /// Current HttpRequest Object
+        /// This can be done only once
         /// </summary>
-        private HttpRequest OriginalRequest { set; get; }
-
-        private readonly bool IsJsonRequest;
+        private void SetBodyContent()
+        {
+            Stream req = this.OriginalRequest.BodyReader.AsStream(true);
+             this.RequestBodyContent = new StreamReader(req, Encoding.UTF8, true, 1024, true).ReadToEnd();
+        }
 
 
         /// <summary>
-        /// Create an help to access post object
+        /// Done only once
         /// </summary>
         /// <param name="request"></param>
-        public RequestHelper(HttpRequest request)
-
+        private void LoadData()
         {
 
             try
             {
-                this.requestVariables = new Dictionary<string, object>();
-                this.OriginalRequest = request;
-                this.IsJsonRequest = (request.ContentType == "application/json");
-                foreach (var p in request.Params)
+                if( this.OriginalRequest.Query.Count > 0 )
                 {
-                    if (p == null)
-                    {
-                        // Parameter is null but there is value.
-                        // That occurs when you send like &value
-                        // Instead of &value=something or atleast with =
-                        // or like this $value=
-                        //Logger.Print("p is null");
-                        // We don't accept that parameter so it won't be regarded
-                        continue;
-                    }
-                    RecursiveAddJson(new KeyValuePair<string, object>(p.ToString(), request[p.ToString()]));
+                    foreach (var p in this.OriginalRequest.Query.ToDictionary((x) => x.Key, (x) => (object)x.Value))
+                        RecursiveAddJson(p);
+
+                    // Process Arrays in Querys
+                    foreach ( var v in  QueryArrayParam.ProcessArraysInQuery(this.RequestVariables.Select(x => new KeyValuePair<string, string>(x.Key, x.Value==null? string.Empty: x.Value.ToString() ) ) ) )
+                        this.RequestVariables.Add(v.ParamKey, v);
                 }
 
 
+                //foreach (var p in request.Params)
+                //{
+                //    if (p == null)
+                //    {
+                //        // Parameter is null but there is value.
+                //        // That occurs when you send like &value
+                //        // Instead of &value=something or atleast with =
+                //        // or like this $value=
+                //        //Logger.Print("p is null");
+                //        // We don't accept that parameter so it won't be regarded
+                //        continue;
+                //    }
+                //    RecursiveAddJson(new KeyValuePair<string, object>(p.ToString(), request[p.ToString()]));
+                //}
 
-                // Only supports object not array, with array, this lines will crash
-                if (this.IsJsonRequest)
-                {
-                    string content = RequestBodyContent;
-                    if ( content != null && content.Trim().StartsWith("{"))
-                    {
-                        var d = JsonDeserializer.deserializeToDictionary(content);
-                        if (d != null)
-                        {
-                            foreach (KeyValuePair<String, Object> p in d)
-                                RecursiveAddJson(p);
 
-                        }
-                    }
-                }
+
+                //// Only supports object not array, with array, this lines will crash
+                //if (this.IsJsonRequest)
+                //{
+                //    string content = RequestBodyContent;
+                //    if (content != null && content.Trim().StartsWith("{"))
+                //    {
+                //        var d = JsonDeserializer.deserializeToDictionary(content);
+                //        if (d != null)
+                //        {
+                //            foreach (KeyValuePair<String, Object> p in d)
+                //                RecursiveAddJson(p);
+
+                //        }
+                //    }
+                //}
             }
             catch (Exception ex)
             {
-                throw ex;
+                Console.WriteLine(ex.Message);
             }
-
-
         }
-
+     
 
         private void RecursiveAddJson(KeyValuePair<String, Object> p, String AppendKeyName = "")
         {
             if (p.Value != null && p.Value.GetType() == typeof(Dictionary<String, Object>))
-                    foreach (KeyValuePair<String, Object> pChild in (Dictionary<String, Object>)p.Value)
-                        RecursiveAddJson(pChild, AppendKeyName + p.Key + ".");
-                else
-                {
-                    if(!this.requestVariables.ContainsKey(p.Key))
-                        this.requestVariables.Add(AppendKeyName + p.Key, p.Value);
-                }
+            {
+                foreach (KeyValuePair<String, Object> pChild in (Dictionary<String, Object>)p.Value)
+                    RecursiveAddJson(pChild, AppendKeyName + p.Key + ".");
+            }
+            else
+            {
+                if (!this.RequestVariables.ContainsKey(p.Key))
+                    this.RequestVariables.Add(AppendKeyName + p.Key, p.Value);
+            }
         }
 
 
-     
+
         /// <summary>
-        /// Checks if a key exists in the request sent
+        /// TODO: Checks if a key exists in the request sent
         /// </summary>
         /// <param name="paramName"></param>
         /// <returns></returns>
         public bool ContainsKey(string paramName)
         {
-            return this.requestVariables.ContainsKey(paramName);
+            return this.RequestVariables.ContainsKey(paramName);
         }
 
 
@@ -167,21 +167,28 @@ namespace EWebFrameworkCore.Vendor.Utils
         /// <returns></returns>
         public object Get(string paramName, bool pIsNullable)
         {
-            if (!this.requestVariables.ContainsKey(paramName)) throw new KeyNotFoundException(String.Format("The parameter name [ {0} ] is not found!", paramName));
+            if (!this.RequestVariables.ContainsKey(paramName) && this.GetArrayableParameters().Where(x => x.Value.Has(paramName)).Count()==0)
+                throw new KeyNotFoundException(String.Format("The parameter name [ {0} ] is not found!", paramName));
 
-            if (this.IsJsonRequest) return this.requestVariables[paramName];
+            //if (this.IsJsonRequest) return this.RequestVariables[paramName];
 
+            if (this.RequestVariables.ContainsKey(paramName)) return this.RequestVariables[paramName];
+            return this.GetArrayableParameters().Where(x => x.Value.Has(paramName)).Select(x=> x.Value.FindContainer(paramName)).FirstOrDefault().GetStringOrQueryArray(paramName);
 
-            /***
-            * Solution here is make the string non-nullable for formdata and send empty string
-            * or make it nullable if you are sure user aren't suppose to enter "null" for the parameter
-            **/
-            String s = EStrings.valueOf(this.requestVariables[paramName]);
-            if (pIsNullable && IsQueryStringNullDefinition(s) ) s = null;
+            ///***
+            //* Solution here is make the string non-nullable for formdata and send empty string
+            //* or make it nullable if you are sure user aren't suppose to enter "null" for the parameter
+            //**/
+            //String s = EStrings.valueOf(this.RequestVariables[paramName]);
+            //if (pIsNullable && IsQueryStringNullDefinition(s)) s = null;
 
-            return s;
+            //return s;
         }
 
+        public KeyValuePair<string, QueryArrayParam>[] GetArrayableParameters()
+        {
+            return this.RequestVariables.Where(x => x.Value is QueryArrayParam).Select( x => new KeyValuePair<string, QueryArrayParam>(x.Key, (QueryArrayParam)x.Value) ).ToArray();
+        }
 
         /// <summary>
         /// Get unprocessed raw value of a parameter
@@ -190,12 +197,10 @@ namespace EWebFrameworkCore.Vendor.Utils
         /// <returns></returns>
         public object GetOriginalSentValueOf(string paramName)
         {
-            if (!this.requestVariables.ContainsKey(paramName)) throw new KeyNotFoundException(String.Format("The parameter name [ {0} ] is not found!", paramName));
+            if (!this.RequestVariables.ContainsKey(paramName)) throw new KeyNotFoundException(String.Format("The parameter name [ {0} ] is not found!", paramName));
 
-            return this.requestVariables[paramName];
+            return this.RequestVariables[paramName];
         }
-
-
 
         /// <summary>
         /// Checks if a file exists in the post
@@ -204,33 +209,30 @@ namespace EWebFrameworkCore.Vendor.Utils
         /// <returns></returns>
         public bool HasFile(string paramName)
         {
-            return this.OriginalRequest.Files.Keys.Cast<String>().Contains(paramName);
+            return this.OriginalRequest.HasFormContentType 
+                && this.OriginalRequest.Form.ContainsKey(paramName) 
+                && this.OriginalRequest.Form.Files.Where(x=> x.Name == paramName).Count()==1;
         }
-
 
         /// <summary>
         /// Return Content Length in Bytes
         /// </summary>
         /// <param name="paramName"></param>
         /// <returns></returns>
-        public int FileSize(string paramName)
+        public long FileSize(string paramName)
         {
-            return this.OriginalRequest.Files[paramName].ContentLength;
+            return this.OriginalRequest.Form.Files[paramName].Length;
         }
 
-
-
-    /// <summary>
-    /// It is only true if the object is string and the value=null or undefined
-    /// </summary>
-    /// <param name="v"></param>
-    /// <returns></returns>
+        /// <summary>
+        /// It is only true if the object is string and the value=null or undefined
+        /// </summary>
+        /// <param name="v"></param>
+        /// <returns></returns>
         public static bool IsQueryStringNullDefinition(object v)
         {
-                if (v == null || !(v is string)) return false;
+            if (v == null || !(v is string)) return false;
             return (v.ToString() == "null" || v.ToString() == "undefined");
-
-
         }
 
 
@@ -245,18 +247,9 @@ namespace EWebFrameworkCore.Vendor.Utils
         /// ExpandoObject
         /// </summary>
         /// <returns></returns>
-        public dynamic HeadersObject()
+        public IHeaderDictionary HeadersObject()
         {
-
-            dynamic pairs = new System.Dynamic.ExpandoObject();
-
-            var x = pairs as IDictionary<string, Object>;
-
-            foreach (var v in this.OriginalRequest.Headers.AllKeys)
-                x.Add(v, this.OriginalRequest.Headers[v]);
-
-            return pairs;
-
+            return this.OriginalRequest.Headers;
         }
 
         /// <summary>
@@ -267,7 +260,6 @@ namespace EWebFrameworkCore.Vendor.Utils
         {
             return JsonConvert.SerializeObject(this.HeadersObject());
         }
-
 
 
 
@@ -285,7 +277,7 @@ namespace EWebFrameworkCore.Vendor.Utils
 
             var x = pairs as IDictionary<string, Object>;
 
-            foreach (var v in this.requestVariables)
+            foreach (var v in this.RequestVariables)
                 x.Add(v);
 
             return pairs;

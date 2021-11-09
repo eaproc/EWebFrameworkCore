@@ -1,24 +1,39 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
   </PropertyGroup>
-
+  
   <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Compile Remove="EWebFramework.Vendor\**" />
+    <Compile Remove="Services\**" />
     <Compile Remove="Utils\DateTimeHelper\**" />
+    <EmbeddedResource Remove="EWebFramework.Vendor\**" />
+    <EmbeddedResource Remove="Services\**" />
     <EmbeddedResource Remove="Utils\DateTimeHelper\**" />
+    <None Remove="EWebFramework.Vendor\**" />
+    <None Remove="Services\**" />
     <None Remove="Utils\DateTimeHelper\**" />
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Remove="PageHandlers.cs" />
     <Compile Remove="Utils\DataExports\Excel\ExcelFileGenerator.cs" />
     <Compile Remove="Utils\DataExports\Excel\IEPPlusExcelExportCustomizer.cs" />
-    <Compile Remove="Utils\ENV.cs" />
     <Compile Remove="Utils\JsonDeserializer.cs" />
     <Compile Remove="Utils\JsonReplies\DataTableSuccessMessage.cs" />
-    <Compile Remove="Utils\RequestHelper.cs" />
     <Compile Remove="Utils\RequestValidator.cs" />
     <Compile Remove="Utils\SessionHelper.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="Services\BaseClientService.cs" />
+    <Compile Include="Services\TemporaryFile.cs" />
+    <Compile Include="Services\TemporaryFolder.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -27,7 +42,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\ELibrary\ELibrary.Standard\ELibrary.Standard.csproj" />
+    <ProjectReference Include="..\..\..\..\epro-libraries-for-vs\coderit-logger\CODERiT.Logger.Standard.VB\CODERiT.Logger.Standard.VB.vbproj" />
+    <ProjectReference Include="..\..\ELibrary\ELibrary.Standard.VB\ELibrary.Standard.VB.vbproj" />
   </ItemGroup>
 
 </Project>

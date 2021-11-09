@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ELibrary.Standard.VB.InputsParsing;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -53,7 +54,7 @@ namespace EWebFrameworkCore.Vendor.Utils.DataExports.Excel
         {
             try
             {
-                var intPart = ELibrary.Standard.InputsParsing.TextParsing.parseOutDoubleAsString(ExcelFormat);
+                var intPart = TextParsing.parseOutDoubleAsString(ExcelFormat);
                 var strPart = ExcelFormat.Substring(0, ExcelFormat.Length - intPart.Length).ToLower();
                 if (!Pool.Contains(strPart)) throw new Exception("Can't locate this part in the pool: " + strPart);
                 int row = int.Parse(intPart);
