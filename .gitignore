@@ -3,3 +3,6 @@
 obj
 bin
 appsettings.*.json
+
+.env
+.config
