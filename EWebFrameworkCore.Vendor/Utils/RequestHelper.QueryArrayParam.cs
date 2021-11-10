@@ -218,7 +218,7 @@ namespace EWebFrameworkCore.Vendor.Utils
                 return pairs;
             }
 
-            private object PackArrayObject()
+            private List<object> PackArrayObject()
             {
                 var x = new List<object>();
                 foreach (var v in this.ArrayObjects)
@@ -230,7 +230,7 @@ namespace EWebFrameworkCore.Vendor.Utils
                 return x;
             }
 
-            private object PackArrayObjectForNamedIndex()
+            private ExpandoObject PackArrayObjectForNamedIndex()
             {
                 dynamic pairs = new System.Dynamic.ExpandoObject();
 
@@ -249,7 +249,7 @@ namespace EWebFrameworkCore.Vendor.Utils
             /// Returns ExpandoObject or List of Objects
             /// </summary>
             /// <returns></returns>
-            private object ToPackagableForJson()
+            public object ToPackagableForJson()
             {
                 var l = new List<object>();
 
@@ -301,7 +301,6 @@ namespace EWebFrameworkCore.Vendor.Utils
             {
                 var v = this.ToPackagableForJson();
                 string s = JsonConvert.SerializeObject(v, Formatting.Indented);
-                Console.WriteLine(s);
                 return s;
             }
 

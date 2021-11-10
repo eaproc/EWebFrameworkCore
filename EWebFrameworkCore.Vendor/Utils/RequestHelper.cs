@@ -14,7 +14,7 @@ namespace EWebFrameworkCore.Vendor.Utils
     /// <summary>
     /// Request Helper helps to get request posted
     /// </summary>
-    public partial class RequestHelper : IJsonable, IArrayable, IRequestHelper
+    public partial class RequestHelper : IRequestHelper
     {
         /// <summary>
         /// Current HttpRequest Object
@@ -45,7 +45,7 @@ namespace EWebFrameworkCore.Vendor.Utils
             this.RequestVariables = new Dictionary<string, object>();
             this.ProcessedRequestVariables = new Dictionary<string, object>();
 
-            this.SetBodyContent();
+            if( this.IsJsonRequest ) this.SetBodyContent();
 
             this.LoadData();
 
@@ -75,17 +75,24 @@ namespace EWebFrameworkCore.Vendor.Utils
                 {
                     foreach (var p in this.Request.Query.ToDictionary((x) => x.Key, (x) => (object)x.Value))
                         RecursiveAddJson(p);
+                }
 
-                    // Process Arrays in Querys
-                    foreach ( var v in  QueryArrayParam.ProcessArraysInQuery(this.RequestVariables.Select(x => new KeyValuePair<string, string>(x.Key, x.Value==null? string.Empty: x.Value.ToString() ) ) ) )
-                        this.RequestVariables.Add(v.ParamKey, v);
+                if (this.Request.HasFormContentType )
+                {
+                    foreach (var p in this.Request.Form.ToDictionary((x) => x.Key, (x) => (object)x.Value))
+                        RecursiveAddJson(p);
+                }
 
-                    //Seperate Parsed Variables
-                    foreach (string s in this.RequestVariables.Where(x => x.Key.IndexOf('[') >= 0).Select(x => x.Key).ToArray())
-                    {
-                        ProcessedRequestVariables.Add(s, this.RequestVariables[s]);
-                        this.RequestVariables.Remove(s);
-                    }
+
+                // Process Arrays in Querys
+                foreach (var v in QueryArrayParam.ProcessArraysInQuery(this.RequestVariables.Select(x => new KeyValuePair<string, string>(x.Key, x.Value == null ? string.Empty : x.Value.ToString()))))
+                    this.RequestVariables.Add(v.ParamKey, v);
+
+                //Seperate Parsed Variables
+                foreach (string s in this.RequestVariables.Where(x => x.Key.IndexOf('[') >= 0).Select(x => x.Key).ToArray())
+                {
+                    ProcessedRequestVariables.Add(s, this.RequestVariables[s]);
+                    this.RequestVariables.Remove(s);
                 }
 
 
@@ -225,6 +232,22 @@ namespace EWebFrameworkCore.Vendor.Utils
         }
 
         /// <summary>
+        /// Gets the end result as StronglyTyped Input
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="ParamName"></param>
+        /// <param name="DefaultValue"></param>
+        /// <returns></returns>
+        public T Objectify<T>(string ParamName) where T: class
+        {
+            QueryArrayParam b = this.Input<QueryArrayParam>(ParamName);
+            if (b == null) return (T)null;
+
+            return JsonConvert.DeserializeObject<T>(b.ToJson());
+        }
+
+
+        /// <summary>
         /// Get all arrayable parameters
         /// </summary>
         /// <returns></returns>
@@ -296,7 +319,6 @@ namespace EWebFrameworkCore.Vendor.Utils
         /// <returns></returns>
         public dynamic ToDynamicObject()
         {
-
             dynamic pairs = new System.Dynamic.ExpandoObject();
 
             var x = pairs as IDictionary<string, Object>;
@@ -306,11 +328,28 @@ namespace EWebFrameworkCore.Vendor.Utils
                 if (v.Value is QueryArrayParam)
                     x.Add(v.Key, ((QueryArrayParam)v.Value).ToDynamicArray());
                 else
-                    x.Add(v);
+                    x.Add(v.Key, v.Value == null ? null : v.Value.ToString());
             }
 
             return pairs;
 
+        }
+
+        public ExpandoObject ToPackagableForJson()
+        {
+            dynamic pairs = new System.Dynamic.ExpandoObject();
+
+            var x = pairs as IDictionary<string, Object>;
+
+            foreach (var v in this.RequestVariables)
+            {
+                if (v.Value is QueryArrayParam)
+                    x.Add(v.Key, ((QueryArrayParam)v.Value).ToPackagableForJson());
+                else
+                    x.Add(v.Key, v.Value == null ? null : v.Value.ToString());
+            }
+
+            return pairs;
         }
 
         /// <summary>
@@ -319,7 +358,7 @@ namespace EWebFrameworkCore.Vendor.Utils
         /// <returns></returns>
         public string ToJson()
         {
-            return JsonConvert.SerializeObject(this.ToDynamicObject());
+            return JsonConvert.SerializeObject(this.ToPackagableForJson());
         }
 
         public IEnumerable<object> ToArray()

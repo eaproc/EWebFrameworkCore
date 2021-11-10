@@ -1,9 +1,10 @@
 ﻿using Microsoft.AspNetCore.Http;
 using System.Collections.Generic;
+using System.Dynamic;
 
 namespace EWebFrameworkCore.Vendor.Utils
 {
-    public interface IRequestHelper
+    public interface IRequestHelper : IArrayable, IJsonable
     {
         string RequestBodyContent { get; }
 
@@ -15,6 +16,10 @@ namespace EWebFrameworkCore.Vendor.Utils
 
         bool ContainsKey(string paramName);
 
+        T Input<T>(string ParamName, object DefaultValue = null);
+
+        T Objectify<T>(string ParamName) where T : class;
+
         object Get(string paramName);
 
         object Get(string paramName, bool pIsNullable);
@@ -25,8 +30,8 @@ namespace EWebFrameworkCore.Vendor.Utils
 
         dynamic ToDynamicObject();
 
-        string ToJson();
+        ExpandoObject ToPackagableForJson();
+
         bool IsQueryStringNullDefinition(object v);
-        T Input<T>(string ParamName, object DefaultValue = null);
     }
 }

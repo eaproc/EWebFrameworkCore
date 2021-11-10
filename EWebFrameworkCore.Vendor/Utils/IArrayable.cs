@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace EWebFrameworkCore.Vendor.Utils
 {
-    interface IArrayable
+   public interface IArrayable
     {
         IEnumerable<object> ToArray();
     }

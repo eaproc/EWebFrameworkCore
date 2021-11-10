@@ -34,7 +34,8 @@ namespace EWebFrameworkCore.Dev.Controllers
 
             //ISpeaker speaker = (ISpeaker)HttpContext.RequestServices.GetService(typeof(ISpeaker));
             //speaker.Speak();
-            
+            //var l = this._RequestHelper.Objectify<float[]>("Arrayable");
+
             var rng = new Random();
             return Enumerable.Range(1, 5).Select(index => new WeatherForecast
             {
@@ -44,5 +45,13 @@ namespace EWebFrameworkCore.Dev.Controllers
             })
             .ToArray();
         }
+
+
+        [HttpPost]
+        public JsonResult Post()
+        {
+            return new JsonResult(this._RequestHelper.ToPackagableForJson());
+        }
+
     }
 }
