@@ -308,7 +308,7 @@ namespace EWebFrameworkCore.Vendor.Utils
 
 
             #region Utilities
-            public bool IsAllNumeric(string[] vs)
+            public static bool IsAllNumeric(string[] vs)
             {
                 foreach (string v in vs)
                 {
@@ -317,7 +317,7 @@ namespace EWebFrameworkCore.Vendor.Utils
                 return true;
             }
 
-            public bool IsNumeric(string value)
+            public static bool IsNumeric(string value)
             {
                 return value.All(char.IsNumber);
             }

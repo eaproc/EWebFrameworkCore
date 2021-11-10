@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using ELibrary.Standard.VB.Objects;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using System;
@@ -176,7 +177,11 @@ namespace EWebFrameworkCore.Vendor.Utils
         /// <returns></returns>
         public object Get(string paramName, bool pIsNullable)
         {
-            if (!this.ContainsKey(paramName) )throw new KeyNotFoundException(String.Format("The parameter name [ {0} ] is not found!", paramName));
+            if (!this.ContainsKey(paramName))
+                if (pIsNullable)
+                    return null;
+                else
+                    throw new KeyNotFoundException(String.Format("The parameter name [ {0} ] is not found!", paramName));
 
             if (this.RequestVariables.ContainsKey(paramName)) return this.RequestVariables[paramName];
             if (this.ProcessedRequestVariables.ContainsKey(paramName)) return this.ProcessedRequestVariables[paramName];
@@ -191,6 +196,32 @@ namespace EWebFrameworkCore.Vendor.Utils
             //if (pIsNullable && IsQueryStringNullDefinition(s)) s = null;
 
             //return s;
+        }
+
+        /// <summary>
+        /// Gets the end result as StronglyTyped Input
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="ParamName"></param>
+        /// <param name="DefaultValue"></param>
+        /// <returns></returns>
+        public T Input<T>( string ParamName, object DefaultValue = null)
+        {
+            var b = this.Get(ParamName);
+            if (b == null) return (T)DefaultValue;
+
+            if (
+                typeof(T) == typeof(string) 
+                ||
+                (typeof(T) == typeof(decimal) || typeof(T) == typeof(float))
+                ||
+                (b is string && QueryArrayParam.IsNumeric((string)b))
+                )
+            {
+                return (T)Convert.ChangeType(b, typeof(T));
+            }
+
+            return (T)b;
         }
 
         /// <summary>
@@ -251,7 +282,7 @@ namespace EWebFrameworkCore.Vendor.Utils
         /// </summary>
         /// <param name="v"></param>
         /// <returns></returns>
-        public static bool IsQueryStringNullDefinition(object v)
+        public bool IsQueryStringNullDefinition(object v)
         {
             if (v == null || !(v is string)) return false;
             return (v.ToString() == "null" || v.ToString() == "undefined");

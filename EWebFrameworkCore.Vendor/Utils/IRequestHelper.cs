@@ -26,5 +26,7 @@ namespace EWebFrameworkCore.Vendor.Utils
         dynamic ToDynamicObject();
 
         string ToJson();
+        bool IsQueryStringNullDefinition(object v);
+        T Input<T>(string ParamName, object DefaultValue = null);
     }
 }

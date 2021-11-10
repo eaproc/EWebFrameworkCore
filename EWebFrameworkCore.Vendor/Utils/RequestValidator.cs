@@ -8,6 +8,7 @@ using static EWebFrameworkCore.Vendor.PathHandlers;
 using ELibrary.Standard.VB.Objects;
 using ELibrary.Standard.VB.InputsParsing;
 using EWebFrameworkCore.Vendor.Services.DataTablesNET;
+using ELibrary.Standard.VB;
 
 namespace EWebFrameworkCore.Vendor.Utils
 {
@@ -186,10 +187,10 @@ namespace EWebFrameworkCore.Vendor.Utils
                                );
                         return;
                     }
-                    if (RequestHelper.HasFile(r.paramName) && RequestHelper.FileSize(r.paramName) > (r.paramMaxSize * 1024))
+                    if (RequestHelper.HasFile(r.paramName) && RequestHelper.File(r.paramName).Length > (r.paramMaxSize * 1024))
                     {
                         this.errors.Add(r.paramName, string.Format("The size of  {0} must be maximum of {2}kb. You uploaded {1}!",
-                            r.paramName, EMaths.getReadableByteValue(RequestHelper.FileSize(r.paramName)), r.paramMaxSize)
+                            r.paramName, EMaths.getReadableByteValue(RequestHelper.File(r.paramName).Length), r.paramMaxSize)
                             );
                     }
 
@@ -328,7 +329,7 @@ namespace EWebFrameworkCore.Vendor.Utils
                     if (r.IsNullable && s == String.Empty)
                     {
                         //it is empty string not null
-                        if (!RequestHelper.IsQueryStringNullDefinition(RequestHelper.GetOriginalSentValueOf(pParamName)))
+                        if (!RequestHelper.IsQueryStringNullDefinition(s))
                             return (T)(object)String.Empty;
                         
                         //it is null
