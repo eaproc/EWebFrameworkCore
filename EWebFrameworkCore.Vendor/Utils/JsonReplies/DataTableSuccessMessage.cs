@@ -1,8 +1,4 @@
-﻿using EWebFramework.Vendor.api.services.DataTablesNET;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
+﻿using EWebFrameworkCore.Vendor.Services.DataTablesNET;
 
 namespace EWebFrameworkCore.Vendor.Utils.JsonReplies
 {

@@ -1,26 +1,24 @@
-﻿using static EWebFrameworkCore.Vendor.PathHandlers;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Web;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.DependencyInjection;
-using ELibrary.Standard.VB.Objects;
 
 namespace EWebFrameworkCore.Vendor.Utils
 {
     /// <summary>
     /// Request Helper helps to get request posted
     /// </summary>
-    public partial class RequestHelper : IJsonable, IRequestHelper
+    public partial class RequestHelper : IJsonable, IArrayable, IRequestHelper
     {
         /// <summary>
         /// Current HttpRequest Object
         /// </summary>
-        public HttpRequest OriginalRequest { private set; get; }
+        public HttpRequest Request { private set; get; }
 
         public bool IsJsonRequest { private set; get; }
 
@@ -35,14 +33,16 @@ namespace EWebFrameworkCore.Vendor.Utils
         /// The variables sent
         /// </summary>
         public Dictionary<string, object> RequestVariables { private set; get; }
+        public Dictionary<string, object> ProcessedRequestVariables { private set; get; }
 
 
         public RequestHelper(IServiceProvider provider)
         {
-            this.OriginalRequest = provider.GetService<IHttpContextAccessor>().HttpContext.Request;
+            this.Request = provider.GetService<IHttpContextAccessor>().HttpContext.Request;
 
-            this.IsJsonRequest = this.OriginalRequest.HasJsonContentType();
+            this.IsJsonRequest = this.Request.HasJsonContentType();
             this.RequestVariables = new Dictionary<string, object>();
+            this.ProcessedRequestVariables = new Dictionary<string, object>();
 
             this.SetBodyContent();
 
@@ -56,7 +56,7 @@ namespace EWebFrameworkCore.Vendor.Utils
         /// </summary>
         private void SetBodyContent()
         {
-            Stream req = this.OriginalRequest.BodyReader.AsStream(true);
+            Stream req = this.Request.BodyReader.AsStream(true);
              this.RequestBodyContent = new StreamReader(req, Encoding.UTF8, true, 1024, true).ReadToEnd();
         }
 
@@ -70,14 +70,21 @@ namespace EWebFrameworkCore.Vendor.Utils
 
             try
             {
-                if( this.OriginalRequest.Query.Count > 0 )
+                if( this.Request.Query.Count > 0 )
                 {
-                    foreach (var p in this.OriginalRequest.Query.ToDictionary((x) => x.Key, (x) => (object)x.Value))
+                    foreach (var p in this.Request.Query.ToDictionary((x) => x.Key, (x) => (object)x.Value))
                         RecursiveAddJson(p);
 
                     // Process Arrays in Querys
                     foreach ( var v in  QueryArrayParam.ProcessArraysInQuery(this.RequestVariables.Select(x => new KeyValuePair<string, string>(x.Key, x.Value==null? string.Empty: x.Value.ToString() ) ) ) )
                         this.RequestVariables.Add(v.ParamKey, v);
+
+                    //Seperate Parsed Variables
+                    foreach (string s in this.RequestVariables.Where(x => x.Key.IndexOf('[') >= 0).Select(x => x.Key).ToArray())
+                    {
+                        ProcessedRequestVariables.Add(s, this.RequestVariables[s]);
+                        this.RequestVariables.Remove(s);
+                    }
                 }
 
 
@@ -138,13 +145,15 @@ namespace EWebFrameworkCore.Vendor.Utils
 
 
         /// <summary>
-        /// TODO: Checks if a key exists in the request sent
+        /// Checks if a key exists in the request sent
         /// </summary>
         /// <param name="paramName"></param>
         /// <returns></returns>
         public bool ContainsKey(string paramName)
         {
-            return this.RequestVariables.ContainsKey(paramName);
+            return this.RequestVariables.ContainsKey(paramName)
+                || this.ProcessedRequestVariables.ContainsKey(paramName)
+                || this.GetArrayableParameters().Where(x => x.Value.Has(paramName)).Count() > 0;
         }
 
 
@@ -160,19 +169,18 @@ namespace EWebFrameworkCore.Vendor.Utils
         }
 
         /// <summary>
-        /// Only downside here is, if the request param is nullable and the value sent is "null", it will be seen as null
+        /// TODO: Only downside here is, if the request param is nullable and the value sent is "null", it will be seen as null
         /// </summary>
         /// <param name="paramName"></param>
         /// <param name="pIsNullable"></param>
         /// <returns></returns>
         public object Get(string paramName, bool pIsNullable)
         {
-            if (!this.RequestVariables.ContainsKey(paramName) && this.GetArrayableParameters().Where(x => x.Value.Has(paramName)).Count()==0)
-                throw new KeyNotFoundException(String.Format("The parameter name [ {0} ] is not found!", paramName));
-
-            //if (this.IsJsonRequest) return this.RequestVariables[paramName];
+            if (!this.ContainsKey(paramName) )throw new KeyNotFoundException(String.Format("The parameter name [ {0} ] is not found!", paramName));
 
             if (this.RequestVariables.ContainsKey(paramName)) return this.RequestVariables[paramName];
+            if (this.ProcessedRequestVariables.ContainsKey(paramName)) return this.ProcessedRequestVariables[paramName];
+
             return this.GetArrayableParameters().Where(x => x.Value.Has(paramName)).Select(x=> x.Value.FindContainer(paramName)).FirstOrDefault().GetStringOrQueryArray(paramName);
 
             ///***
@@ -185,22 +193,26 @@ namespace EWebFrameworkCore.Vendor.Utils
             //return s;
         }
 
+        /// <summary>
+        /// Get all arrayable parameters
+        /// </summary>
+        /// <returns></returns>
         public KeyValuePair<string, QueryArrayParam>[] GetArrayableParameters()
         {
             return this.RequestVariables.Where(x => x.Value is QueryArrayParam).Select( x => new KeyValuePair<string, QueryArrayParam>(x.Key, (QueryArrayParam)x.Value) ).ToArray();
         }
 
-        /// <summary>
-        /// Get unprocessed raw value of a parameter
-        /// </summary>
-        /// <param name="paramName"></param>
-        /// <returns></returns>
-        public object GetOriginalSentValueOf(string paramName)
-        {
-            if (!this.RequestVariables.ContainsKey(paramName)) throw new KeyNotFoundException(String.Format("The parameter name [ {0} ] is not found!", paramName));
+        ///// <summary>
+        ///// Get unprocessed raw value of a parameter
+        ///// </summary>
+        ///// <param name="paramName"></param>
+        ///// <returns></returns>
+        //public object GetOriginalSentValueOf(string paramName)
+        //{
+        //    if (!this.RequestVariables.ContainsKey(paramName)) throw new KeyNotFoundException(String.Format("The parameter name [ {0} ] is not found!", paramName));
 
-            return this.RequestVariables[paramName];
-        }
+        //    return this.RequestVariables[paramName];
+        //}
 
         /// <summary>
         /// Checks if a file exists in the post
@@ -209,20 +221,30 @@ namespace EWebFrameworkCore.Vendor.Utils
         /// <returns></returns>
         public bool HasFile(string paramName)
         {
-            return this.OriginalRequest.HasFormContentType 
-                && this.OriginalRequest.Form.ContainsKey(paramName) 
-                && this.OriginalRequest.Form.Files.Where(x=> x.Name == paramName).Count()==1;
+            return this.Request.HasFormContentType 
+                && this.Request.Form.ContainsKey(paramName) 
+                && this.Request.Form.Files.Where(x=> x.Name == paramName).Count()==1;
         }
 
         /// <summary>
-        /// Return Content Length in Bytes
+        /// Checks if a file exists in the post
         /// </summary>
         /// <param name="paramName"></param>
         /// <returns></returns>
-        public long FileSize(string paramName)
+        public IFormFile File(string paramName)
         {
-            return this.OriginalRequest.Form.Files[paramName].Length;
+            return this.Request.Form.Files[paramName];
         }
+
+        ///// <summary>
+        ///// Return Content Length in Bytes
+        ///// </summary>
+        ///// <param name="paramName"></param>
+        ///// <returns></returns>
+        //public long FileSize(string paramName)
+        //{
+        //    return this.OriginalRequest.Form.Files[paramName].Length;
+        //}
 
         /// <summary>
         /// It is only true if the object is string and the value=null or undefined
@@ -236,41 +258,12 @@ namespace EWebFrameworkCore.Vendor.Utils
         }
 
 
-
-
-
-
-
-
-        /// <summary>
-        /// Returns headers as object but preferrable if you access as dictionary
-        /// ExpandoObject
-        /// </summary>
-        /// <returns></returns>
-        public IHeaderDictionary HeadersObject()
-        {
-            return this.OriginalRequest.Headers;
-        }
-
-        /// <summary>
-        /// Returns headers as JSON
-        /// </summary>
-        /// <returns></returns>
-        public string HeadersJson()
-        {
-            return JsonConvert.SerializeObject(this.HeadersObject());
-        }
-
-
-
-
-
         /// <summary>
         /// Return Variables as Object
         /// ExpandoObject == > Dictionary
         /// </summary>
         /// <returns></returns>
-        public dynamic ToObject()
+        public dynamic ToDynamicObject()
         {
 
             dynamic pairs = new System.Dynamic.ExpandoObject();
@@ -278,13 +271,16 @@ namespace EWebFrameworkCore.Vendor.Utils
             var x = pairs as IDictionary<string, Object>;
 
             foreach (var v in this.RequestVariables)
-                x.Add(v);
+            {
+                if (v.Value is QueryArrayParam)
+                    x.Add(v.Key, ((QueryArrayParam)v.Value).ToDynamicArray());
+                else
+                    x.Add(v);
+            }
 
             return pairs;
 
         }
-
-
 
         /// <summary>
         /// Returns as JSON
@@ -292,9 +288,13 @@ namespace EWebFrameworkCore.Vendor.Utils
         /// <returns></returns>
         public string ToJson()
         {
-            return JsonConvert.SerializeObject(this.ToObject());
+            return JsonConvert.SerializeObject(this.ToDynamicObject());
         }
 
-
+        public IEnumerable<object> ToArray()
+        {
+            ExpandoObject z = (ExpandoObject)this.ToDynamicObject();
+            return z.Cast<object>();
+        }
     }
 }

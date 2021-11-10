@@ -1,63 +1,33 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
 
-using EPRO.Library.InputsParsing;
-using EPRO.Library.Objects;
-using EPRO.Library;
-using EWebFramework.Vendor.api.services.DataTablesNET;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
-using static EWebFramework.Vendor.PageHandlers;
+using static EWebFrameworkCore.Vendor.PathHandlers;
+using ELibrary.Standard.VB.Objects;
+using ELibrary.Standard.VB.InputsParsing;
+using EWebFrameworkCore.Vendor.Services.DataTablesNET;
 
 namespace EWebFrameworkCore.Vendor.Utils
 {
-    public class RequestValidator
+    public partial class RequestValidator
     {
-
-        public RequestValidator()
-        {
-            this.errors = new SortedList<string, string>();
-            this.ValidatedRules = new Dictionary<string, Rule>();
-        }
-
-
-
-        public SortedList<string, string> errors;
-        public struct Rule
-        {
-            public string paramName;
-            public bool isRequired;
-            public long paramMinSize;
-            public long paramMaxSize;
-            public ParamTypes paramType;
-            public bool IsNullable;
-
-            public enum ParamTypes
-            {
-                STRING, UNESCAPED_STRING, NUMERIC_STRING,  EMAIL,
-                FILE, INTEGER, DECIMAL, BOOLEAN, JSON, DATE, DATE_TIME, TIME
-            }
-
-            public Rule(string pName, bool pIsRequired, long pParamMinSize = 1, long pParamMaxSize = 50, ParamTypes pParamType = ParamTypes.STRING, bool pIsNullable = false)
-            {
-                this.paramName = pName;
-                this.isRequired = pIsRequired;
-                this.paramMinSize = pParamMinSize;
-                this.paramMaxSize = pParamMaxSize;
-                this.paramType = pParamType;
-                this.IsNullable = pIsNullable;
-            }
-
-        }
-
+        public IRequestHelper RequestHelper { private set; get; }
 
         private readonly Dictionary<String, Rule> ValidatedRules;
 
+        public SortedList<string, string> errors;
+
+        public RequestValidator(IRequestHelper helper)
+        {
+            this.errors = new SortedList<string, string>();
+            this.ValidatedRules = new Dictionary<string, Rule>();
+            this.RequestHelper = helper;
+        }
 
 
-        private static bool IsValidJson(string strInput)
+        public static bool IsValidJson(string strInput)
         {
             strInput = strInput.Trim();
             if ((strInput.StartsWith("{") && strInput.EndsWith("}")) || //For object
@@ -87,17 +57,16 @@ namespace EWebFrameworkCore.Vendor.Utils
         }
 
 
-
-        private void Check(RequestHelper requestHelper, HttpResponse response, System.Web.SessionState.HttpSessionState session, Rule r)
+        private void Check( Rule r)
         {
             // Logger.Print(r.paramName);
             if (r.isRequired && (
                 (
-                    !requestHelper.ContainsKey(r.paramName)
+                    !RequestHelper.ContainsKey(r.paramName)
                     ||
-                    (requestHelper.ContainsKey(r.paramName) && EStrings.valueOf(requestHelper.Get(r.paramName)) == String.Empty)
+                    (RequestHelper.ContainsKey(r.paramName) && EStrings.valueOf(RequestHelper.Get(r.paramName)) == String.Empty)
                 )
-                && !requestHelper.HasFile(r.paramName)
+                && !RequestHelper.HasFile(r.paramName)
                 )
                 )
             {
@@ -109,24 +78,22 @@ namespace EWebFrameworkCore.Vendor.Utils
             //
             // Test for NULL
             //
-            if (requestHelper.ContainsKey(r.paramName))
+            if (RequestHelper.ContainsKey(r.paramName))
             {
-                var t = EStrings.valueOf(requestHelper.Get(r.paramName));
+                var t = EStrings.valueOf(RequestHelper.Get(r.paramName));
 
                 if ((t == "null" || t == string.Empty) && r.IsNullable) return;
 
             }
 
 
-
-
             switch (r.paramType)
             {
                 case Rule.ParamTypes.UNESCAPED_STRING:
                 case Rule.ParamTypes.STRING:
-                    if (requestHelper.ContainsKey(r.paramName))
+                    if (RequestHelper.ContainsKey(r.paramName))
                     {
-                        var s = EStrings.valueOf(requestHelper.Get(r.paramName));
+                        var s = EStrings.valueOf(RequestHelper.Get(r.paramName));
                         if(r.paramType== Rule.ParamTypes.UNESCAPED_STRING) s = Uri.UnescapeDataString(s);
 
                         if (s.Length > r.paramMaxSize || s.Length < r.paramMinSize)
@@ -138,9 +105,9 @@ namespace EWebFrameworkCore.Vendor.Utils
                     }
                     break;
                 case Rule.ParamTypes.EMAIL:
-                    if (requestHelper.ContainsKey(r.paramName))
+                    if (RequestHelper.ContainsKey(r.paramName))
                     {
-                        var s = EStrings.valueOf(requestHelper.Get(r.paramName));
+                        var s = EStrings.valueOf(RequestHelper.Get(r.paramName));
                         if (s.Length > r.paramMaxSize || s.Length < r.paramMinSize)
                             this.errors.Add(r.paramName, string.Format("The size of  {0} must be minimum of {1} and maximum of {2}",
                                 r.paramName, r.paramMinSize, r.paramMaxSize)
@@ -155,9 +122,9 @@ namespace EWebFrameworkCore.Vendor.Utils
                     // 
                     // Acts as string but makes sure the content is all number
                     //
-                    if (requestHelper.ContainsKey(r.paramName))
+                    if (RequestHelper.ContainsKey(r.paramName))
                     {
-                        var s = EStrings.valueOf(requestHelper.Get(r.paramName));
+                        var s = EStrings.valueOf(RequestHelper.Get(r.paramName));
                         if (s.Length > r.paramMaxSize || s.Length < r.paramMinSize)
                             this.errors.Add(r.paramName, string.Format("The size of  {0} must be minimum of {1} and maximum of {2}",
                                 r.paramName, r.paramMinSize, r.paramMaxSize)
@@ -170,9 +137,9 @@ namespace EWebFrameworkCore.Vendor.Utils
                     }
                     break;
                 case Rule.ParamTypes.BOOLEAN:
-                    if (requestHelper.ContainsKey(r.paramName))
+                    if (RequestHelper.ContainsKey(r.paramName))
                     {
-                        var s = EStrings.valueOf(requestHelper.Get(r.paramName));
+                        var s = EStrings.valueOf(RequestHelper.Get(r.paramName));
                         if (s.Length == 0 ||
                             (s != "1" && s != "0" && s.ToLower() != "true" && s.ToLower() != "false")
                             )
@@ -186,9 +153,9 @@ namespace EWebFrameworkCore.Vendor.Utils
 
                     break;
                 case Rule.ParamTypes.DECIMAL:
-                    if (requestHelper.ContainsKey(r.paramName))
+                    if (RequestHelper.ContainsKey(r.paramName))
                     {
-                        var s = EStrings.valueOf(requestHelper.Get(r.paramName));
+                        var s = EStrings.valueOf(RequestHelper.Get(r.paramName));
 
                         if ((s == "null" || s == string.Empty) && r.IsNullable) return;
 
@@ -212,26 +179,26 @@ namespace EWebFrameworkCore.Vendor.Utils
                     }
                     break;
                 case Rule.ParamTypes.FILE:
-                    if (requestHelper.ContainsKey(r.paramName) && requestHelper.Get(r.paramName) != null && EStrings.valueOf(requestHelper.Get(r.paramName)) != string.Empty)
+                    if (RequestHelper.ContainsKey(r.paramName) && RequestHelper.Get(r.paramName) != null && EStrings.valueOf(RequestHelper.Get(r.paramName)) != string.Empty)
                     {
-                        Logger.Print(EStrings.valueOf(requestHelper.Get(r.paramName)));
+                        Logger.Print(EStrings.valueOf(RequestHelper.Get(r.paramName)));
                         this.errors.Add(r.paramName, string.Format("Invalid value passed in for {0}. It must be file.", r.paramName)
                                );
                         return;
                     }
-                    if (requestHelper.HasFile(r.paramName) && requestHelper.FileSize(r.paramName) > (r.paramMaxSize * 1024))
+                    if (RequestHelper.HasFile(r.paramName) && RequestHelper.FileSize(r.paramName) > (r.paramMaxSize * 1024))
                     {
                         this.errors.Add(r.paramName, string.Format("The size of  {0} must be maximum of {2}kb. You uploaded {1}!",
-                            r.paramName, EMaths.getReadableByteValue(requestHelper.FileSize(r.paramName)), r.paramMaxSize)
+                            r.paramName, EMaths.getReadableByteValue(RequestHelper.FileSize(r.paramName)), r.paramMaxSize)
                             );
                     }
 
 
                     break;
                 case Rule.ParamTypes.INTEGER:
-                    if (requestHelper.ContainsKey(r.paramName))
+                    if (RequestHelper.ContainsKey(r.paramName))
                     {
-                        var s = EStrings.valueOf(requestHelper.Get(r.paramName));
+                        var s = EStrings.valueOf(RequestHelper.Get(r.paramName));
 
                         if (
                             (r.paramMinSize != 0 && s.Length == 0) || TextParsing.parseOutIntegers(s).Length != s.Length)
@@ -254,9 +221,9 @@ namespace EWebFrameworkCore.Vendor.Utils
 
 
                 case Rule.ParamTypes.JSON:
-                    if (requestHelper.ContainsKey(r.paramName))
+                    if (RequestHelper.ContainsKey(r.paramName))
                     {
-                        var s = EStrings.valueOf(requestHelper.Get(r.paramName));
+                        var s = EStrings.valueOf(RequestHelper.Get(r.paramName));
                         if (!IsValidJson(s))
                             this.errors.Add(r.paramName, string.Format("The value of  {0} must be a valid json!", r.paramName)
                                 );
@@ -267,9 +234,9 @@ namespace EWebFrameworkCore.Vendor.Utils
 
 
                 case Rule.ParamTypes.DATE:
-                    if (requestHelper.ContainsKey(r.paramName))
+                    if (RequestHelper.ContainsKey(r.paramName))
                     {
-                        var s = EStrings.valueOf(requestHelper.Get(r.paramName));
+                        var s = EStrings.valueOf(RequestHelper.Get(r.paramName));
                         if (DataTableRequestFields.ParseDate(s) == null)
                         {
                             this.errors.Add(r.paramName, string.Format("Invalid value passed in for {0}. It must be a valid date with format (yyyy-MM-dd).", r.paramName)
@@ -282,9 +249,9 @@ namespace EWebFrameworkCore.Vendor.Utils
                     break;
 
                 case Rule.ParamTypes.TIME:
-                    if (requestHelper.ContainsKey(r.paramName))
+                    if (RequestHelper.ContainsKey(r.paramName))
                     {
-                        var s = EStrings.valueOf(requestHelper.Get(r.paramName));
+                        var s = EStrings.valueOf(RequestHelper.Get(r.paramName));
                         if (DataTableRequestFields.ParseTime(s) == null)
                         {
                             this.errors.Add(r.paramName, string.Format("Invalid value passed in for {0}. It must be a valid time with format ({1}).",
@@ -305,16 +272,14 @@ namespace EWebFrameworkCore.Vendor.Utils
 
 
 
-        public bool Validate(RequestHelper requestHelper, HttpResponse response, System.Web.SessionState.HttpSessionState session,
-            params Rule[] rules)
+        public bool Validate(params Rule[] rules)
         {
 
             this.errors.Clear();
 
-
             foreach (Rule r in rules)
             {
-                Check(requestHelper, response, session, r);
+                Check( r);
                 this.ValidatedRules.Add(r.paramName, r);
             }
 
@@ -345,20 +310,15 @@ namespace EWebFrameworkCore.Vendor.Utils
 
 
 
-
-
-
-
         public T GetValue<T>(String pParamName){
             if(!this.ValidatedRules.ContainsKey(key: pParamName)) return default(T);
 
             Rule r = this.ValidatedRules[key: pParamName];
-            RequestHelper requestHelper = new RequestHelper(HttpContext.Current.Request);
 
-            if (!requestHelper.ContainsKey(pParamName) && !requestHelper.HasFile(paramName: pParamName) ) return default(T);
+            if (!RequestHelper.ContainsKey(pParamName) && !RequestHelper.HasFile(paramName: pParamName) ) return default(T);
 
 
-            String s = r.paramType != Rule.ParamTypes.FILE ?  EStrings.valueOf(requestHelper.Get(pParamName)) : null;
+            String s = r.paramType != Rule.ParamTypes.FILE ?  EStrings.valueOf(RequestHelper.Get(pParamName)) : null;
 
             switch (r.paramType)
             {
@@ -368,7 +328,7 @@ namespace EWebFrameworkCore.Vendor.Utils
                     if (r.IsNullable && s == String.Empty)
                     {
                         //it is empty string not null
-                        if (!RequestHelper.IsQueryStringNullDefinition(requestHelper.GetOriginalSentValueOf(pParamName)))
+                        if (!RequestHelper.IsQueryStringNullDefinition(RequestHelper.GetOriginalSentValueOf(pParamName)))
                             return (T)(object)String.Empty;
                         
                         //it is null
@@ -409,10 +369,8 @@ namespace EWebFrameworkCore.Vendor.Utils
 
                 case Rule.ParamTypes.FILE:
                     // it won't reach here if it is not nullable
-                    if (r.IsNullable && !requestHelper.HasFile(paramName: pParamName)) return default(T);
-                    return (T)(object)HttpContext.Current.Request.Files[pParamName];
-
-
+                    if (r.IsNullable && !RequestHelper.HasFile(paramName: pParamName)) return default(T);
+                    return (T)(object)RequestHelper.File(pParamName);
             }
 
 

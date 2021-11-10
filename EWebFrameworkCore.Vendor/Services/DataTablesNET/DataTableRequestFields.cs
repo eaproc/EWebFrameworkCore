@@ -1,9 +1,9 @@
-﻿using EPRO.Library.Objects;
+﻿using ELibrary.Standard.VB.Objects;
+using EWebFrameworkCore.Vendor.Utils;
 using System;
-using EWebFramework.Vendor.api.utils;
-using static EWebFramework.Vendor.PageHandlers;
+using static EWebFrameworkCore.Vendor.PathHandlers;
 
-namespace EWebFramework.Vendor.api.services.DataTablesNET
+namespace EWebFrameworkCore.Vendor.Services.DataTablesNET
 {
     public class DataTableRequestFields
     {
@@ -96,7 +96,7 @@ namespace EWebFramework.Vendor.api.services.DataTablesNET
 
 
 
-        public static DataTableRequestFields ProcessDataTableRequestFields(RequestHelper requestHelper)
+        public static DataTableRequestFields ProcessDataTableRequestFields(IRequestHelper requestHelper)
         {
             return new DataTableRequestFields
             {
@@ -137,10 +137,6 @@ namespace EWebFramework.Vendor.api.services.DataTablesNET
                 new RequestValidator.Rule("start_date", true, 0, 1000, RequestValidator.Rule.ParamTypes.DATE),
                 new RequestValidator.Rule("end_date", true, 0, 1000, RequestValidator.Rule.ParamTypes.DATE)
         };
-
-
-
-
 
     }
 

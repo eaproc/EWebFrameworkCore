@@ -25,15 +25,18 @@
     <Compile Remove="Utils\DataExports\Excel\ExcelFileGenerator.cs" />
     <Compile Remove="Utils\DataExports\Excel\IEPPlusExcelExportCustomizer.cs" />
     <Compile Remove="Utils\JsonDeserializer.cs" />
-    <Compile Remove="Utils\JsonReplies\DataTableSuccessMessage.cs" />
-    <Compile Remove="Utils\RequestValidator.cs" />
     <Compile Remove="Utils\SessionHelper.cs" />
   </ItemGroup>
 
   <ItemGroup>
     <Compile Include="Services\BaseClientService.cs" />
+    <Compile Include="Services\DataTablesNET\DataTableRequestFields.cs" />
+    <Compile Include="Services\DataTablesNET\DataTableReturnFormat.cs" />
     <Compile Include="Services\TemporaryFile.cs" />
     <Compile Include="Services\TemporaryFolder.cs" />
+    <Compile Include="Utils\DateTimeHelper\DateTimeZoneConverter.cs" />
+    <Compile Include="Utils\DateTimeHelper\InvalidTimeZoneSettingsException.cs" />
+    <Compile Include="Utils\DateTimeHelper\TimeZoneManager.cs" />
   </ItemGroup>
 
   <ItemGroup>
