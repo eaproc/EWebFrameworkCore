@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Dynamic;
@@ -74,14 +75,22 @@ namespace EWebFrameworkCore.Vendor.Utils
                 if( this.Request.Query.Count > 0 )
                 {
                     foreach (var p in this.Request.Query.ToDictionary((x) => x.Key, (x) => (object)x.Value))
-                        RecursiveAddJson(p);
+                        AddToRequestVariables(p);
                 }
 
                 if (this.Request.HasFormContentType )
                 {
                     foreach (var p in this.Request.Form.ToDictionary((x) => x.Key, (x) => (object)x.Value))
-                        RecursiveAddJson(p);
+                        AddToRequestVariables(p);
                 }
+
+
+                // Load Json Body
+                if (this.IsJsonRequest)
+                {
+                    InspectAndBuildQuery(this.RequestBodyContent).Select(x => new KeyValuePair<string, object>(x.Key, x.Value)).ToList().ForEach(x => this.AddToRequestVariables(x));
+                }
+
 
 
                 // Process Arrays in Querys
@@ -95,59 +104,18 @@ namespace EWebFrameworkCore.Vendor.Utils
                     this.RequestVariables.Remove(s);
                 }
 
-
-                //foreach (var p in request.Params)
-                //{
-                //    if (p == null)
-                //    {
-                //        // Parameter is null but there is value.
-                //        // That occurs when you send like &value
-                //        // Instead of &value=something or atleast with =
-                //        // or like this $value=
-                //        //Logger.Print("p is null");
-                //        // We don't accept that parameter so it won't be regarded
-                //        continue;
-                //    }
-                //    RecursiveAddJson(new KeyValuePair<string, object>(p.ToString(), request[p.ToString()]));
-                //}
-
-
-
-                //// Only supports object not array, with array, this lines will crash
-                //if (this.IsJsonRequest)
-                //{
-                //    string content = RequestBodyContent;
-                //    if (content != null && content.Trim().StartsWith("{"))
-                //    {
-                //        var d = JsonDeserializer.deserializeToDictionary(content);
-                //        if (d != null)
-                //        {
-                //            foreach (KeyValuePair<String, Object> p in d)
-                //                RecursiveAddJson(p);
-
-                //        }
-                //    }
-                //}
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                Console.WriteLine(ex.Message);
+                throw;
             }
         }
      
 
-        private void RecursiveAddJson(KeyValuePair<String, Object> p, String AppendKeyName = "")
+        private void AddToRequestVariables(KeyValuePair<String, Object> p)
         {
-            if (p.Value != null && p.Value.GetType() == typeof(Dictionary<String, Object>))
-            {
-                foreach (KeyValuePair<String, Object> pChild in (Dictionary<String, Object>)p.Value)
-                    RecursiveAddJson(pChild, AppendKeyName + p.Key + ".");
-            }
-            else
-            {
-                if (!this.RequestVariables.ContainsKey(p.Key))
-                    this.RequestVariables.Add(AppendKeyName + p.Key, p.Value);
-            }
+            if (!this.RequestVariables.ContainsKey(p.Key))
+                this.RequestVariables.Add(p.Key, p.Value);
         }
 
 
@@ -366,5 +334,102 @@ namespace EWebFrameworkCore.Vendor.Utils
             ExpandoObject z = (ExpandoObject)this.ToDynamicObject();
             return z.Cast<object>();
         }
+
+
+
+        #region BuildingJson
+        private IDictionary<string, string> InspectAndBuildQuery(string jsonString)
+        {
+            jsonString = jsonString.Trim();
+            if (jsonString.StartsWith("{")) return BuildQueryFromJToken(JsonConvert.DeserializeObject<IDictionary<string, object>>(jsonString));
+            if (jsonString.StartsWith("["))
+            {
+                Dictionary<string, string> l = new Dictionary<string, string>();
+
+                List<object> list = JsonConvert.DeserializeObject<List<object>>(jsonString);
+                for (int i = 0; i < list.Count; i++)
+                {
+                    object b = list[i];
+                    CreateValuesFromJToken((JToken)b, string.Format("Root[{0}]", i)
+                        ).ToList().ForEach(x => l.Add(
+                            ToQuerableArrayableKey(x.Key), x.Value));
+
+                }
+
+                return l;
+            }
+            return new Dictionary<string, string>();
+        }
+
+        private  IDictionary<string, string> BuildQueryFromJToken(IDictionary<string, object> v)
+        {
+            Dictionary<string, string> l = new Dictionary<string, string>();
+
+            foreach (var k in v)
+            {
+                CreateValuesFromJToken(k).ToList().ForEach(x => l.Add(ToQuerableArrayableKey(x.Key), x.Value));
+            }
+
+            return l;
+        }
+
+        private  IDictionary<string, string> CreateValuesFromJToken(JToken k, string ParentPath = "")
+        {
+            Dictionary<string, string> l = new Dictionary<string, string>();
+
+            foreach (JToken itemInArray in k)
+            {
+                if (itemInArray is JProperty || itemInArray is JArray || itemInArray is JObject)
+                {
+                    CreateValuesFromJToken(itemInArray, ParentPath).ToList().ForEach(x => l.Add(x.Key, x.Value));
+                }
+                else
+                {
+                    l.Add(ParentPath + "." + itemInArray.Path, (string)Convert.ChangeType(((JValue)itemInArray).Value, typeof(string)));
+                }
+            }
+
+            return l;
+        }
+
+        private  IDictionary<string, string> CreateValuesFromJToken(KeyValuePair<string, object> k)
+        {
+            Dictionary<string, string> l = new Dictionary<string, string>();
+
+            if (k.Value is JProperty || k.Value is JArray || k.Value is JObject)
+            {
+                foreach (JToken itemInArray in (JToken)k.Value)
+                {
+                    if (itemInArray is JValue)
+                        l.Add(k.Key + "." + itemInArray.Path, (string)Convert.ChangeType(((JValue)itemInArray).Value, typeof(string)));
+                    else
+                        CreateValuesFromJToken(itemInArray, k.Key).ToList().ForEach(x => l.Add(x.Key, x.Value));
+                }
+            }
+            else
+            {
+                l.Add(k.Key, (string)Convert.ChangeType(k.Value, typeof(string)));
+            }
+            return l;
+        }
+
+        private  string ToQuerableArrayableKey(string initialKey)
+        {
+            string[] chunks = initialKey.Split(".");
+            string keyName = chunks.FirstOrDefault();
+            if (chunks.Length > 1)
+            {
+                var s = (
+                    from v in chunks.Skip(1)
+                    let z = v.StartsWith("[") ? v : "[" + v
+                    let y = z.EndsWith("]") ? z : z + "]"
+                    select y
+                    ).ToArray();
+                return keyName + string.Join("", s);
+            }
+
+            return keyName;
+        }
+        #endregion
     }
 }
