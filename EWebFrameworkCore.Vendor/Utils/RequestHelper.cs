@@ -74,13 +74,13 @@ namespace EWebFrameworkCore.Vendor.Utils
             {
                 if( this.Request.Query.Count > 0 )
                 {
-                    foreach (var p in this.Request.Query.ToDictionary((x) => x.Key, (x) => (object)x.Value))
+                    foreach (var p in this.Request.Query.ToDictionary((x) => x.Key, (x) => (object)CleanUpKeyValue(x.Value)))
                         AddToRequestVariables(p);
                 }
 
                 if (this.Request.HasFormContentType )
                 {
-                    foreach (var p in this.Request.Form.ToDictionary((x) => x.Key, (x) => (object)x.Value))
+                    foreach (var p in this.Request.Form.ToDictionary((x) => x.Key, (x) => (object)CleanUpKeyValue(x.Value)))
                         AddToRequestVariables(p);
                 }
 
@@ -352,7 +352,7 @@ namespace EWebFrameworkCore.Vendor.Utils
                     object b = list[i];
                     CreateValuesFromJToken((JToken)b, string.Format("Root[{0}]", i)
                         ).ToList().ForEach(x => l.Add(
-                            ToQuerableArrayableKey(x.Key), x.Value));
+                            ToQuerableArrayableKey(x.Key), CleanUpKeyValue(x.Value)));
 
                 }
 
@@ -367,7 +367,7 @@ namespace EWebFrameworkCore.Vendor.Utils
 
             foreach (var k in v)
             {
-                CreateValuesFromJToken(k).ToList().ForEach(x => l.Add(ToQuerableArrayableKey(x.Key), x.Value));
+                CreateValuesFromJToken(k).ToList().ForEach(x => l.Add(ToQuerableArrayableKey(x.Key), CleanUpKeyValue(x.Value) ));
             }
 
             return l;
@@ -429,6 +429,12 @@ namespace EWebFrameworkCore.Vendor.Utils
             }
 
             return keyName;
+        }
+
+        private string CleanUpKeyValue( string v )
+        {
+            if (v == null) return v;
+            return v.Trim();
         }
         #endregion
     }
