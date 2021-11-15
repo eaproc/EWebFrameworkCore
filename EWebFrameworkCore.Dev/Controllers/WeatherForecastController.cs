@@ -13,9 +13,8 @@ using System.Web;
 
 namespace EWebFrameworkCore.Dev.Controllers
 {
-    [ApiController]
     [Route("[controller]")]
-    public class WeatherForecastController : ControllerBase
+    public class WeatherForecastController : EWebFrameworkCore.Vendor.Controller
     {
         private static readonly string[] Summaries = new[]
         {
@@ -23,12 +22,9 @@ namespace EWebFrameworkCore.Dev.Controllers
         };
 
         private readonly ILogger<WeatherForecastController> _logger;
-        private readonly IRequestHelper _RequestHelper;
-
-        public WeatherForecastController(ILogger<WeatherForecastController> logger, IRequestHelper requestHelper)
+        public WeatherForecastController(ILogger<WeatherForecastController> logger, IServiceProvider provider):base(provider)
         {
             _logger = logger;
-            _RequestHelper = requestHelper;
         }
 
         [HttpGet]
@@ -38,8 +34,16 @@ namespace EWebFrameworkCore.Dev.Controllers
             //ISpeaker speaker = (ISpeaker)HttpContext.RequestServices.GetService(typeof(ISpeaker));
             //speaker.Speak();
             //var l = this._RequestHelper.Objectify<float[]>("Arrayable");
-
-            return new JsonResult(this._RequestHelper.ToPackagableForJson());
+            try
+            {
+                throw new Exception("Testing Serilog");
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Let's see");
+                //Log.Error(ex, "Let's see");
+            }
+            return new JsonResult(this.RequestInputs.ToPackagableForJson());
 
             //var rng = new Random();
             //return Enumerable.Range(1, 5).Select(index => new WeatherForecast
@@ -57,7 +61,7 @@ namespace EWebFrameworkCore.Dev.Controllers
         public JsonResult Post()
         {
             //QueryHelpers.;
-            return new JsonResult(this._RequestHelper.ToPackagableForJson());
+            return new JsonResult(this.RequestInputs.ToPackagableForJson());
         }
 
     }

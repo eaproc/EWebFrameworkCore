@@ -30,6 +30,8 @@ namespace EWebFrameworkCore.Vendor.Utils
         /// </summary>
         public string RequestBodyContent { private set; get; }
 
+        public string Id { private set; get; }
+
 
         /// <summary>
         /// The variables sent
@@ -40,6 +42,7 @@ namespace EWebFrameworkCore.Vendor.Utils
 
         public RequestHelper(IServiceProvider provider)
         {
+            this.Id = Guid.NewGuid().ToString();
             this.Request = provider.GetService<IHttpContextAccessor>().HttpContext.Request;
 
             this.IsJsonRequest = this.Request.HasJsonContentType();

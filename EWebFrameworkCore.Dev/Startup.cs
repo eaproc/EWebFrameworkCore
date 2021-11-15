@@ -1,3 +1,4 @@
+using EWebFrameworkCore.Vendor;
 using EWebFrameworkCore.Vendor.Utils;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -51,9 +52,8 @@ namespace EWebFrameworkCore.Dev
             //services.AddScoped<ISpeaker, Speaker>();
             //services.AddScoped<ISpeaker>((provider) => new Speaker( provider.GetService<IHttpContextAccessor>())); ;
 
-            services.AddScoped<IRequestHelper, RequestHelper>();
-
-
+            services.ConfigureEwebFrameworkCoreServices();
+            
             services.AddAuthorization();
 
             services.AddControllers();

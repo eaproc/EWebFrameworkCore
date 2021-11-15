@@ -1,3 +1,4 @@
+using EWebFrameworkCore.Vendor;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
@@ -14,7 +15,8 @@ namespace EWebFrameworkCore.Dev
     {
         public static void Main(string[] args)
         {
-            CreateHostBuilder(args).Build().Run();
+            CreateHostBuilder(args).Build()
+                .Run();
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) {

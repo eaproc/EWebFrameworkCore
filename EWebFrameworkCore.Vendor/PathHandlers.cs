@@ -18,7 +18,7 @@ namespace EWebFrameworkCore.Vendor
 
         static PathHandlers()
         {
-            var logFile = PathHandlers.StoragePath(String.Format("{0}__EPWebFramework.Core.log", DateTime.Now.ToString("yyyy_MM_dd")));
+            var logFile = PathHandlers.StoragePath(String.Format("{0}__EPWebFrameworkCore.Vendor.log", DateTime.Now.ToString("yyyy_MM_dd")));
 
             Logger = new Log1(logFile, Log1.Modes.FILE, false);
         }
