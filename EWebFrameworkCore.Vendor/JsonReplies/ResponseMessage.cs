@@ -1,53 +1,38 @@
-﻿using Newtonsoft.Json;
+﻿using EWebFrameworkCore.Vendor.Utils;
+using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
-using System.Text.Json;
+using System.Net;
 
-
-namespace EWebFrameworkCore.Vendor.Utils.JsonReplies
+namespace EWebFrameworkCore.Vendor.JsonReplies
 {
-    public class ResponseMessage : IArrayable, IJsonable
+    public class ResponseMessage : ObjectResult, IJsonable
     {
-
-
-
+        /// <summary>
+        ///  Major change in latter version will eliminate all properties and send just data
+        /// </summary>
         public String message;
         public bool success;
         public object data;
 
 
-
-
-
-        public ResponseMessage(bool pSuccess=true, String pMessage = null, object pData = null )
+        public ResponseMessage(bool pSuccess=true, String pMessage = null, object pData = null ):base(value: new {
+            message = pMessage,
+            success= pSuccess,
+            data = pData
+        })
         {
-
 
             this.success = pSuccess;
             this.message = pMessage;
             this.data = pData;
 
+            //this.Value = this;
+            this.StatusCode = (int?)HttpStatusCode.OK;
         }
 
-
-
-
-
-
-
-
-
-
-        /// <summary>
-        /// NOT Implemented
-        /// </summary>
-        /// <returns></returns>
-       public IEnumerable<object> ToArray()
-        {
-            throw new NotImplementedException();
-        }
 
 
         /// <summary>

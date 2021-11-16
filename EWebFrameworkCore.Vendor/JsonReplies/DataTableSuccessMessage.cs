@@ -1,6 +1,6 @@
 ﻿using EWebFrameworkCore.Vendor.Services.DataTablesNET;
 
-namespace EWebFrameworkCore.Vendor.Utils.JsonReplies
+namespace EWebFrameworkCore.Vendor.JsonReplies
 {
     public class DataTableSuccessMessage:SuccessResult
     {

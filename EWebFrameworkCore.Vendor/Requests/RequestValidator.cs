@@ -9,8 +9,9 @@ using ELibrary.Standard.VB.Objects;
 using ELibrary.Standard.VB.InputsParsing;
 using EWebFrameworkCore.Vendor.Services.DataTablesNET;
 using ELibrary.Standard.VB;
+using EWebFrameworkCore.Vendor.Configurations;
 
-namespace EWebFrameworkCore.Vendor.Utils
+namespace EWebFrameworkCore.Vendor.Requests
 {
     public partial class RequestValidator
     {
@@ -62,13 +63,10 @@ namespace EWebFrameworkCore.Vendor.Utils
         {
             // Logger.Print(r.paramName);
             if (r.isRequired && (
-                (
-                    !RequestHelper.ContainsKey(r.paramName)
-                    ||
-                    (RequestHelper.ContainsKey(r.paramName) && EStrings.valueOf(RequestHelper.Get(r.paramName)) == String.Empty)
-                )
-                && !RequestHelper.HasFile(r.paramName)
-                )
+                     (!RequestHelper.ContainsKey(r.paramName) && !RequestHelper.HasFile(r.paramName))
+                        ||
+                        (RequestHelper.ContainsKey(r.paramName) && EStrings.valueOf(RequestHelper.Get(r.paramName)) == String.Empty)
+                    )
                 )
             {
                 this.errors.Add(r.paramName, r.paramName.Replace("_", " ") + " is required must be of type " + r.paramType.ToString());
@@ -180,9 +178,9 @@ namespace EWebFrameworkCore.Vendor.Utils
                     }
                     break;
                 case Rule.ParamTypes.FILE:
-                    if (RequestHelper.ContainsKey(r.paramName) && RequestHelper.Get(r.paramName) != null && EStrings.valueOf(RequestHelper.Get(r.paramName)) != string.Empty)
+                    if (RequestHelper.ContainsKey(r.paramName))
                     {
-                        Logger.Print(EStrings.valueOf(RequestHelper.Get(r.paramName)));
+                        //Logger.Print(EStrings.valueOf(RequestHelper.Get(r.paramName)));
                         this.errors.Add(r.paramName, string.Format("Invalid value passed in for {0}. It must be file.", r.paramName)
                                );
                         return;
@@ -297,7 +295,7 @@ namespace EWebFrameworkCore.Vendor.Utils
         /// <returns></returns>
         public Dictionary<String, String> OutputErrors()
         {
-            if (EBoolean.valueOf(ENV.General("APP_DEBUG")))
+            if (EWebFrameworkCoreENV.APP_DEBUG)
                 return this.errors.ToDictionary(x => x.Key, x => x.Value);
 
             Dictionary<String, String> r = new Dictionary<string, string>

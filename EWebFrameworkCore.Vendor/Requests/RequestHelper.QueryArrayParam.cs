@@ -1,10 +1,11 @@
-﻿using Newtonsoft.Json;
+﻿using EWebFrameworkCore.Vendor.Utils;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
 
-namespace EWebFrameworkCore.Vendor.Utils
+namespace EWebFrameworkCore.Vendor.Requests
 {
     public partial class RequestHelper
     {

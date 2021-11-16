@@ -1,8 +1,9 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using EWebFrameworkCore.Vendor.Utils;
+using Microsoft.AspNetCore.Http;
 using System.Collections.Generic;
 using System.Dynamic;
 
-namespace EWebFrameworkCore.Vendor.Utils
+namespace EWebFrameworkCore.Vendor.Requests
 {
     public interface IRequestHelper : IArrayable, IJsonable
     {

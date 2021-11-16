@@ -1,17 +1,10 @@
 using EWebFrameworkCore.Vendor;
-using EWebFrameworkCore.Vendor.Utils;
+using EWebFrameworkCore.Vendor.Middlewares;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace EWebFrameworkCore.Dev
 {
@@ -52,7 +45,7 @@ namespace EWebFrameworkCore.Dev
             //services.AddScoped<ISpeaker, Speaker>();
             //services.AddScoped<ISpeaker>((provider) => new Speaker( provider.GetService<IHttpContextAccessor>())); ;
 
-            services.ConfigureEwebFrameworkCoreServices();
+            services.ConfigureEwebFrameworkCoreServices( this.Configuration );
             
             services.AddAuthorization();
 
@@ -66,6 +59,8 @@ namespace EWebFrameworkCore.Dev
             {
                 app.UseDeveloperExceptionPage();
             }
+
+            app.ConfigureEWebFrameworkCoreMiddlewares();
 
             app.UseRouting();
 

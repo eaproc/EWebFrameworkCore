@@ -1,5 +1,8 @@
 ﻿using EWebFrameworkCore.Vendor.Utils;
+using EWebFrameworkCore.Vendor.Configurations;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Serilog;
 using Serilog.Core;
 using Serilog.Enrichers;
@@ -10,6 +13,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using EWebFrameworkCore.Vendor.Requests;
+using Microsoft.Extensions.Hosting;
+using System.IO;
 
 namespace EWebFrameworkCore.Vendor
 {
@@ -18,10 +24,23 @@ namespace EWebFrameworkCore.Vendor
         public static IServiceCollection Services { private set; get; }
         public static Logger Log { private set; get; }
 
-        public static IServiceCollection ConfigureEwebFrameworkCoreServices(this IServiceCollection services)
+        public static ConfigurationOptions GetEWebFrameworkCoreOptions(this IServiceProvider provider)
+        {
+            return ((OptionsManager<ConfigurationOptions>)provider.GetService(typeof(IOptionsSnapshot<ConfigurationOptions>))).Value;
+        }
+
+        public static IServiceCollection ConfigureEwebFrameworkCoreServices(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddScoped<IRequestHelper, RequestHelper>();
             Services = services;
+
+            // Not updating
+            //Options = new ConfigurationOptions();
+            //configuration.Bind(Options);
+
+            services.Configure<ConfigurationOptions>(configuration);
+
+
 
             // https://github.com/serilog/serilog/wiki/Writing-Log-Events
             // Log Event Levels
@@ -37,7 +56,8 @@ namespace EWebFrameworkCore.Vendor
             // https://github.com/serilog-contrib/serilog-sinks-slack
             //.WriteTo.Slack("https://hooks.slack.com/services/zzzzzzzzzzzzzzzzzzzzz", restrictedToMinimumLevel: LogEventLevel.Error)
             .WriteTo.Console(restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Verbose)
-            .WriteTo.File("Storage/Logs/EWebFrameworkCore.Vendor.txt", rollingInterval: RollingInterval.Day, retainedFileCountLimit: 14, restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Warning,
+            .WriteTo.File(PathHandlers.AppLogStore("EWebFrameworkCore.Vendor.txt"),
+            rollingInterval: RollingInterval.Day, retainedFileCountLimit: 14, restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Warning,
                 outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj} <{ProcessId}><{ThreadId}>{NewLine}{Exception}"
                 )
             .CreateLogger();
@@ -45,6 +65,17 @@ namespace EWebFrameworkCore.Vendor
             return services;
         }
 
+        /// <summary>
+        /// Place .env file in the app root if you want to load it.
+        /// </summary>
+        /// <param name="builder"></param>
+        /// <returns></returns>
+        public static IHostBuilder LoadEnvFile(this IHostBuilder builder)
+        {
+            string ENVFILE = Vendor.PathHandlers.RootPath(".env");
+            if (File.Exists(ENVFILE)) DotNetEnv.Env.Load(ENVFILE);
 
+            return builder;
+        }
     }
 }

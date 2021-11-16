@@ -15,14 +15,11 @@ namespace EWebFrameworkCore.Dev
     {
         public static void Main(string[] args)
         {
-            CreateHostBuilder(args).Build()
+            CreateHostBuilder(args).LoadEnvFile().Build()
                 .Run();
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) {
-
-            string ENVFILE = Vendor.PathHandlers.RootPath(".env");
-            if( File.Exists( ENVFILE ) ) DotNetEnv.Env.Load(ENVFILE);
             return  Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {

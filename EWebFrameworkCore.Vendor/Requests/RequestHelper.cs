@@ -10,7 +10,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
-namespace EWebFrameworkCore.Vendor.Utils
+namespace EWebFrameworkCore.Vendor.Requests
 {
     /// <summary>
     /// Request Helper helps to get request posted
@@ -124,7 +124,7 @@ namespace EWebFrameworkCore.Vendor.Utils
 
 
         /// <summary>
-        /// Checks if a key exists in the request sent
+        /// Checks if a key exists in the request sent. Only check value keys, use HasFile for files
         /// </summary>
         /// <param name="paramName"></param>
         /// <returns></returns>
@@ -247,7 +247,6 @@ namespace EWebFrameworkCore.Vendor.Utils
         public bool HasFile(string paramName)
         {
             return this.Request.HasFormContentType 
-                && this.Request.Form.ContainsKey(paramName) 
                 && this.Request.Form.Files.Where(x=> x.Name == paramName).Count()==1;
         }
 

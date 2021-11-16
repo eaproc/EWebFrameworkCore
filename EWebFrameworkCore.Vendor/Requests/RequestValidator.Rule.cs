@@ -1,4 +1,4 @@
-﻿namespace EWebFrameworkCore.Vendor.Utils
+﻿namespace EWebFrameworkCore.Vendor.Requests
 {
     public partial class RequestValidator
     {
