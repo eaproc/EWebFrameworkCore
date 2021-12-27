@@ -10,7 +10,6 @@ using ELibrary.Standard.VB.Modules;
 using EEntityCore.DB.MSSQL.Schemas;                  
 using EEntityCore.DB.MSSQL;                  
 using EEntityCore.DB.Modules;                  
-using static EWebFrameworkCore.Dev.DBEntities.DatabaseSchema.DatabaseInit;
 using EWebFrameworkCore.Dev.DBEntities.DatabaseSchema;
 
 namespace EWebFrameworkCore.Dev.DBEntities.DatabaseSchema.AuxTables.AuxViews.pay_gateway                  
@@ -334,18 +333,14 @@ namespace EWebFrameworkCore.Dev.DBEntities.DatabaseSchema.AuxTables.AuxViews.pay
             return null;                                                                        
         }                                                                        
                                                                         
-        public static V___PayoutAbleClients GetFullTable(DBTransaction transaction = null) =>                   
-            TransactionRunner.InvokeRun( (conn) =>                  
-                new V___PayoutAbleClients(conn.Fetch(PayoutAbleClients__ALL_COLUMNS___SQL_FILL_QUERY).FirstTable()),                  
-                transaction                  
+        public static V___PayoutAbleClients GetFullTable(TransactionRunner runner) =>                   
+            runner.Run( (conn) =>                  
+                new V___PayoutAbleClients(conn.Fetch(PayoutAbleClients__ALL_COLUMNS___SQL_FILL_QUERY).FirstTable())                  
                 );                                                      
                                                       
-        public static V___PayoutAbleClients GetRowWhereIDUsingSQL(long pID, DBTransaction transaction = null)                                                                        
+        public static V___PayoutAbleClients GetRowWhereIDUsingSQL(long pID, TransactionRunner runner)                                                                        
         {                  
-            return TransactionRunner.InvokeRun(                  
-                (conn) =>                   
-                new V___PayoutAbleClients( conn.Fetch($"SELECT * FROM {TABLE_NAME} WHERE ID={pID}" ).FirstTable(), pID ),                  
-                transaction                  
+            return runner.Run( (conn) =>  new V___PayoutAbleClients( conn.Fetch($"SELECT * FROM {TABLE_NAME} WHERE ID={pID}" ).FirstTable(), pID )                  
                 );                  
         }                                                                        
                                                                         

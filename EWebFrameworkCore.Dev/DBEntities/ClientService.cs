@@ -1,22 +1,15 @@
-﻿using EWebFrameworkCore.Dev.DBEntities.DatabaseSchema;
 using EWebFrameworkCore.Vendor.Configurations;
-using EWebFrameworkCore.Vendor.Utils;
-using System;
+using EWebFrameworkCore.Vendor.Services;
 
 namespace EWebFrameworkCore.Dev.DBEntities
 {
     /// <summary>
     /// 
     /// </summary>
-    public class ClientService:IClientService
+    public class ClientService : BaseClientService
     {
-        public ClientService(MSSQLConnectionOption connectionOption)
+        public ClientService(MSSQLConnectionOption connectionOption): base(connectionOption)
         {
-            DatabaseInit.DBConnectInterface = new DatabaseInit(
-                connectionOption.DATABASE_NAME, connectionOption.DATABASE_USER_NAME,
-                connectionOption.DATABASE_USER_PASSWORD, connectionOption.PORT,
-                connectionOption.HOST
-                );
         }
     }
 }

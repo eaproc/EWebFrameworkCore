@@ -10,7 +10,6 @@ using ELibrary.Standard.VB.Modules;
 using EEntityCore.DB.MSSQL.Schemas;                  
 using EEntityCore.DB.MSSQL;                  
 using EEntityCore.DB.Modules;                  
-using static EWebFrameworkCore.Dev.DBEntities.DatabaseSchema.DatabaseInit;
 using EWebFrameworkCore.Dev.DBEntities.DatabaseSchema;
 
 namespace EWebFrameworkCore.Dev.DBEntities.DatabaseSchema.AuxTables.AuxViews.common                  
@@ -409,18 +408,14 @@ namespace EWebFrameworkCore.Dev.DBEntities.DatabaseSchema.AuxTables.AuxViews.com
             return null;                                                                        
         }                                                                        
                                                                         
-        public static V___StaffPersons GetFullTable(DBTransaction transaction = null) =>                   
-            TransactionRunner.InvokeRun( (conn) =>                  
-                new V___StaffPersons(conn.Fetch(StaffPersons__ALL_COLUMNS___SQL_FILL_QUERY).FirstTable()),                  
-                transaction                  
+        public static V___StaffPersons GetFullTable(TransactionRunner runner) =>                   
+            runner.Run( (conn) =>                  
+                new V___StaffPersons(conn.Fetch(StaffPersons__ALL_COLUMNS___SQL_FILL_QUERY).FirstTable())                  
                 );                                                      
                                                       
-        public static V___StaffPersons GetRowWhereIDUsingSQL(long pID, DBTransaction transaction = null)                                                                        
+        public static V___StaffPersons GetRowWhereIDUsingSQL(long pID, TransactionRunner runner)                                                                        
         {                  
-            return TransactionRunner.InvokeRun(                  
-                (conn) =>                   
-                new V___StaffPersons( conn.Fetch($"SELECT * FROM {TABLE_NAME} WHERE ID={pID}" ).FirstTable(), pID ),                  
-                transaction                  
+            return runner.Run( (conn) =>  new V___StaffPersons( conn.Fetch($"SELECT * FROM {TABLE_NAME} WHERE ID={pID}" ).FirstTable(), pID )                  
                 );                  
         }                                                                        
                                                                         

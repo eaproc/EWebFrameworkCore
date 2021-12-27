@@ -10,7 +10,6 @@ using ELibrary.Standard.VB.Modules;
 using EEntityCore.DB.MSSQL.Schemas;                  
 using EEntityCore.DB.MSSQL;                  
 using EEntityCore.DB.Modules;                  
-using static EWebFrameworkCore.Dev.DBEntities.DatabaseSchema.DatabaseInit;
 using EWebFrameworkCore.Dev.DBEntities.DatabaseSchema;
 
 namespace EWebFrameworkCore.Dev.DBEntities.DatabaseSchema.AuxTables.AuxTables.system                  
@@ -290,18 +289,14 @@ namespace EWebFrameworkCore.Dev.DBEntities.DatabaseSchema.AuxTables.AuxTables.sy
             return null;                                                                        
         }                                                                        
                                                                         
-        public static T___RequestMonitor GetFullTable(DBTransaction transaction = null) =>                   
-            TransactionRunner.InvokeRun( (conn) =>                  
-                new T___RequestMonitor(conn.Fetch(RequestMonitor__ALL_COLUMNS___SQL_FILL_QUERY).FirstTable()),                  
-                transaction                  
+        public static T___RequestMonitor GetFullTable(TransactionRunner runner) =>                   
+            runner.Run( (conn) =>                  
+                new T___RequestMonitor(conn.Fetch(RequestMonitor__ALL_COLUMNS___SQL_FILL_QUERY).FirstTable())                  
                 );                                                      
                                                       
-        public static T___RequestMonitor GetRowWhereIDUsingSQL(long pID, DBTransaction transaction = null)                                                                        
+        public static T___RequestMonitor GetRowWhereIDUsingSQL(long pID, TransactionRunner runner)                                                                        
         {                  
-            return TransactionRunner.InvokeRun(                  
-                (conn) =>                   
-                new T___RequestMonitor( conn.Fetch($"SELECT * FROM {TABLE_NAME} WHERE ID={pID}" ).FirstTable(), pID ),                  
-                transaction                  
+            return runner.Run( (conn) =>  new T___RequestMonitor( conn.Fetch($"SELECT * FROM {TABLE_NAME} WHERE ID={pID}" ).FirstTable(), pID )                  
                 );                  
         }                                                                        
                                                                         
@@ -440,9 +435,9 @@ namespace EWebFrameworkCore.Dev.DBEntities.DatabaseSchema.AuxTables.AuxTables.sy
                     .ToList();                  
             }                  
                   
-            public int Execute(DBTransaction trans = null)                  
+            public int Execute(TransactionRunner runner)                  
             {                  
-                return TransactionRunner.InvokeRun((conn) => conn.ExecuteTransactionQuery(this.BuildSQL()), trans);                  
+                return runner.Run((conn) => conn.ExecuteTransactionQuery(this.BuildSQL()));                  
             }                  
         }                  
                   
@@ -458,17 +453,16 @@ namespace EWebFrameworkCore.Dev.DBEntities.DatabaseSchema.AuxTables.AuxTables.sy
         /// </summary> 
         /// <returns>Boolean</returns> 
         /// <remarks></remarks> 
-        public static long InsertGetID(
-            string AbsoluteURL,
-            string IPAddress,
-            DateTime CreatedAt,
-            string RequestParametersJSON = null,
-            string SessionVariables = null,
-            string Browser = null,
-            int? UserID = null,
-            string RequestBody = null,
-            string RequestHeaders = null,
-            DBTransaction transaction = null
+        public static long InsertGetID( TransactionRunner runner, 
+            string AbsoluteURL
+,            string IPAddress
+,            DateTime CreatedAt
+,            string RequestParametersJSON = null
+,            string SessionVariables = null
+,            string Browser = null
+,            int? UserID = null
+,            string RequestBody = null
+,            string RequestHeaders = null
           ){
 
                 DataColumnParameter paramAbsoluteURL = new (defAbsoluteURL, AbsoluteURL);
@@ -483,7 +477,7 @@ namespace EWebFrameworkCore.Dev.DBEntities.DatabaseSchema.AuxTables.AuxTables.sy
 
                   
                   
-            using var r = new TransactionRunner(transaction);                  
+            using var r = runner;                  
                   
             return r.Run( (conn) =>                   
             {                   
@@ -511,18 +505,17 @@ namespace EWebFrameworkCore.Dev.DBEntities.DatabaseSchema.AuxTables.AuxTables.sy
         /// </summary> 
         /// <returns>Boolean</returns> 
         /// <remarks></remarks> 
-        public static bool AddWithID(
-            int ID,
-            string AbsoluteURL,
-            string IPAddress,
-            DateTime CreatedAt,
-            string RequestParametersJSON = null,
-            string SessionVariables = null,
-            string Browser = null,
-            int? UserID = null,
-            string RequestBody = null,
-            string RequestHeaders = null,
-            DBTransaction transaction = null
+        public static bool AddWithID(TransactionRunner runner,
+            int ID
+,            string AbsoluteURL
+,            string IPAddress
+,            DateTime CreatedAt
+,            string RequestParametersJSON = null
+,            string SessionVariables = null
+,            string Browser = null
+,            int? UserID = null
+,            string RequestBody = null
+,            string RequestHeaders = null
           ){
 
                 DataColumnParameter paramID = new (defID, ID);
@@ -538,7 +531,7 @@ namespace EWebFrameworkCore.Dev.DBEntities.DatabaseSchema.AuxTables.AuxTables.sy
 
                   
                   
-            using var r = new TransactionRunner(transaction);                  
+            using var r = runner;                  
                   
             return r.Run( (conn) =>                   
                       conn.ExecuteTransactionQuery(                  
@@ -563,17 +556,16 @@ namespace EWebFrameworkCore.Dev.DBEntities.DatabaseSchema.AuxTables.AuxTables.sy
         /// </summary> 
         /// <returns>Boolean</returns> 
         /// <remarks></remarks> 
-        public static bool Add(
-            string AbsoluteURL,
-            string IPAddress,
-            DateTime CreatedAt,
-            string RequestParametersJSON = null,
-            string SessionVariables = null,
-            string Browser = null,
-            int? UserID = null,
-            string RequestBody = null,
-            string RequestHeaders = null,
-            DBTransaction transaction = null
+        public static bool Add(TransactionRunner runner,
+            string AbsoluteURL
+,            string IPAddress
+,            DateTime CreatedAt
+,            string RequestParametersJSON = null
+,            string SessionVariables = null
+,            string Browser = null
+,            int? UserID = null
+,            string RequestBody = null
+,            string RequestHeaders = null
           ){
 
                 DataColumnParameter paramAbsoluteURL = new (defAbsoluteURL, AbsoluteURL);
@@ -588,7 +580,7 @@ namespace EWebFrameworkCore.Dev.DBEntities.DatabaseSchema.AuxTables.AuxTables.sy
 
                   
                   
-            using var r = new TransactionRunner(transaction);                  
+            using var r = runner;                  
                   
             return r.Run( (conn) => conn.ExecuteTransactionQuery(                  
                     string.Format(" INSERT INTO {0}([AbsoluteURL],[RequestParametersJSON],[IPAddress],[SessionVariables],[Browser],[UserID],[CreatedAt],[RequestBody],[RequestHeaders]) VALUES({1},{2},{3},{4},{5},{6},{7},{8},{9})  ", TABLE_NAME,
@@ -616,15 +608,14 @@ namespace EWebFrameworkCore.Dev.DBEntities.DatabaseSchema.AuxTables.AuxTables.sy
         /// <param name="reloadTable">if you want this class reloaded</param>                  
         /// <param name="transaction"></param>                  
         /// <returns></returns>                  
-        public bool Update(bool reloadTable = false, DBTransaction transaction = null)                  
+        public bool Update(TransactionRunner runner, bool reloadTable = false)                  
         {                  
-            return TransactionRunner.InvokeRun(                  
+            return runner.Run(                  
                (conn) => {                  
-                   bool r = new UpdateQueryBuilder(this).Execute(conn).ToBoolean();                  
-                   if (reloadTable) this.LoadFromRows( GetRowWhereIDUsingSQL(this.ID, conn).TargettedRow );                  
+                   bool r = new UpdateQueryBuilder(this).Execute(new (conn, false)).ToBoolean();                  
+                   if (reloadTable) this.LoadFromRows( GetRowWhereIDUsingSQL(this.ID, new (conn, false)).TargettedRow );                  
                    return r;                  
-               },                  
-               transaction                  
+               }                  
                );                  
         }                  
                   
@@ -638,16 +629,15 @@ namespace EWebFrameworkCore.Dev.DBEntities.DatabaseSchema.AuxTables.AuxTables.sy
         /// </summary>                  
         /// <returns></returns>                  
         /// <remarks></remarks>                  
-        public bool DeleteRow(DBTransaction transaction = null)                  
+        public bool DeleteRow(TransactionRunner runner)                  
         {                  
-            return DeleteItemRow(ID, transaction);                  
+            return DeleteItemRow(runner, ID);                  
         }                  
                   
-        public static bool DeleteItemRow(long pID, DBTransaction transaction = null)                                                      
+        public static bool DeleteItemRow(TransactionRunner runner, long pID)                                                      
         {                  
-            return TransactionRunner.InvokeRun(                  
-               (conn) => conn.ExecuteTransactionQuery($"DELETE FROM {TABLE_NAME} WHERE ID={pID} ").ToBoolean(),                  
-               transaction                  
+            return runner.Run(                  
+               (conn) => conn.ExecuteTransactionQuery($"DELETE FROM {TABLE_NAME} WHERE ID={pID} ").ToBoolean()                  
                );                  
         }                  
 

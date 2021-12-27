@@ -8,11 +8,16 @@ using System.Threading.Tasks;
 
 namespace EWebFrameworkCore.Dev.Services
 {
-    public class AcademicSessionService
+    public class AcademicSessionService: ClientService
     {
+        public AcademicSessionService(MSSQLConnectionOption connectionOption) : base(connectionOption)
+        {
+
+        }
+
         public string GetFirstRowName()
         {
-            return T___AcademicSession.GetFullTable().GetFirstRow().Name;
+            return T___AcademicSession.GetFullTable(CreateTransactionRunner()).GetFirstRow().Name;
         }
 
     }

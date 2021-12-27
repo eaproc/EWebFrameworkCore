@@ -1,4 +1,6 @@
-﻿using EWebFrameworkCore.Vendor.Utils;
+﻿using EEntityCore.DB.MSSQL;
+using EWebFrameworkCore.Vendor.Configurations;
+using EWebFrameworkCore.Vendor.Utils;
 using System;
 
 namespace EWebFrameworkCore.Vendor.Services
@@ -8,6 +10,32 @@ namespace EWebFrameworkCore.Vendor.Services
     /// </summary>
     public class BaseClientService
     {
+
+        protected MSSQLConnectionOption ConnectionOption;
+
+        public BaseClientService(MSSQLConnectionOption connectionOption)
+        {
+            SetConnection(connectionOption);
+        }
+
+        protected void SetConnection(MSSQLConnectionOption connectionOption)
+        {
+            this.ConnectionOption = connectionOption;
+        }
+
+        private DBTransaction CreateTransaction()
+        {
+            return new DBTransaction(this.GetDBConn().GetSQLConnection());
+        }
+        public TransactionRunner CreateTransactionRunner(bool allowDispose = true)
+        {
+            return new TransactionRunner(CreateTransaction(), allowDispose: allowDispose);
+        }
+
+        public MsSQLDB GetDBConn()
+        {
+            return new MsSQLDB(ConnectionOption.HOST, ConnectionOption.PORT, ConnectionOption.DATABASE_USER_NAME, ConnectionOption.DATABASE_USER_PASSWORD, ConnectionOption.DATABASE_NAME);
+        }
 
 
         ///// <summary>
@@ -71,7 +99,7 @@ namespace EWebFrameworkCore.Vendor.Services
         //        Logger.Print(ex);
         //        throw ex;
         //    }
-            
+
         //}
 
 
@@ -455,23 +483,6 @@ namespace EWebFrameworkCore.Vendor.Services
 
         //    return filename;
         //}
-
-
-
-        /// <summary>
-        /// Create a random file name for this session to temporary store file and delete
-        /// </summary>
-        /// <param name="pExtWithDot">Just additional string to append</param>
-        /// <param name="appendRandom">If you want to generate the randomString Part with it</param>
-        /// <param name="randomStringLength">The length of the random string if needed</param>
-        /// <returns></returns>
-        public static string GetSessionTempFileName(string pExtWithDot = "", bool appendRandom = true, uint randomStringLength = 6)
-        {
-            string s = appendRandom ? AlphaNumericCodeGenerator.RandomString((int)randomStringLength) : string.Empty;
-            return String.Format(@"{0}_{1}{2}", AlphaNumericCodeGenerator.RandomString(16), s, pExtWithDot).AppTempStore();
-        }
-
-
 
 
 

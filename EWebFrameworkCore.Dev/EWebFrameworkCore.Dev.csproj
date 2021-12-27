@@ -24,7 +24,8 @@
     <EmbeddedResource Remove="DBEntities\DatabaseSchema.*\**" />
     <None Remove="DBEntities\DatabaseSchema.*\**" />
   </ItemGroup>
-  
+
+
   <ItemGroup>
     <None Remove=".env" />
     <None Remove="appsettings.json" />

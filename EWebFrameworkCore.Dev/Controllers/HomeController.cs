@@ -21,8 +21,8 @@ namespace EWebFrameworkCore.Dev.Controllers
     {
         public HomeController(IServiceProvider provider):base(provider)
         {
-            // this needs to be called at least once to force the creation of the class
-            var serv = (DBEntities.IClientService)Provider.GetService(typeof(DBEntities.IClientService));
+            //// this needs to be called at least once to force the creation of the class
+            //var serv = (DBEntities.IClientService)Provider.GetService(typeof(DBEntities.IClientService));
         }
 
         [HttpPost]
@@ -67,7 +67,7 @@ namespace EWebFrameworkCore.Dev.Controllers
         [HttpGet]
         public OkObjectResult Get()
         {
-            var service = new Services.AcademicSessionService();
+            var service = new Services.AcademicSessionService(DEFAULT_MSSQL);
 
             return Ok(new { message = service.GetFirstRowName() }); 
             //return Ok(new { message = "Welcome to EWebFrameworkCore." });

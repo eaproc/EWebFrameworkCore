@@ -21,7 +21,8 @@ namespace EWebFrameworkCore.Dev.Controllers
             "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
         };
 
-        public static string ReadChangeTest { get; set; } = "NOT SET";
+        
+        private static string ReadChangeTest  = "NOT SET";
 
         private readonly ILogger<WeatherForecastController> _logger;
         public WeatherForecastController(ILogger<WeatherForecastController> logger, IServiceProvider provider):base(provider)
@@ -37,7 +38,7 @@ namespace EWebFrameworkCore.Dev.Controllers
                 ReadChangeTest = (string)RequestInputs.Get("Value");
 
 
-            return new JsonResult(new { ReadChangeTest });
+            return new JsonResult(new { ReadChangeTest, System.Threading.Thread.CurrentThread.ManagedThreadId });
 
 
             ////ISpeaker speaker = (ISpeaker)HttpContext.RequestServices.GetService(typeof(ISpeaker));
