@@ -7,7 +7,8 @@ namespace EWebFrameworkCore.Vendor.Middlewares
     {
         public static IApplicationBuilder ConfigureEWebFrameworkCoreMiddlewares(this IApplicationBuilder builder)
         {
-            return builder.UseMiddleware<CheckServiceProviderMiddleware>();
+            return builder;
+            //return builder.UseMiddleware<CheckServiceProviderMiddleware>();
         }
     }
 }

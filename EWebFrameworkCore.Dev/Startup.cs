@@ -47,8 +47,6 @@ namespace EWebFrameworkCore.Dev
             //// Configure Database
             //services.AddScoped<DBEntities.IClientService>((provider) => new DBEntities.ClientService(provider.GetEWebFrameworkCoreOptions().DATABASE_CONNECTION)); ;
 
-            services.ConfigureEwebFrameworkCoreServices( this.Configuration );
-            
             services.AddAuthorization();
 
             services.AddControllers();

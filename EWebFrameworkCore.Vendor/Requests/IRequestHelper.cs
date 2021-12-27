@@ -1,5 +1,6 @@
 ﻿using EWebFrameworkCore.Vendor.Utils;
 using Microsoft.AspNetCore.Http;
+using System;
 using System.Collections.Generic;
 using System.Dynamic;
 
@@ -14,6 +15,7 @@ namespace EWebFrameworkCore.Vendor.Requests
         Dictionary<string, object> ProcessedRequestVariables { get; }
 
         HttpRequest Request { get; }
+        IServiceProvider ServiceProvider { get; }
 
         bool ContainsKey(string paramName);
 

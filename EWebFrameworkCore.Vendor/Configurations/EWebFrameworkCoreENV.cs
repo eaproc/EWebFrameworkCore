@@ -1,17 +1,22 @@
 ﻿using EWebFrameworkCore.Vendor.Middlewares;
+using System;
 using static EWebFrameworkCore.Vendor.Configurations.ConfigurationOptions;
 
 namespace EWebFrameworkCore.Vendor.Configurations
 {
-    public static class EWebFrameworkCoreENV
+    public class EWebFrameworkCoreENV
     {
+        public EWebFrameworkCoreENV(IServiceProvider ServiceProvider)
+        {
+            this.ServiceProvider = ServiceProvider;
+        }
 
         /// <summary>
         /// Returns the APP_URL set in .env file
         /// </summary>
-        public static string APP_URL
+        public string APP_URL
         {
-            get { return CheckServiceProviderMiddleware.Provider.GetEWebFrameworkCoreOptions().GENERAL.APP_URL; }
+            get { return ServiceProvider.GetEWebFrameworkCoreOptions().GENERAL.APP_URL; }
         }
 
 
@@ -19,10 +24,10 @@ namespace EWebFrameworkCore.Vendor.Configurations
         /// Indicate if app is in Debug mode ( ENVIRONMENT.DEVELOPMENT || APP_DEBUG )
         /// </summary>
         /// <returns></returns>
-        public static bool APP_DEBUG
+        public  bool APP_DEBUG
         {
             get {
-                var z = CheckServiceProviderMiddleware.Provider.GetEWebFrameworkCoreOptions();
+                var z = ServiceProvider.GetEWebFrameworkCoreOptions();
                 return z.GetEnvironment() == ENVIRONMENT.DEVELOPMENT || z.GENERAL.APP_DEBUG; 
             }
         }
@@ -32,14 +37,13 @@ namespace EWebFrameworkCore.Vendor.Configurations
         /// Checks GENERAL:RUNNING_MODE first then ASPNETCORE_ENVIRONMENT
         /// </summary>
         /// <returns></returns>
-        public static string RUNNING_MODE
+        public  string RUNNING_MODE
         {
             get{
-                return CheckServiceProviderMiddleware.Provider.GetEWebFrameworkCoreOptions().RUNNING_MODE;
+                return ServiceProvider.GetEWebFrameworkCoreOptions().RUNNING_MODE;
             } 
         }
 
-      
-
+        public IServiceProvider ServiceProvider { get; }
     }
   }

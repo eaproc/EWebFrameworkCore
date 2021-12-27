@@ -16,6 +16,7 @@ namespace EWebFrameworkCore.Vendor.Requests
     public partial class RequestValidator
     {
         public IRequestHelper RequestHelper { private set; get; }
+        public EWebFrameworkCoreENV ENV { get; }
 
         private readonly Dictionary<String, Rule> ValidatedRules;
 
@@ -26,6 +27,7 @@ namespace EWebFrameworkCore.Vendor.Requests
             this.errors = new SortedList<string, string>();
             this.ValidatedRules = new Dictionary<string, Rule>();
             this.RequestHelper = helper;
+            this.ENV = new EWebFrameworkCoreENV(helper.ServiceProvider);
         }
 
 
@@ -295,7 +297,7 @@ namespace EWebFrameworkCore.Vendor.Requests
         /// <returns></returns>
         public Dictionary<String, String> OutputErrors()
         {
-            if (EWebFrameworkCoreENV.APP_DEBUG)
+            if (ENV.APP_DEBUG)
                 return this.errors.ToDictionary(x => x.Key, x => x.Value);
 
             Dictionary<String, String> r = new Dictionary<string, string>

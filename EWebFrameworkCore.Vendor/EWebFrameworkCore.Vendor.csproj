@@ -21,6 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Remove="Middlewares\CheckServiceProviderMiddleware.cs" />
     <Compile Remove="PageHandlers.cs" />
     <Compile Remove="Utils\DataExports\Excel\ExcelFileGenerator.cs" />
     <Compile Remove="Utils\DataExports\Excel\IEPPlusExcelExportCustomizer.cs" />

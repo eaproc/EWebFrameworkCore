@@ -21,7 +21,7 @@ namespace EWebFrameworkCore.Vendor.Requests
         /// Current HttpRequest Object
         /// </summary>
         public HttpRequest Request { private set; get; }
-
+        public IServiceProvider ServiceProvider { get; private set; }
         public bool IsJsonRequest { private set; get; }
 
 
@@ -44,6 +44,8 @@ namespace EWebFrameworkCore.Vendor.Requests
         {
             this.Id = Guid.NewGuid().ToString();
             this.Request = provider.GetService<IHttpContextAccessor>().HttpContext.Request;
+
+            this.ServiceProvider = provider;
 
             this.IsJsonRequest = this.Request.HasJsonContentType();
             this.RequestVariables = new Dictionary<string, object>();
