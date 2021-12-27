@@ -46,6 +46,11 @@ namespace EWebFrameworkCore.Dev
             //services.AddScoped<ISpeaker>((provider) => new Speaker( provider.GetService<IHttpContextAccessor>())); ;
 
             services.ConfigureEwebFrameworkCoreServices( this.Configuration );
+
+            // Configure Database
+            services.AddScoped<DBEntities.IClientService>((provider) => new DBEntities.ClientService(provider.GetEWebFrameworkCoreOptions().DATABASE_CONNECTION)); ;
+
+            services.ConfigureEwebFrameworkCoreServices( this.Configuration );
             
             services.AddAuthorization();
 

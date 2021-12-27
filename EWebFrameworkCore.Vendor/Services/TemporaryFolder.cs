@@ -1,6 +1,7 @@
 ﻿using ELibrary.Standard.VB;
 using System;
 using System.IO;
+using static EWebFrameworkCore.Vendor.PathHandlers;
 
 namespace EWebFrameworkCore.Vendor.Services
 {
@@ -26,7 +27,7 @@ namespace EWebFrameworkCore.Vendor.Services
         /// <summary>
         /// Create a temporary folder. Note the folder is not physically created
         /// </summary>
-        public TemporaryFolder():this(BaseClientService.GetSessionTempFileName() )
+        public TemporaryFolder():this(GetRandomTempFileName() )
         {}
 
 

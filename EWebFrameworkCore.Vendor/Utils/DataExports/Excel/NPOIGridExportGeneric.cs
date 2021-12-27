@@ -1,5 +1,5 @@
 ﻿using ELibrary.Standard.VB;
-using EWebFrameworkCore.Vendor.Services;
+using static EWebFrameworkCore.Vendor.PathHandlers;
 using NPOI.SS.UserModel;
 using System;
 using System.Collections.Generic;
@@ -88,7 +88,7 @@ namespace EWebFrameworkCore.Vendor.Utils.DataExports.Excel
         protected string ExportTo(bool IsXLS , bool FillHeaderNames, int HeaderRowIndex = 0, int HeaderColumnIndex = 0)
         {
 
-            string FilePath = BaseClientService.GetSessionTempFileName();
+            string FilePath = GetRandomTempFileName();
 
             EIO.DeleteFileIfExists(_FileName: FilePath);
             if (!Directory.Exists(EIO.getDirectoryFullPath(FilePath))) System.IO.Directory.CreateDirectory(EIO.getDirectoryFullPath(FilePath));

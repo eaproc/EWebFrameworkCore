@@ -21,7 +21,14 @@ namespace EWebFrameworkCore.Vendor
 {
    public static class Bootstrap
     {
-        public static IServiceCollection Services { private set; get; }
+        // Static variables are bad in Web App because they will persist accross the app domain
+        // if the resource is suppose to be Per Request Scope, don't use STATIC
+
+        //public static IServiceCollection Services { private set; get; }
+
+        /// <summary>
+        /// App Wide Domain Serilog Logger
+        /// </summary>
         public static Logger Log { private set; get; }
 
         public static ConfigurationOptions GetEWebFrameworkCoreOptions(this IServiceProvider provider)
@@ -32,7 +39,7 @@ namespace EWebFrameworkCore.Vendor
         public static IServiceCollection ConfigureEwebFrameworkCoreServices(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddScoped<IRequestHelper, RequestHelper>();
-            Services = services;
+            //Services = services;
 
             // Not updating
             //Options = new ConfigurationOptions();
@@ -48,8 +55,11 @@ namespace EWebFrameworkCore.Vendor
             // https://github.com/serilog/serilog/wiki/Provided-Sinks
             Log = new LoggerConfiguration()
              .MinimumLevel.Verbose()
-             .Enrich.WithProcessId()
-             .Enrich.WithThreadId()
+
+            // outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj} <{ProcessId}><{ThreadId}>{NewLine}{Exception}"
+            //.Enrich.WithProcessId()
+            //.Enrich.WithThreadId()
+
             //.Enrich.WithThreadName()
             //.Enrich.WithProperty(ThreadNameEnricher.ThreadNamePropertyName, "MyDefault")
             //.Enrich.FromLogContext()
@@ -58,7 +68,7 @@ namespace EWebFrameworkCore.Vendor
             .WriteTo.Console(restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Verbose)
             .WriteTo.File(PathHandlers.AppLogStore("EWebFrameworkCore.Vendor.txt"),
             rollingInterval: RollingInterval.Day, retainedFileCountLimit: 14, restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Warning,
-                outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj} <{ProcessId}><{ThreadId}>{NewLine}{Exception}"
+                outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj} {NewLine}{Exception}"
                 )
             .CreateLogger();
 

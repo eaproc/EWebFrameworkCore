@@ -21,6 +21,8 @@ namespace EWebFrameworkCore.Dev.Controllers
             "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
         };
 
+        public static string ReadChangeTest { get; set; } = "NOT SET";
+
         private readonly ILogger<WeatherForecastController> _logger;
         public WeatherForecastController(ILogger<WeatherForecastController> logger, IServiceProvider provider):base(provider)
         {
@@ -31,31 +33,38 @@ namespace EWebFrameworkCore.Dev.Controllers
         public JsonResult Get()
         {
 
-            //ISpeaker speaker = (ISpeaker)HttpContext.RequestServices.GetService(typeof(ISpeaker));
-            //speaker.Speak();
-            //var l = this._RequestHelper.Objectify<float[]>("Arrayable");
-            try
-            {
-                throw new Exception("Testing Serilog");
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "Let's see");
-                //Log.Error(ex, "Let's see");
-            }
-            return new JsonResult(this.RequestInputs.ToPackagableForJson());
+            if (RequestInputs.ContainsKey("Value"))
+                ReadChangeTest = (string)RequestInputs.Get("Value");
 
-            //var rng = new Random();
-            //return Enumerable.Range(1, 5).Select(index => new WeatherForecast
+
+            return new JsonResult(new { ReadChangeTest });
+
+
+            ////ISpeaker speaker = (ISpeaker)HttpContext.RequestServices.GetService(typeof(ISpeaker));
+            ////speaker.Speak();
+            ////var l = this._RequestHelper.Objectify<float[]>("Arrayable");
+            //try
             //{
-            //    Date = DateTime.Now.AddDays(index),
-            //    TemperatureC = rng.Next(-20, 55),
-            //    Summary = Summaries[rng.Next(Summaries.Length)]
-            //})
-            //.ToArray();
+            //    throw new Exception("Testing Serilog");
+            //}
+            //catch (Exception ex)
+            //{
+            //    Log.Error(ex, "Let's see");
+            //    //Log.Error(ex, "Let's see");
+            //}
+            //return new JsonResult(this.RequestInputs.ToPackagableForJson());
+
+            ////var rng = new Random();
+            ////return Enumerable.Range(1, 5).Select(index => new WeatherForecast
+            ////{
+            ////    Date = DateTime.Now.AddDays(index),
+            ////    TemperatureC = rng.Next(-20, 55),
+            ////    Summary = Summaries[rng.Next(Summaries.Length)]
+            ////})
+            ////.ToArray();
         }
 
-      
+
 
         [HttpPost]
         public JsonResult Post()

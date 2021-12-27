@@ -170,7 +170,7 @@ namespace EWebFrameworkCore.Vendor.Requests
             //* Solution here is make the string non-nullable for formdata and send empty string
             //* or make it nullable if you are sure user aren't suppose to enter "null" for the parameter
             //**/
-            //String s = EStrings.valueOf(this.RequestVariables[paramName]);
+            //String s = EStrings.ValueOf(this.RequestVariables[paramName]);
             //if (pIsNullable && IsQueryStringNullDefinition(s)) s = null;
 
             //return s;

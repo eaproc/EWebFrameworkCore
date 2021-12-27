@@ -44,12 +44,12 @@ namespace EWebFrameworkCore.Vendor.Services.DataTablesNET
                 pParts[0].Length == 4 &&
                 pParts[1].Length == 2 &&
                 pParts[2].Length == 2 &&
-                (EInt.valueOf(pParts[0]) > 0 && EInt.valueOf(pParts[0]) < 4000) &&
-                (EInt.valueOf(pParts[1]) > 0 && EInt.valueOf(pParts[1]) < 13) &&
-                (EInt.valueOf(pParts[2]) > 0 && EInt.valueOf(pParts[2]) < 32)
+                (EInt.ValueOf(pParts[0]) > 0 && EInt.ValueOf(pParts[0]) < 4000) &&
+                (EInt.ValueOf(pParts[1]) > 0 && EInt.ValueOf(pParts[1]) < 13) &&
+                (EInt.ValueOf(pParts[2]) > 0 && EInt.ValueOf(pParts[2]) < 32)
                 )
                 {
-                    int pYr = EInt.valueOf(pParts[0]), pMonth = EInt.valueOf(pParts[1]), pDay = EInt.valueOf(pParts[2]);
+                    int pYr = EInt.ValueOf(pParts[0]), pMonth = EInt.ValueOf(pParts[1]), pDay = EInt.ValueOf(pParts[2]);
                     return new DateTime(pYr, pMonth, pDay);     //this may throw exception
 
                 }
@@ -76,11 +76,11 @@ namespace EWebFrameworkCore.Vendor.Services.DataTablesNET
                 if (pParts.Length == 2 &&
                 pParts[0].Length == 2 &&
                 pParts[1].Length == 2 &&
-                (EInt.valueOf(pParts[0]) >= 0 && EInt.valueOf(pParts[0]) < 24) &&
-                (EInt.valueOf(pParts[1]) >= 0 && EInt.valueOf(pParts[1]) < 60)
+                (EInt.ValueOf(pParts[0]) >= 0 && EInt.ValueOf(pParts[0]) < 24) &&
+                (EInt.ValueOf(pParts[1]) >= 0 && EInt.ValueOf(pParts[1]) < 60)
                 )
                 {
-                    int pHr = EInt.valueOf(pParts[0]), pMin = EInt.valueOf(pParts[1]);
+                    int pHr = EInt.ValueOf(pParts[0]), pMin = EInt.ValueOf(pParts[1]);
                     return new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, pHr, pMin, 0);     //this may throw exception
 
                 }
@@ -107,7 +107,7 @@ namespace EWebFrameworkCore.Vendor.Services.DataTablesNET
                 OrderByColumnIndex = Convert.ToInt32(requestHelper.Get("order[0][column]")),
                 OrderByColumnDirection = requestHelper.Get("order[0][dir]").ToString(),
                 OrderByColumnName = requestHelper.ContainsKey("order[0][name]") ? requestHelper.Get("order[0][name]").ToString() : String.Empty,
-                SortUsingColumnName = requestHelper.ContainsKey("SortUsingColumnName") ? EBoolean.valueOf(requestHelper.Get("SortUsingColumnName")) : false,
+                SortUsingColumnName = requestHelper.ContainsKey("SortUsingColumnName") ? EBoolean.ValueOf(requestHelper.Get("SortUsingColumnName")) : false,
                 SearchValue = requestHelper.ContainsKey("search[value]") ? requestHelper.Get("search[value]").ToString() : "",
                 StartDate = requestHelper.ContainsKey("start_date") ? DataTableRequestFields.ParseDate(requestHelper.Get("start_date").ToString()) : null,
                 EndDate = requestHelper.ContainsKey("end_date") ? DataTableRequestFields.ParseDate(requestHelper.Get("end_date").ToString()) : null

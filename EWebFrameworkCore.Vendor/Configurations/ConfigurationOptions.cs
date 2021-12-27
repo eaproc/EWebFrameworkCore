@@ -21,6 +21,7 @@ namespace EWebFrameworkCore.Vendor.Configurations
         public enum ENVIRONMENT { UNKNOWN, DEVELOPMENT, PRODUCTION, STAGING }
 
         public GeneralOption GENERAL { get; set; } = new GeneralOption();
+        public MSSQLConnectionOption DATABASE_CONNECTION { get; set; } = new MSSQLConnectionOption();
 
         public string ASPNETCORE_ENVIRONMENT { get; set; } = "Development";
         public string TEST_ME { get; set; } 

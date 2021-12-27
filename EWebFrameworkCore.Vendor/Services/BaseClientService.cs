@@ -415,7 +415,7 @@ namespace EWebFrameworkCore.Vendor.Services
 
         //    DataTableReturnFormat dtrf = new DataTableReturnFormat()
         //    {
-        //        recordsFiltered = paginated != null && paginated.Rows.Count > 0 ? EInt.valueOf(paginated.Rows[0]["filtered_record_count"]) : 0,
+        //        recordsFiltered = paginated != null && paginated.Rows.Count > 0 ? EInt.ValueOf(paginated.Rows[0]["filtered_record_count"]) : 0,
         //        recordsTotal = pTotalCountWithoutPagination,
         //        totalPagesSummary = dCompleteTableWithFilterSummary != null ? Controller.ToDictionary(dCompleteTableWithFilterSummary).First() : null
         //    };

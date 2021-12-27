@@ -32,8 +32,8 @@ namespace EWebFrameworkCore.Vendor.Utils.DateTimeHelper
                 String valuePart = !TextParsing.IsNumber(pSign.First()) ? timeZone.Substring(1) : timeZone;
                 String[] vParts = valuePart.Split(':');
 
-                this.Hour = EInt.valueOf(vParts[0]);
-                this.Min = EInt.valueOf(vParts[1]);
+                this.Hour = EInt.ValueOf(vParts[0]);
+                this.Min = EInt.ValueOf(vParts[1]);
 
                 if (this.Hour > HOUR_PART_MAX || this.Min > MINUTE_PART_MAX) throw new InvalidTimeZoneSettingsException();
 

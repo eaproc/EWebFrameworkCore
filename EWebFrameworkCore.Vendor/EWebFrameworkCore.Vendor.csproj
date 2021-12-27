@@ -29,7 +29,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="Services\BaseClientService.cs" />
     <Compile Include="Services\DataTablesNET\DataTableRequestFields.cs" />
     <Compile Include="Services\DataTablesNET\DataTableReturnFormat.cs" />
     <Compile Include="Services\TemporaryFile.cs" />

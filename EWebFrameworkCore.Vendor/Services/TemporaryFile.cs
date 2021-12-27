@@ -1,5 +1,6 @@
 ﻿using ELibrary.Standard.VB;
 using System;
+using static EWebFrameworkCore.Vendor.PathHandlers;
 
 namespace EWebFrameworkCore.Vendor.Services
 {
@@ -27,7 +28,7 @@ namespace EWebFrameworkCore.Vendor.Services
         /// </summary>
         /// <param name="ExtWithDot">Just additional string to append</param>
         /// <param name="appendRandom">If you want to generate the randomString Part with it</param>
-        public TemporaryFile( string ExtWithDot = "", bool appendRandom = true):this(BaseClientService.GetSessionTempFileName(pExtWithDot: ExtWithDot, appendRandom: appendRandom) )
+        public TemporaryFile( string ExtWithDot = "", bool appendRandom = true):this(GetRandomTempFileName(pExtWithDot: ExtWithDot, appendRandom: appendRandom) )
         {}
 
 

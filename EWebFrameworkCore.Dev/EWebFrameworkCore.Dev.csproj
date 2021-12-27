@@ -19,12 +19,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Remove="ISpeaker.cs" />
-    <Compile Remove="PositionOptions.cs" />
-    <Compile Remove="Speaker.cs" />
-    <Compile Remove="TopItemSettings.cs" />
+    <None Remove="DBEntities\DatabaseSchema.*" />
+    <Compile Remove="DBEntities\DatabaseSchema.*\**" />
+    <EmbeddedResource Remove="DBEntities\DatabaseSchema.*\**" />
+    <None Remove="DBEntities\DatabaseSchema.*\**" />
   </ItemGroup>
-
+  
   <ItemGroup>
     <None Remove=".env" />
     <None Remove="appsettings.json" />
@@ -53,9 +53,28 @@
       <CopyToPublishDirectory>Do not copy</CopyToPublishDirectory>
     </Content>
   </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="4.0.0" />
+  </ItemGroup>
   
   <ItemGroup>
     <ProjectReference Include="..\EWebFrameworkCore.Vendor\EWebFrameworkCore.Vendor.csproj" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Reference Include="CODERiT.Logger.Standard.VB">
+      <HintPath>..\..\EEntityCore\EEntityCore.DB\EEntityCore.DB.MSSQL\bin\Debug\net5.0\CODERiT.Logger.Standard.VB.dll</HintPath>
+    </Reference>
+    <Reference Include="EEntityCore.DB">
+      <HintPath>..\..\EEntityCore\EEntityCore.DB\EEntityCore.DB.MSSQL\bin\Debug\net5.0\EEntityCore.DB.dll</HintPath>
+    </Reference>
+    <Reference Include="EEntityCore.DB.MSSQL">
+      <HintPath>..\..\EEntityCore\EEntityCore.DB\EEntityCore.DB.MSSQL\bin\Debug\net5.0\EEntityCore.DB.MSSQL.dll</HintPath>
+    </Reference>
+    <Reference Include="ELibrary.Standard.VB">
+      <HintPath>..\..\EEntityCore\EEntityCore.DB\EEntityCore.DB.MSSQL\bin\Debug\net5.0\ELibrary.Standard.VB.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>

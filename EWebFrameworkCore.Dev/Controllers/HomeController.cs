@@ -20,7 +20,10 @@ namespace EWebFrameworkCore.Dev.Controllers
     public class HomeController : Vendor.Controller
     {
         public HomeController(IServiceProvider provider):base(provider)
-        {}
+        {
+            // this needs to be called at least once to force the creation of the class
+            var serv = (DBEntities.IClientService)Provider.GetService(typeof(DBEntities.IClientService));
+        }
 
         [HttpPost]
         public ObjectResult Post()
@@ -64,7 +67,10 @@ namespace EWebFrameworkCore.Dev.Controllers
         [HttpGet]
         public OkObjectResult Get()
         {
-            return Ok(new { message = "Welcome to EWebFrameworkCore." });
+            var service = new Services.AcademicSessionService();
+
+            return Ok(new { message = service.GetFirstRowName() }); 
+            //return Ok(new { message = "Welcome to EWebFrameworkCore." });
         }
     }
 }

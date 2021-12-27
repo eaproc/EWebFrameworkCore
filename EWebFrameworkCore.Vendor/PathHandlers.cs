@@ -1,4 +1,5 @@
 ﻿using CODERiT.Logger.Standard.VB;
+using EWebFrameworkCore.Vendor.Utils;
 using System;
 using System.Linq;
 
@@ -138,6 +139,22 @@ namespace EWebFrameworkCore.Vendor
         {
             return StoragePath("/Temp/" + pPath);
         }
+
+
+        /// <summary>
+        /// Create a random file name for this session to temporary store file and delete
+        /// </summary>
+        /// <param name="pExtWithDot">Just additional string to append</param>
+        /// <param name="appendRandom">If you want to generate the randomString Part with it</param>
+        /// <param name="randomStringLength">The length of the random string if needed</param>
+        /// <returns></returns>
+        public static string GetRandomTempFileName(string pExtWithDot = "", bool appendRandom = true, uint randomStringLength = 6)
+        {
+            string s = appendRandom ? AlphaNumericCodeGenerator.RandomString((int)randomStringLength) : string.Empty;
+            return String.Format(@"{0}_{1}{2}", AlphaNumericCodeGenerator.RandomString(16), s, pExtWithDot).AppTempStore();
+        }
+
+
 
     }
 }

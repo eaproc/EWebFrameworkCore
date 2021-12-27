@@ -15,7 +15,7 @@ namespace EWebFrameworkCore.Vendor.Utils.DataExports.Excel
 
 
             if (value != null && value.GetType() == typeof(string))
-                cell.SetCellValue(EStrings.valueOf(value));
+                cell.SetCellValue(EStrings.ValueOf(value));
 
             else if (value != null && value.GetType() == typeof(DateTime))
                 cell.SetCellValue((DateTime)value);
@@ -26,7 +26,7 @@ namespace EWebFrameworkCore.Vendor.Utils.DataExports.Excel
             else if (value != null && value.GetType() == typeof(bool))
                 cell.SetCellValue((bool)value);
 
-            else cell.SetCellValue(EDouble.valueOf(value));
+            else cell.SetCellValue(EDouble.ValueOf(value));
 
 
 
