@@ -2,6 +2,11 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
+    <Authors>EAPROC</Authors>
+    <Description>A web framework built on .NET Core</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <RepositoryUrl>https://github.com/eaproc/EWebFrameworkCore</RepositoryUrl>
+    <PackageTags>EWebFramework,Framework,Web</PackageTags>
   </PropertyGroup>
   
   <ItemGroup>
