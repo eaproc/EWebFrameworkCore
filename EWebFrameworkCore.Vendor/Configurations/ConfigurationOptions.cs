@@ -24,24 +24,7 @@ namespace EWebFrameworkCore.Vendor.Configurations
         public MSSQLConnectionOption DATABASE_CONNECTION { get; set; } = new MSSQLConnectionOption();
 
         public string ASPNETCORE_ENVIRONMENT { get; set; } = "Development";
-        public string TEST_ME { get; set; } 
 
-        public string Default { get; set; } = string.Empty;
-        public string Microsoft { get; set; }
-
-
-
-        /// <summary>
-        /// Checks GENERAL:RUNNING_MODE first then ASPNETCORE_ENVIRONMENT
-        /// </summary>
-        /// <returns></returns>
-        public  string RUNNING_MODE
-        {
-            get
-            {
-                return GENERAL.RUNNING_MODE ?? ASPNETCORE_ENVIRONMENT;
-            }
-        }
 
         /// <summary>
         /// Get application environment
@@ -49,7 +32,7 @@ namespace EWebFrameworkCore.Vendor.Configurations
         /// <returns></returns>
         public ENVIRONMENT GetEnvironment()
         {
-            switch (RUNNING_MODE.ToUpper())
+            switch (ASPNETCORE_ENVIRONMENT.ToUpper())
             {
                 case "DEVELOPMENT":
                     return ENVIRONMENT.DEVELOPMENT;

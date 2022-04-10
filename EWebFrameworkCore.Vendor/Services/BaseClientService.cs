@@ -1,7 +1,13 @@
-﻿using EEntityCore.DB.MSSQL;
+﻿using EEntityCore.DB.Abstracts;
+using EEntityCore.DB.MSSQL;
 using EWebFrameworkCore.Vendor.Configurations;
 using EWebFrameworkCore.Vendor.Utils;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Serilog.Core;
 using System;
+using System.Data;
 
 namespace EWebFrameworkCore.Vendor.Services
 {
@@ -13,8 +19,26 @@ namespace EWebFrameworkCore.Vendor.Services
 
         protected MSSQLConnectionOption ConnectionOption;
 
-        public BaseClientService(MSSQLConnectionOption connectionOption)
+        public IServiceProvider Provider { get; }
+        public HttpContext? HttpContext { get; }
+        public IConfiguration? Configurations { get; private set; }
+
+        public readonly ConfigurationOptions EWebFrameworkCoreConfigurations;
+
+        public Logger Log { get; }
+        public DatabaseTimeZoneUtilsExtensions.DatabaseTimeZoneUtils DBTimeZoneUtils { get; }
+
+        public BaseClientService(IServiceProvider provider, MSSQLConnectionOption connectionOption)
         {
+            this.Provider = provider;
+            this.HttpContext = provider.GetService<IHttpContextAccessor>().HttpContext;
+            this.Configurations = provider.GetService<IConfiguration>();
+
+            this.EWebFrameworkCoreConfigurations = Provider.GetEWebFrameworkCoreOptions();
+            this.Log = Bootstrap.Log;
+
+            this.DBTimeZoneUtils = new DatabaseTimeZoneUtilsExtensions.DatabaseTimeZoneUtils(this.EWebFrameworkCoreConfigurations.GENERAL.DATABASE_TIMEZONE);
+
             SetConnection(connectionOption);
         }
 
@@ -37,6 +61,13 @@ namespace EWebFrameworkCore.Vendor.Services
             return new MsSQLDB(ConnectionOption.HOST, ConnectionOption.PORT, ConnectionOption.DATABASE_USER_NAME, ConnectionOption.DATABASE_USER_PASSWORD, ConnectionOption.DATABASE_NAME);
         }
 
+        public DateTime ServerNowDateTime
+        {
+            get
+            {
+                return DateTime.Now.FromServerTimeZone(DBTimeZoneUtils);
+            }
+        }
 
         ///// <summary>
         ///// Use for DB
@@ -70,74 +101,65 @@ namespace EWebFrameworkCore.Vendor.Services
 
 
 
-        ///// <summary>
-        ///// Turn this on if you want to trace sql query
-        ///// </summary>
-        //public static bool TRACE_DEBUG_SQL = false;
+        /// <summary>
+        /// Turn this on if you want to trace sql query
+        /// </summary>
+        protected bool TRACE_DEBUG_SQL = false;
 
 
-        ///// <summary>
-        ///// Addressing apostrophe means you will pass string value with this \'{0}\'
-        ///// </summary>
-        ///// <param name="pSQL"></param>
-        ///// <param name="AddressApostrophe"></param>
-        ///// <returns>DataTable or null</returns>
-        //public virtual System.Data.DataTable GetSQLTable(String pSQL, bool AddressApostrophe = false)
-        //{
+        /// <summary>
+        /// Addressing apostrophe means you will pass string value with this \'{0}\'
+        /// </summary>
+        /// <param name="pSQL"></param>
+        /// <param name="AddressApostrophe"></param>
+        /// <returns>DataTable or null</returns>
+        public virtual System.Data.DataTable GetSQLTable(String pSQL, bool AddressApostrophe = false)
+        {
 
-        //    if (TRACE_DEBUG_SQL) Logger.Print(pSQL);
-        //    if (this.credentialManager == null) throw new InvalidOperationException("Please, set the credential manager on the inherited Client Service!");
+            if (TRACE_DEBUG_SQL) PathHandlers.Logger.Print(pSQL);
+            try
+            {
+                var db = (All__DBs)this.GetDBConn();
+                var p = db.getRS(pSQL, AddressApostrophe);
+                return (p != null && p.Tables.Count > 0) ? p.Tables[0] : null;
+            }
+            catch (Exception ex)
+            {
+                PathHandlers.Logger.Print(ex);
+                throw;
+            }
 
-        //    try
-        //    {
-        //        var db = (DB.Abstracts.All__DBs)this.credentialManager.GetDBConn();
-        //        var p = db.getRS(pSQL, AddressApostrophe);
-        //        return (p != null && p.Tables.Count > 0) ? p.Tables[0] : null;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        Logger.Print(ex);
-        //        throw ex;
-        //    }
-
-        //}
-
-
-
-        ///// <summary>
-        ///// Addressing apostrophe means you will pass string value with this \'{0}\'
-        ///// </summary>
-        ///// <param name="pSQL"></param>
-        ///// <param name="AddressApostrophe"></param>
-        ///// <returns>boolean</returns>
-        //public virtual bool ExecuteQuery(String pSQL, bool AddressApostrophe = false)
-        //{
-
-        //    if (TRACE_DEBUG_SQL) Logger.Print(pSQL);
+        }
 
 
 
-        //    var db = (DB.Abstracts.All__DBs)this.credentialManager.GetDBConn();
-        //    var p = db.dbExec(SQL: pSQL, Address_Apostrophe_Issue: AddressApostrophe);
-        //    return p;
-        //}
+        /// <summary>
+        /// Addressing apostrophe means you will pass string value with this \'{0}\'
+        /// </summary>
+        /// <param name="pSQL"></param>
+        /// <param name="AddressApostrophe"></param>
+        /// <returns>boolean</returns>
+        public virtual int ExecuteQuery(String pSQL, bool AddressApostrophe = false)
+        {
+            if (TRACE_DEBUG_SQL) PathHandlers.Logger.Print(pSQL);
+            return GetDBConn().DbExec(SQL: pSQL, Address_Apostrophe_Issue: AddressApostrophe);
+        }
 
 
 
-        //#region "Utilities"
+        #region "Utilities"
 
-        ///// <summary>
-        ///// Checks if table is not null and has rows
-        ///// </summary>
-        ///// <param name="dataTable"></param>
-        ///// <returns></returns>
-        //public static bool HasRows(DataTable dataTable)
-        //{
-        //    return dataTable != null && dataTable.Rows.Count > 0;
-        //}
+        /// <summary>
+        /// Checks if table is not null and has rows
+        /// </summary>
+        /// <param name="dataTable"></param>
+        /// <returns></returns>
+        public static bool HasRows(DataTable dataTable)
+        {
+            return dataTable != null && dataTable.Rows.Count > 0;
+        }
 
-
-        //#endregion
+        #endregion
 
 
 
@@ -175,7 +197,7 @@ namespace EWebFrameworkCore.Vendor.Services
         //public int ExecuteTransactionQuery(String pSQL)
         //{
 
-        //    if (TRACE_DEBUG_SQL) Logger.Print(pSQL);
+        //    if (TRACE_DEBUG_SQL) PathHandlers.Logger.Print(pSQL);
 
         //    this.DBTransactionCommand.CommandText = pSQL;
         //    return this.DBTransactionCommand.ExecuteNonQuery();
@@ -622,7 +644,7 @@ namespace EWebFrameworkCore.Vendor.Services
         //    }
         //    catch (Exception ex)
         //    {
-        //        Logger.Print(ex);
+        //        PathHandlers.Logger.Print(ex);
         //        return false;
         //    }
 
@@ -653,7 +675,7 @@ namespace EWebFrameworkCore.Vendor.Services
         //    }
         //    catch (Exception ex)
         //    {
-        //        Logger.Print(ex);
+        //        PathHandlers.Logger.Print(ex);
         //        return false;
         //    }
 

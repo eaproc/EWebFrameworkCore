@@ -11,7 +11,7 @@ namespace EWebFrameworkCore.Vendor.JsonReplies
 
         public FailedResult(String pMessage = "FAILED", object pData = null) : base(pSuccess: false, pMessage: pMessage, pData: pData)
         {
-            this.StatusCode = (int?)HttpStatusCode.PreconditionFailed;
+            this.StatusCode = (int)HttpStatusCode.PreconditionFailed;
         }
     }
 }

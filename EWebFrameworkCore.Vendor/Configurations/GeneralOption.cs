@@ -8,12 +8,14 @@ namespace EWebFrameworkCore.Vendor.Configurations
 {
     public class GeneralOption
     {
+        /// <summary>
+        /// Returns true if it is Development Environment
+        /// </summary>
         public bool APP_DEBUG { get; set; }
         public bool REDIRECT_HTTPS { get; set; }
         public bool REDIRECT_WWW { get; set; }
         public string DATABASE_TIMEZONE { get; set; }
         public string APP_URL { get; set; }
-        public string RUNNING_MODE { get; set; }
 
         /// <summary>
         /// # All apps should have this for secure connection

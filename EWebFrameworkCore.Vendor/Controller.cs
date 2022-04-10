@@ -8,6 +8,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using EWebFrameworkCore.Vendor.Requests;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace EWebFrameworkCore.Vendor
 {
@@ -15,8 +17,12 @@ namespace EWebFrameworkCore.Vendor
     public class Controller: ControllerBase
     {
         protected readonly IRequestHelper RequestInputs;
+
+        protected RequestValidator InputValidator { get; }
+
         protected readonly IServiceProvider Provider;
         protected readonly ConfigurationOptions EWebFrameworkCoreConfigurations;
+        public IConfiguration? Configurations { get; private set; }
 
         public MSSQLConnectionOption DEFAULT_MSSQL { get; }
 
@@ -25,10 +31,13 @@ namespace EWebFrameworkCore.Vendor
         public Controller(IServiceProvider Provider)
         {
             this.EWebFrameworkCoreConfigurations = Provider.GetEWebFrameworkCoreOptions();
+            this.Configurations = Provider.GetService<IConfiguration>();
+
             this.DEFAULT_MSSQL = EWebFrameworkCoreConfigurations.DATABASE_CONNECTION;
             this.Provider = Provider;
             this.Log = Bootstrap.Log;
-            RequestInputs = (IRequestHelper)Provider.GetService(typeof(IRequestHelper));
+            RequestInputs = Provider.GetService(typeof(IRequestHelper)) as IRequestHelper;
+            InputValidator = new RequestValidator(RequestInputs);
         }
     }
 }

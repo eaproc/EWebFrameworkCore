@@ -273,7 +273,7 @@ namespace EWebFrameworkCore.Vendor.Requests
 
 
 
-        public bool Validate(params Rule[] rules)
+        public bool ValidateRulesQuitely(params Rule[] rules)
         {
 
             this.errors.Clear();
@@ -288,6 +288,18 @@ namespace EWebFrameworkCore.Vendor.Requests
         }
 
 
+        /// <summary>
+        /// Throws exception if validation fails
+        /// </summary>
+        /// <param name="rules"></param>
+        /// <returns></returns>
+        /// <exception cref="InputValidationFailedException"></exception>
+        public bool ValidateRules(params Rule[] rules)
+        {
+            if (!this.ValidateRulesQuitely(rules))
+                throw new InputValidationFailedException(this.OutputErrors());
+            return true;
+        }
 
 
 
@@ -297,15 +309,17 @@ namespace EWebFrameworkCore.Vendor.Requests
         /// <returns></returns>
         public Dictionary<String, String> OutputErrors()
         {
-            if (ENV.APP_DEBUG)
-                return this.errors.ToDictionary(x => x.Key, x => x.Value);
+            return this.errors.ToDictionary(x => x.Key, x => x.Value);
 
-            Dictionary<String, String> r = new Dictionary<string, string>
-            {
-                { "error", "Fill the required fields!" }
-            };
+            //if (ENV.APP_DEBUG)
+            //    return this.errors.ToDictionary(x => x.Key, x => x.Value);
 
-            return r;
+            //Dictionary<String, String> r = new Dictionary<string, string>
+            //{
+            //    { "error", "Fill the required fields!" }
+            //};
+
+            //return r;
 
         }
 

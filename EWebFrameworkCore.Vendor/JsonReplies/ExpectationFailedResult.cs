@@ -12,7 +12,7 @@ namespace EWebFrameworkCore.Vendor.JsonReplies
         public ExpectationFailedResult(String pMessage = "EXPECTATION FAILED", object pData = null) 
             : base(pSuccess: false, pMessage: pMessage, pData: pData)
         {
-            this.StatusCode = (int?)HttpStatusCode.ExpectationFailed;
+            this.StatusCode = (int)HttpStatusCode.ExpectationFailed;
         }
     }
 }

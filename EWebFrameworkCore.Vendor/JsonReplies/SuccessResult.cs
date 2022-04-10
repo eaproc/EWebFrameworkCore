@@ -12,15 +12,6 @@ namespace EWebFrameworkCore.Vendor.JsonReplies
         {
             
         }
-
-
-
-
-
-
-
-
-
     }
 
 }

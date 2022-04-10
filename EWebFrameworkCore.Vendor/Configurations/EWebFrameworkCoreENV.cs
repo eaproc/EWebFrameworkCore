@@ -28,21 +28,10 @@ namespace EWebFrameworkCore.Vendor.Configurations
         {
             get {
                 var z = ServiceProvider.GetEWebFrameworkCoreOptions();
-                return z.GetEnvironment() == ENVIRONMENT.DEVELOPMENT || z.GENERAL.APP_DEBUG; 
+                return  z.GENERAL.APP_DEBUG; 
             }
         }
 
-
-        /// <summary>
-        /// Checks GENERAL:RUNNING_MODE first then ASPNETCORE_ENVIRONMENT
-        /// </summary>
-        /// <returns></returns>
-        public  string RUNNING_MODE
-        {
-            get{
-                return ServiceProvider.GetEWebFrameworkCoreOptions().RUNNING_MODE;
-            } 
-        }
 
         public IServiceProvider ServiceProvider { get; }
     }

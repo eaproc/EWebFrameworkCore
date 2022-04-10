@@ -1,14 +1,17 @@
 ﻿using EWebFrameworkCore.Vendor.Utils;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Net.Mime;
 
 namespace EWebFrameworkCore.Vendor.JsonReplies
 {
-    public class ResponseMessage : ObjectResult, IJsonable
+    public class ResponseMessage : IActionResult, IJsonable
     {
         /// <summary>
         ///  Major change in latter version will eliminate all properties and send just data
@@ -18,19 +21,38 @@ namespace EWebFrameworkCore.Vendor.JsonReplies
         public object data;
 
 
-        public ResponseMessage(bool pSuccess=true, String pMessage = null, object pData = null ):base(value: new {
-            message = pMessage,
-            success= pSuccess,
-            data = pData
-        })
+        public ResponseMessage(bool pSuccess=true, String pMessage = null, object pData = null )
         {
 
             this.success = pSuccess;
             this.message = pMessage;
             this.data = pData;
 
-            //this.Value = this;
-            this.StatusCode = (int?)HttpStatusCode.OK;
+            this.StatusCode = (int)HttpStatusCode.OK;
+        }
+
+        protected int StatusCode { get; set; }
+
+        public Task ExecuteResultAsync(ActionContext context)
+        {
+            // Without this line, it throws error 
+            // asp-net-core-synchronous-operations-are-disallowed-call-writeasync-or-set-all
+            // https://stackoverflow.com/questions/47735133/asp-net-core-synchronous-operations-are-disallowed-call-writeasync-or-set-all
+            var syncIOFeature = context.HttpContext.Features.Get<IHttpBodyControlFeature>();
+            if (syncIOFeature != null)
+            {
+                syncIOFeature.AllowSynchronousIO = true;
+            }
+            // ------------------------
+
+            var Response = context.HttpContext.Response;
+            Response.StatusCode = this.StatusCode;
+            Response.Headers["Content-Type"] = MediaTypeNames.Application.Json;
+            using (var sw = new StreamWriter(Response.Body, System.Text.Encoding.UTF8))
+            {
+                sw.WriteAsync(this.ToJson());
+            }
+            return Task.CompletedTask;
         }
 
 

@@ -16,6 +16,7 @@ using System.Threading.Tasks;
 using EWebFrameworkCore.Vendor.Requests;
 using Microsoft.Extensions.Hosting;
 using System.IO;
+using Microsoft.AspNetCore.Builder;
 
 namespace EWebFrameworkCore.Vendor
 {
@@ -36,16 +37,16 @@ namespace EWebFrameworkCore.Vendor
             return ((OptionsManager<ConfigurationOptions>)provider.GetService(typeof(IOptionsSnapshot<ConfigurationOptions>))).Value;
         }
 
-        public static IServiceCollection ConfigureEwebFrameworkCoreServices(this IServiceCollection services, IConfiguration configuration)
+        public static WebApplicationBuilder ConfigureEwebFrameworkCoreServices(this WebApplicationBuilder builder)
         {
-            services.AddScoped<IRequestHelper, RequestHelper>();
+            builder.Services.AddScoped<IRequestHelper, RequestHelper>();
             //Services = services;
 
             // Not updating
             //Options = new ConfigurationOptions();
             //configuration.Bind(Options);
 
-            services.Configure<ConfigurationOptions>(configuration);
+            builder.Services.Configure<ConfigurationOptions>(builder.Configuration);
 
 
 
@@ -72,7 +73,7 @@ namespace EWebFrameworkCore.Vendor
                 )
             .CreateLogger();
 
-            return services;
+            return builder;
         }
 
         /// <summary>
@@ -80,7 +81,7 @@ namespace EWebFrameworkCore.Vendor
         /// </summary>
         /// <param name="builder"></param>
         /// <returns></returns>
-        public static IHostBuilder LoadEnvFile(this IHostBuilder builder)
+        public static WebApplicationBuilder LoadEnvFile(this WebApplicationBuilder builder)
         {
             string ENVFILE = Vendor.PathHandlers.RootPath(".env");
             if (File.Exists(ENVFILE)) DotNetEnv.Env.Load(ENVFILE);
