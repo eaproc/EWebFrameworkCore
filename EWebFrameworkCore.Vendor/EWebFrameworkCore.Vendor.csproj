@@ -63,17 +63,16 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <ProjectReference Include="..\..\EEntityCore\EEntityCore.DB\EEntityCore.DB.MSSQL\EEntityCore.DB.MSSQL.csproj" />
+	  <ProjectReference Include="..\..\ELibrary\ELibrary.Standard.VB\ELibrary.Standard.VB.vbproj" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<Reference Include="CODERiT.Logger.Standard.VB">
 		  <HintPath>..\..\..\..\..\..\DATA-DRIVE\Repos\github\eaproc\EEntityCore\EEntityCore.DB\EEntityCore.DB.MSSQL\bin\Debug\net5.0\CODERiT.Logger.Standard.VB.dll</HintPath>
 		</Reference>
 		<Reference Include="EEntityCore.DB">
 		  <HintPath>..\..\..\..\..\..\DATA-DRIVE\Repos\github\eaproc\EEntityCore\EEntityCore.DB\EEntityCore.DB.MSSQL\bin\Debug\net5.0\EEntityCore.DB.dll</HintPath>
-		</Reference>
-		<Reference Include="EEntityCore.DB.MSSQL">
-		  <HintPath>..\..\..\..\..\..\DATA-DRIVE\Repos\github\eaproc\EEntityCore\EEntityCore.DB\EEntityCore.DB.MSSQL\bin\Debug\net5.0\EEntityCore.DB.MSSQL.dll</HintPath>
-		</Reference>
-		<Reference Include="ELibrary.Standard.VB">
-		  <HintPath>..\..\..\..\..\..\DATA-DRIVE\Repos\github\eaproc\EEntityCore\EEntityCore.DB\EEntityCore.DB.MSSQL\bin\Debug\net5.0\ELibrary.Standard.VB.dll</HintPath>
 		</Reference>
 	</ItemGroup>
 

@@ -51,9 +51,10 @@ namespace EWebFrameworkCore.Vendor.Services
         {
             return new DBTransaction(this.GetDBConn().GetSQLConnection());
         }
-        public TransactionRunner CreateTransactionRunner(bool allowDispose = true)
+
+        public TransactionRunner CreateTransactionRunner(bool allowDispose = true, bool immediateDisposal = true)
         {
-            return new TransactionRunner(CreateTransaction(), allowDispose: allowDispose);
+            return new TransactionRunner(CreateTransaction(), allowDispose: allowDispose, immediateDisposal: immediateDisposal);
         }
 
         public MsSQLDB GetDBConn()
