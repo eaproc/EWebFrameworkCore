@@ -29,7 +29,7 @@ namespace EWebFrameworkCore.Vendor.Services
                 // TODO: FIX Deprecation
                 // https://docs.microsoft.com/en-us/dotnet/api/system.timezoneinfo?view=net-6.0
                 //
-                ServerTimeZone = new TimeZoneManager(TimeZone.CurrentTimeZone.GetUtcOffset(DateTime.Now).ToString());
+                ServerTimeZone = new TimeZoneManager(TimeZoneInfo.Local.GetUtcOffset(DateTime.Now).ToString());
 
                 //SET this on request call
                 // Make this same as database timezone

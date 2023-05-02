@@ -8,7 +8,6 @@ namespace EWebFrameworkCore.Vendor.JsonReplies
 {
     public class ExpectationFailedResult : ResponseMessage
     {
-
         public ExpectationFailedResult(String pMessage = "EXPECTATION FAILED", object pData = null) 
             : base(pSuccess: false, pMessage: pMessage, pData: pData)
         {
