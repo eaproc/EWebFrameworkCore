@@ -1,12 +1,10 @@
 ﻿using EEntityCore.DB.Abstracts;
 using EEntityCore.DB.MSSQL;
 using EWebFrameworkCore.Vendor.Configurations;
-using EWebFrameworkCore.Vendor.Utils;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog.Core;
-using System;
 using System.Data;
 
 namespace EWebFrameworkCore.Vendor.Services
@@ -17,10 +15,13 @@ namespace EWebFrameworkCore.Vendor.Services
     public class BaseClientService
     {
 
+        public const string SQL_DB_GMT_TIMEZONED_DATE_TIME_STRING = "yyyy-MM-dd HH:mm:ss \"GMT\"zzz";
+        public const string SQL_DB_DATE_STRING = "yyyy-MM-dd";
+
         protected MSSQLConnectionOption ConnectionOption;
 
         public IServiceProvider Provider { get; }
-        public HttpContext? HttpContext { get; }
+        public HttpContext HttpContext { get; }
         public IConfiguration? Configurations { get; private set; }
 
         public readonly ConfigurationOptions EWebFrameworkCoreConfigurations;
@@ -28,10 +29,19 @@ namespace EWebFrameworkCore.Vendor.Services
         public Logger Log { get; }
         public DatabaseTimeZoneUtilsExtensions.DatabaseTimeZoneUtils DBTimeZoneUtils { get; }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="provider"></param>
+        /// <param name="connectionOption"></param>
+        /// <exception cref="InvalidOperationException"></exception>
         public BaseClientService(IServiceProvider provider, MSSQLConnectionOption connectionOption)
         {
             this.Provider = provider;
-            this.HttpContext = provider.GetService<IHttpContextAccessor>().HttpContext;
+
+            IHttpContextAccessor httpContextAccessor = provider.GetService<IHttpContextAccessor>()?? throw new InvalidOperationException("IHttpContextAccessor: Services must be used via http request calls. All depends on HttpContext!");
+            HttpContext = httpContextAccessor.HttpContext ?? throw new InvalidOperationException("HttpContext: Services must be used via http request calls. All depends on HttpContext!");
+
             this.Configurations = provider.GetService<IConfiguration>();
 
             this.EWebFrameworkCoreConfigurations = Provider.GetEWebFrameworkCoreOptions();
@@ -39,8 +49,11 @@ namespace EWebFrameworkCore.Vendor.Services
 
             this.DBTimeZoneUtils = new DatabaseTimeZoneUtilsExtensions.DatabaseTimeZoneUtils(this.EWebFrameworkCoreConfigurations.GENERAL.DATABASE_TIMEZONE);
 
-            SetConnection(connectionOption);
+            this.ConnectionOption = connectionOption;
         }
+
+        public BaseClientService(IServiceProvider provider) : this( provider, new MSSQLConnectionOption())
+        {}
 
         protected void SetConnection(MSSQLConnectionOption connectionOption)
         {
@@ -107,7 +120,6 @@ namespace EWebFrameworkCore.Vendor.Services
         /// </summary>
         protected bool TRACE_DEBUG_SQL = false;
 
-
         /// <summary>
         /// Addressing apostrophe means you will pass string value with this \'{0}\'
         /// </summary>
@@ -120,9 +132,10 @@ namespace EWebFrameworkCore.Vendor.Services
             if (TRACE_DEBUG_SQL) PathHandlers.Logger.Print(pSQL);
             try
             {
+                // I don't expect table to be null if sql executes successfully
                 var db = (All__DBs)this.GetDBConn();
-                var p = db.getRS(pSQL, AddressApostrophe);
-                return (p != null && p.Tables.Count > 0) ? p.Tables[0] : null;
+                DataSet p = db.getRS(pSQL, AddressApostrophe);
+                return p.Tables[0];
             }
             catch (Exception ex)
             {
@@ -131,7 +144,6 @@ namespace EWebFrameworkCore.Vendor.Services
             }
 
         }
-
 
 
         /// <summary>

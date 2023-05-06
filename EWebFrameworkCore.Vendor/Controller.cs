@@ -1,15 +1,9 @@
-﻿using EWebFrameworkCore.Vendor.Utils;
-using EWebFrameworkCore.Vendor.Configurations;
-using Microsoft.AspNetCore.Mvc;
-using Serilog.Core;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using EWebFrameworkCore.Vendor.Configurations;
 using EWebFrameworkCore.Vendor.Requests;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Serilog.Core;
 
 namespace EWebFrameworkCore.Vendor
 {
@@ -22,7 +16,7 @@ namespace EWebFrameworkCore.Vendor
 
         protected readonly IServiceProvider Provider;
         protected readonly ConfigurationOptions EWebFrameworkCoreConfigurations;
-        public IConfiguration? Configurations { get; private set; }
+        public IConfiguration Configurations { get; private set; }
 
         public MSSQLConnectionOption DEFAULT_MSSQL { get; }
 
@@ -31,12 +25,12 @@ namespace EWebFrameworkCore.Vendor
         public Controller(IServiceProvider Provider)
         {
             this.EWebFrameworkCoreConfigurations = Provider.GetEWebFrameworkCoreOptions();
-            this.Configurations = Provider.GetService<IConfiguration>();
+            this.Configurations = Provider.GetService<IConfiguration>()?? throw new InvalidOperationException("It seems we can not initialize IConfiguration service");
 
             this.DEFAULT_MSSQL = EWebFrameworkCoreConfigurations.DATABASE_CONNECTION;
             this.Provider = Provider;
             this.Log = Bootstrap.Log;
-            RequestInputs = Provider.GetService(typeof(IRequestHelper)) as IRequestHelper;
+            RequestInputs = Provider.GetService(typeof(IRequestHelper)) as IRequestHelper?? throw new InvalidOperationException("It seems we can not initialize IRequestHelper service");
             InputValidator = new RequestValidator(RequestInputs);
         }
     }
