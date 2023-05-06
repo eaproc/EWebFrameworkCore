@@ -21,8 +21,11 @@ namespace EWebFrameworkCore.Vendor.Services
             /// </summary>
             public readonly TimeZoneManager DatabaseTimeZone;
 
-
-            public DatabaseTimeZoneUtils(string DATABASE_TIMEZONE)
+            /// <summary>
+            /// It uses UTC "+00:00" by default
+            /// </summary>
+            /// <param name="DATABASE_TIMEZONE"></param>
+            public DatabaseTimeZoneUtils(string? DATABASE_TIMEZONE)
             {
                 DatabaseTimeZone = new TimeZoneManager(DATABASE_TIMEZONE ?? "+00:00");
 

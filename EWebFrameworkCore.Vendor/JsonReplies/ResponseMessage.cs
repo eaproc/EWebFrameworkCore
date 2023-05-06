@@ -1,11 +1,7 @@
 ﻿using EWebFrameworkCore.Vendor.Utils;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Net.Mime;
 
@@ -16,12 +12,12 @@ namespace EWebFrameworkCore.Vendor.JsonReplies
         /// <summary>
         ///  Major change in latter version will eliminate all properties and send just data
         /// </summary>
-        public String message;
+        public string? message;
         public bool success;
-        public object data;
+        public object? data;
 
 
-        public ResponseMessage(bool pSuccess=true, String pMessage = null, object pData = null )
+        public ResponseMessage(bool pSuccess=true, string? pMessage = null, object? pData = null )
         {
 
             this.success = pSuccess;

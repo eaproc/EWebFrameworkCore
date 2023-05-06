@@ -8,8 +8,8 @@ namespace EWebFrameworkCore.Vendor.Services.DataTablesNET
     [Serializable()]
     public class DataTableReturnFormat
     {
-        public int draw, recordsTotal, recordsFiltered;
-        public object data, totalPagesSummary;
+        public int? draw, recordsTotal, recordsFiltered;
+        public object? data, totalPagesSummary;
 
         public DataTableReturnFormat()
         { }

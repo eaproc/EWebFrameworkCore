@@ -1,6 +1,8 @@
 ﻿using EEntityCore.DB.Abstracts;
 using EEntityCore.DB.MSSQL;
+using ELibrary.Standard.VB.Objects;
 using EWebFrameworkCore.Vendor.Configurations;
+using EWebFrameworkCore.Vendor.Services.DataTablesNET;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -39,21 +41,21 @@ namespace EWebFrameworkCore.Vendor.Services
         {
             this.Provider = provider;
 
-            IHttpContextAccessor httpContextAccessor = provider.GetService<IHttpContextAccessor>()?? throw new InvalidOperationException("IHttpContextAccessor: Services must be used via http request calls. All depends on HttpContext!");
+            IHttpContextAccessor httpContextAccessor = provider.GetService<IHttpContextAccessor>() ?? throw new InvalidOperationException("IHttpContextAccessor: Services must be used via http request calls. All depends on HttpContext!");
             HttpContext = httpContextAccessor.HttpContext ?? throw new InvalidOperationException("HttpContext: Services must be used via http request calls. All depends on HttpContext!");
 
             this.Configurations = provider.GetService<IConfiguration>();
 
             this.EWebFrameworkCoreConfigurations = Provider.GetEWebFrameworkCoreOptions();
-            this.Log = Bootstrap.Log;
+            this.Log = Bootstrap.Log?? throw new InvalidProgramException("Please, set a logger!");
 
-            this.DBTimeZoneUtils = new DatabaseTimeZoneUtilsExtensions.DatabaseTimeZoneUtils(this.EWebFrameworkCoreConfigurations.GENERAL.DATABASE_TIMEZONE);
+            this.DBTimeZoneUtils = new DatabaseTimeZoneUtilsExtensions.DatabaseTimeZoneUtils(EWebFrameworkCoreConfigurations.GENERAL.DATABASE_TIMEZONE);
 
             this.ConnectionOption = connectionOption;
         }
 
-        public BaseClientService(IServiceProvider provider) : this( provider, new MSSQLConnectionOption())
-        {}
+        public BaseClientService(IServiceProvider provider) : this(provider, new MSSQLConnectionOption())
+        { }
 
         protected void SetConnection(MSSQLConnectionOption connectionOption)
         {
@@ -83,49 +85,17 @@ namespace EWebFrameworkCore.Vendor.Services
             }
         }
 
-        ///// <summary>
-        ///// Use for DB
-        ///// </summary>
-        //protected CredentialManager credentialManager;
-
-        ///// <summary>
-        ///// Handles Session
-        ///// </summary>
-        //public SessionHelper sessionHelper;
-
-
-        ///// <summary>
-        ///// Initialize 
-        ///// </summary>
-        ///// <param name="sessionHelper"></param>
-        //public BaseClientService(SessionHelper sessionHelper)
-        //{
-
-        //    this.sessionHelper = sessionHelper;
-
-        //}
-
-        ///// <summary>
-        ///// Use this if you are accessing it from CronJob. No session will be used
-        ///// </summary>
-        //public BaseClientService():this(null)
-        //{}
-
-
-
-
-
         /// <summary>
         /// Turn this on if you want to trace sql query
         /// </summary>
-        protected bool TRACE_DEBUG_SQL = false;
+        protected bool TRACE_DEBUG_SQL { get; set; } = false;
 
         /// <summary>
         /// Addressing apostrophe means you will pass string value with this \'{0}\'
         /// </summary>
         /// <param name="pSQL"></param>
         /// <param name="AddressApostrophe"></param>
-        /// <returns>DataTable or null</returns>
+        /// <returns>DataTable or throws exception</returns>
         public virtual System.Data.DataTable GetSQLTable(String pSQL, bool AddressApostrophe = false)
         {
 
@@ -246,255 +216,234 @@ namespace EWebFrameworkCore.Vendor.Services
 
 
 
-        //#region Pagination
+        #region Pagination
 
-        ///// <summary>
-        ///// For pagination
-        ///// </summary>
-        ///// <param name="pStart"></param>
-        ///// <param name="pLength"></param>
-        ///// <param name="pSQL"></param>
-        ///// <param name="pPreSQL"></param>
-        ///// <param name="OverrideOrderBy"></param>
-        ///// <param name="pOrderByColumn"></param>
-        ///// <param name="pOrderByColumnDirection"></param>
-        ///// <param name="pWhereClauseFilter"></param>
-        ///// <returns></returns>
-        //protected DataTable Paginate(int pStart, int pLength, string pSQL,
-        //     string pPreSQL = "", String OverrideOrderBy = null,
-        //    String pOrderByColumn = "1", String pOrderByColumnDirection = "asc", string pWhereClauseFilter = "")
-        //{
-        //    // Injected filtered_record_count
-        //    //
-        //    String bSQL = String.Empty;
-        //    if (OverrideOrderBy==null|| OverrideOrderBy==String.Empty)
-        //    {
-        //        bSQL = String.Format(
-        //                                pPreSQL + Environment.NewLine +
-        //                                "SELECT TOP {2} * FROM (                  " + Environment.NewLine +
-        //                                "     SELECT *                                                                                " + Environment.NewLine +
-        //                                "         FROM (                                                                                  " + Environment.NewLine +
-        //                                "                   SELECT *,                                                                     " + Environment.NewLine +
-        //                                "                       (                                                                         " + Environment.NewLine +
-        //                                "                          SELECT count(*) as filtered_record_count                               " + Environment.NewLine +
-        //                                "                          FROM (                                                                 " + Environment.NewLine +
-        //                                "                                   {0}                                                           " + Environment.NewLine +
-        //                                "                               ) as rows_fetched                                                 " + Environment.NewLine +
-        //                                "                          {3}                                                                    " + Environment.NewLine +
-        //                                "                       ) AS filtered_record_count                                                " + Environment.NewLine +
-        //                                "                   FROM (                                                                        " + Environment.NewLine +
-        //                                "                           {0}                                                                   " + Environment.NewLine +
-        //                                "                         ) as rows_fetched                                                       " + Environment.NewLine +
-        //                                "                   {3}                                                                           " + Environment.NewLine +
-        //                                "            ) as rows_fetched_with_count                                                         " + Environment.NewLine +
-        //                                "         ORDER BY {4} {5}                                                                        " + Environment.NewLine +
-        //                                "         OFFSET {1} ROWS                                                                         " + Environment.NewLine +
-        //                                "                      ) finalFetch                  " + Environment.NewLine +
-        //                                "                  ", pSQL, pStart, pLength, pWhereClauseFilter, pOrderByColumn, pOrderByColumnDirection
-        //                                );
-        //    }
-        //    else
-        //    {
-        //        bSQL = String.Format(
-        //                        pPreSQL + Environment.NewLine +
-        //                                "SELECT TOP {2} * FROM (                  " + Environment.NewLine +
-        //                                "     SELECT *                                                                                " + Environment.NewLine +
-        //                                "         FROM (                                                                                  " + Environment.NewLine +
-        //                                "                   SELECT *,                                                                     " + Environment.NewLine +
-        //                                "                       (                                                                         " + Environment.NewLine +
-        //                                "                          SELECT count(*) as filtered_record_count                               " + Environment.NewLine +
-        //                                "                          FROM (                                                                 " + Environment.NewLine +
-        //                                "                                   {0}                                                           " + Environment.NewLine +
-        //                                "                               ) as rows_fetched                                                 " + Environment.NewLine +
-        //                                "                          {3}                                                                    " + Environment.NewLine +
-        //                                "                       ) AS filtered_record_count                                                " + Environment.NewLine +
-        //                                "                   FROM (                                                                        " + Environment.NewLine +
-        //                                "                           {0}                                                                   " + Environment.NewLine +
-        //                                "                         ) as rows_fetched                                                       " + Environment.NewLine +
-        //                                "                   {3}                                                                           " + Environment.NewLine +
-        //                                "            ) as rows_fetched_with_count                                                         " + Environment.NewLine +
-        //                                "         ORDER BY {4}                                                                        " + Environment.NewLine +
-        //                                "         OFFSET {1} ROWS                                                                         " + Environment.NewLine +
-        //                                "                      ) finalFetch                  " + Environment.NewLine +
-        //                                "                  ", pSQL, pStart, pLength, pWhereClauseFilter, OverrideOrderBy
-        //                       );
-        //    }
+        /// <summary>
+        /// For pagination
+        /// </summary>
+        /// <param name="pStart"></param>
+        /// <param name="pLength"></param>
+        /// <param name="pSQL"></param>
+        /// <param name="pPreSQL"></param>
+        /// <param name="OverrideOrderBy"></param>
+        /// <param name="pOrderByColumn"></param>
+        /// <param name="pOrderByColumnDirection"></param>
+        /// <param name="pWhereClauseFilter"></param>
+        /// <returns>DataTable or throws exception</returns>
+        protected DataTable Paginate(int pStart, int pLength, string pSQL,
+             string pPreSQL = "", String? OverrideOrderBy = null,
+            String pOrderByColumn = "1", String pOrderByColumnDirection = "asc", string pWhereClauseFilter = "")
+        {
+            // Injected filtered_record_count
+            //
+            string bSQL;
+            if (OverrideOrderBy == null || OverrideOrderBy == String.Empty)
+            {
+                bSQL = String.Format(
+                                        pPreSQL + Environment.NewLine +
+                                        "SELECT TOP {2} * FROM (                  " + Environment.NewLine +
+                                        "     SELECT *                                                                                " + Environment.NewLine +
+                                        "         FROM (                                                                                  " + Environment.NewLine +
+                                        "                   SELECT *,                                                                     " + Environment.NewLine +
+                                        "                       (                                                                         " + Environment.NewLine +
+                                        "                          SELECT count(*) as filtered_record_count                               " + Environment.NewLine +
+                                        "                          FROM (                                                                 " + Environment.NewLine +
+                                        "                                   {0}                                                           " + Environment.NewLine +
+                                        "                               ) as rows_fetched                                                 " + Environment.NewLine +
+                                        "                          {3}                                                                    " + Environment.NewLine +
+                                        "                       ) AS filtered_record_count                                                " + Environment.NewLine +
+                                        "                   FROM (                                                                        " + Environment.NewLine +
+                                        "                           {0}                                                                   " + Environment.NewLine +
+                                        "                         ) as rows_fetched                                                       " + Environment.NewLine +
+                                        "                   {3}                                                                           " + Environment.NewLine +
+                                        "            ) as rows_fetched_with_count                                                         " + Environment.NewLine +
+                                        "         ORDER BY {4} {5}                                                                        " + Environment.NewLine +
+                                        "         OFFSET {1} ROWS                                                                         " + Environment.NewLine +
+                                        "                      ) finalFetch                  " + Environment.NewLine +
+                                        "                  ", pSQL, pStart, pLength, pWhereClauseFilter, pOrderByColumn, pOrderByColumnDirection
+                                        );
+            }
+            else
+            {
+                bSQL = String.Format(
+                                pPreSQL + Environment.NewLine +
+                                        "SELECT TOP {2} * FROM (                  " + Environment.NewLine +
+                                        "     SELECT *                                                                                " + Environment.NewLine +
+                                        "         FROM (                                                                                  " + Environment.NewLine +
+                                        "                   SELECT *,                                                                     " + Environment.NewLine +
+                                        "                       (                                                                         " + Environment.NewLine +
+                                        "                          SELECT count(*) as filtered_record_count                               " + Environment.NewLine +
+                                        "                          FROM (                                                                 " + Environment.NewLine +
+                                        "                                   {0}                                                           " + Environment.NewLine +
+                                        "                               ) as rows_fetched                                                 " + Environment.NewLine +
+                                        "                          {3}                                                                    " + Environment.NewLine +
+                                        "                       ) AS filtered_record_count                                                " + Environment.NewLine +
+                                        "                   FROM (                                                                        " + Environment.NewLine +
+                                        "                           {0}                                                                   " + Environment.NewLine +
+                                        "                         ) as rows_fetched                                                       " + Environment.NewLine +
+                                        "                   {3}                                                                           " + Environment.NewLine +
+                                        "            ) as rows_fetched_with_count                                                         " + Environment.NewLine +
+                                        "         ORDER BY {4}                                                                        " + Environment.NewLine +
+                                        "         OFFSET {1} ROWS                                                                         " + Environment.NewLine +
+                                        "                      ) finalFetch                  " + Environment.NewLine +
+                                        "                  ", pSQL, pStart, pLength, pWhereClauseFilter, OverrideOrderBy
+                               );
+            }
 
-        //    return GetSQLTable(pSQL: bSQL);
-        //}
-
-
-
-        ///// <summary>
-        ///// 
-        ///// </summary>
-        ///// <param name="pSQL"></param>
-        ///// <param name="pOrderByColumnIndex"></param>
-        ///// <param name="pOrderByColumnDirection"></param>
-        ///// <param name="pWhereClauseFilter"></param>
-        ///// <returns></returns>
-        //protected DataTable ProcessForExport(string pSQL, int pOrderByColumnIndex = 1, String pOrderByColumnDirection = "asc", string pWhereClauseFilter = "")
-        //{
-        //    // Injected filtered_record_count
-        //    //
-
-        //    return GetSQLTable(pSQL:
-        //        String.Format("     SELECT *                                                              " + Environment.NewLine +
-        //                        "     FROM (                                                                " + Environment.NewLine +
-        //                        "               SELECT *                                                   " + Environment.NewLine +
-        //                        "               FROM (                                                      " + Environment.NewLine +
-        //                        "                       {0}                                                 " + Environment.NewLine +
-        //                        "                     ) as rows_fetched                                     " + Environment.NewLine +
-        //                        "               {1}                                                         " + Environment.NewLine +
-        //                        "        ) as rows_fetched_with_count                                       " + Environment.NewLine +
-        //                        "     ORDER BY {2} {3}                                                      " + Environment.NewLine +
-        //                        "  ", pSQL, pWhereClauseFilter, pOrderByColumnIndex, pOrderByColumnDirection
-        //                        )
-        //                );
-        //}
-
-        ///// <summary>
-        ///// 
-        ///// </summary>
-        ///// <param name="pSQL"></param>
-        ///// <param name="dTR"></param>
-        ///// <param name="pWhereClauseFilter"></param>
-        ///// <param name="OverrideOrderBy"></param>
-        ///// <param name="pSummarizeColumnNames"></param>
-        ///// <returns></returns>
-        //protected DataTableReturnFormat ProcessPaginate(String pSQL, 
-        //                                       DataTableRequestFields dTR,
-        //                                       string pWhereClauseFilter = "",
-        //                                       String OverrideOrderBy = null,
-        //                                       params String[] pSummarizeColumnNames
-        //    )
-        //{
-        //    var dtrf =  ProcessPaginate(pSQL: pSQL, pWhereClauseFilter: pWhereClauseFilter,
-        //        pStart: dTR.Start, pLength: dTR.Length,
-        //        pOrderByColumn: dTR.SortUsingColumnName ? dTR.OrderByColumnName : dTR.OrderByColumnIndex.ToString(),
-        //        pOrderByColumnDirection: dTR.OrderByColumnDirection,
-        //        pSummarizeColumnNames: pSummarizeColumnNames, OverrideOrderBy: OverrideOrderBy
-        //        );
-
-        //    dtrf.draw = dTR.Draw;
+            return GetSQLTable(pSQL: bSQL);
+        }
 
 
-        //    return dtrf;
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="pSQL"></param>
+        /// <param name="pOrderByColumnIndex"></param>
+        /// <param name="pOrderByColumnDirection"></param>
+        /// <param name="pWhereClauseFilter"></param>
+        /// <returns></returns>
+        protected DataTable ProcessForExport(string pSQL, int pOrderByColumnIndex = 1, String pOrderByColumnDirection = "asc", string pWhereClauseFilter = "")
+        {
+            // Injected filtered_record_count
+            //
 
+            return GetSQLTable(pSQL:
+                String.Format("     SELECT *                                                              " + Environment.NewLine +
+                                "     FROM (                                                                " + Environment.NewLine +
+                                "               SELECT *                                                   " + Environment.NewLine +
+                                "               FROM (                                                      " + Environment.NewLine +
+                                "                       {0}                                                 " + Environment.NewLine +
+                                "                     ) as rows_fetched                                     " + Environment.NewLine +
+                                "               {1}                                                         " + Environment.NewLine +
+                                "        ) as rows_fetched_with_count                                       " + Environment.NewLine +
+                                "     ORDER BY {2} {3}                                                      " + Environment.NewLine +
+                                "  ", pSQL, pWhereClauseFilter, pOrderByColumnIndex, pOrderByColumnDirection
+                                )
+                        );
+        }
 
-        //}
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="pSQL"></param>
+        /// <param name="dTR"></param>
+        /// <param name="pWhereClauseFilter"></param>
+        /// <param name="OverrideOrderBy"></param>
+        /// <param name="pSummarizeColumnNames"></param>
+        /// <returns></returns>
+        protected DataTableReturnFormat ProcessPaginate(String pSQL,
+                                               DataTableRequestFields dTR,
+                                               string pWhereClauseFilter = "",
+                                               string? OverrideOrderBy = null,
+                                               params string[] pSummarizeColumnNames
+            )
+        {
+            var dtrf = ProcessPaginate(pSQL: pSQL, pWhereClauseFilter: pWhereClauseFilter,
+                pStart: dTR.Start, pLength: dTR.Length,
+                pOrderByColumn: dTR.SortUsingColumnName ? dTR.OrderByColumnName : (dTR.OrderByColumnIndex+1).ToString(),
+                pOrderByColumnDirection: dTR.OrderByColumnDirection,
+                pSummarizeColumnNames: pSummarizeColumnNames, OverrideOrderBy: OverrideOrderBy
+                );
 
-        ///// <summary>
-        ///// 
-        ///// </summary>
-        ///// <param name="pPreSQL"></param>
-        ///// <param name="pSQL"></param>
-        ///// <param name="dTR"></param>
-        ///// <param name="pWhereClauseFilter"></param>
-        ///// <param name="pSummarizeColumnNames"></param>
-        ///// <returns></returns>
-        //protected DataTableReturnFormat ProcessPaginate(
-        //    String pPreSQL, 
-        //    String pSQL,
-        //                                    DataTableRequestFields dTR,
-        //                                    string pWhereClauseFilter = "",
-        //                                    params String[] pSummarizeColumnNames
-        // )
-        //{
-        //    var dtrf = ProcessPaginate(pSQL: pSQL, pPreSQL:pPreSQL, 
-        //        pWhereClauseFilter: pWhereClauseFilter,
-        //        pStart: dTR.Start, pLength: dTR.Length,
-        //        pOrderByColumn: dTR.SortUsingColumnName ? dTR.OrderByColumnName : dTR.OrderByColumnIndex.ToString(),
-        //        pOrderByColumnDirection: dTR.OrderByColumnDirection,
-        //        pSummarizeColumnNames: pSummarizeColumnNames
-        //        );
+            dtrf.draw = dTR.Draw;
 
-        //    dtrf.draw = dTR.Draw;
+            return dtrf;
 
+        }
 
-        //    return dtrf;
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="pPreSQL"></param>
+        /// <param name="pSQL"></param>
+        /// <param name="dTR"></param>
+        /// <param name="pWhereClauseFilter"></param>
+        /// <param name="pSummarizeColumnNames"></param>
+        /// <returns></returns>
+        protected DataTableReturnFormat ProcessPaginate(
+            string pPreSQL,
+            string pSQL,
+                                            DataTableRequestFields dTR,
+                                            string pWhereClauseFilter = "",
+                                            params string[] pSummarizeColumnNames
+         )
+        {
+            var dtrf = ProcessPaginate(pSQL: pSQL, pPreSQL: pPreSQL,
+                pWhereClauseFilter: pWhereClauseFilter,
+                pStart: dTR.Start, pLength: dTR.Length,
+                pOrderByColumn: dTR.SortUsingColumnName ? dTR.OrderByColumnName : dTR.OrderByColumnIndex.ToString(),
+                pOrderByColumnDirection: dTR.OrderByColumnDirection,
+                pSummarizeColumnNames: pSummarizeColumnNames
+                );
 
+            dtrf.draw = dTR.Draw;
 
-        //}
+            return dtrf;
 
-        ///// <summary>
-        ///// 
-        ///// </summary>
-        ///// <param name="pSQL"></param>
-        ///// <param name="pWhereClauseFilter"></param>
-        ///// <param name="pPreSQL"></param>
-        ///// <param name="pStart"></param>
-        ///// <param name="pLength"></param>
-        ///// <param name="pOrderByColumn"></param>
-        ///// <param name="pOrderByColumnDirection"></param>
-        ///// <param name="OverrideOrderBy"></param>
-        ///// <param name="pSummarizeColumnNames"></param>
-        ///// <returns></returns>
-        //protected DataTableReturnFormat ProcessPaginate(String pSQL,
-        //    string pWhereClauseFilter = "",
-        //    string pPreSQL = "",
-        //    int pStart = 0, int pLength = 20, String pOrderByColumn = "1", String pOrderByColumnDirection = "asc",
-        //     String OverrideOrderBy = null,
-        //    params String[] pSummarizeColumnNames)
-        //{
+        }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="pSQL"></param>
+        /// <param name="pWhereClauseFilter"></param>
+        /// <param name="pPreSQL"></param>
+        /// <param name="pStart"></param>
+        /// <param name="pLength"></param>
+        /// <param name="pOrderByColumn"></param>
+        /// <param name="pOrderByColumnDirection"></param>
+        /// <param name="OverrideOrderBy"></param>
+        /// <param name="pSummarizeColumnNames"></param>
+        /// <returns></returns>
+        protected DataTableReturnFormat ProcessPaginate(string pSQL,
+            string pWhereClauseFilter = "",
+            string pPreSQL = "",
+            int pStart = 0, int pLength = 20, string pOrderByColumn = "1", string pOrderByColumnDirection = "asc",
+             string? OverrideOrderBy = null,
+            params string[] pSummarizeColumnNames)
+        {
 
+            DataTable dCompleteTable = GetSQLTable(pSQL: pPreSQL + Environment.NewLine + pSQL);
 
+            DataTable? dCompleteTableWithFilterSummary = null;
 
-        //    DataTable dCompleteTable = GetSQLTable(pSQL: pPreSQL + Environment.NewLine+  pSQL);
+            if (pSummarizeColumnNames.Length > 0)
+            {
+                string columns = string.Join(", ", pSummarizeColumnNames.Select(x => string.Format("SUM({0}) as SUM_{0}", x)));
+                dCompleteTableWithFilterSummary = GetSQLTable(pSQL:
+               string.Format("     {3}       " + Environment.NewLine +
+                                "     SELECT  {2}       " + Environment.NewLine +
+                               "               FROM (                                                      " + Environment.NewLine +
+                               "                       {0}                                                 " + Environment.NewLine +
+                               "                     ) as rows_fetched                                     " + Environment.NewLine +
+                               "               {1}                                                         " + Environment.NewLine,
+                                           pSQL, pWhereClauseFilter, columns, pPreSQL
+                               )
+                       );
+            }
 
+            int pTotalCountWithoutPagination = 0;
+            if (dCompleteTable != null) pTotalCountWithoutPagination = dCompleteTable.Rows.Count;
 
-        //    DataTable dCompleteTableWithFilterSummary = null;
+            DataTable paginated = Paginate(pStart: pStart, pLength: pLength, pSQL: pSQL, pPreSQL: pPreSQL,
+                pOrderByColumn: pOrderByColumn, pOrderByColumnDirection: pOrderByColumnDirection,
+                pWhereClauseFilter: pWhereClauseFilter, OverrideOrderBy: OverrideOrderBy
+                );
 
+            DataTableReturnFormat dtrf = new()
+            {
+                recordsFiltered = paginated.Rows.Count > 0 ? EInt.ValueOf(paginated.Rows[0]["filtered_record_count"]) : 0,
+                recordsTotal = pTotalCountWithoutPagination,
+                totalPagesSummary = dCompleteTableWithFilterSummary?.ToDictionary().First(),
+                data = paginated.ToDictionary()
+            };
 
-        //    if (pSummarizeColumnNames.Count() > 0)
-        //    {
-        //        String columns = String.Join(", ", pSummarizeColumnNames.Select(x => String.Format("SUM({0}) as SUM_{0}", x)));
-        //        dCompleteTableWithFilterSummary = GetSQLTable(pSQL:
-        //       String.Format("     {3}       " + Environment.NewLine +
-        //                        "     SELECT  {2}       " + Environment.NewLine +
-        //                       "               FROM (                                                      " + Environment.NewLine +
-        //                       "                       {0}                                                 " + Environment.NewLine +
-        //                       "                     ) as rows_fetched                                     " + Environment.NewLine +
-        //                       "               {1}                                                         " + Environment.NewLine,
-        //                                   pSQL, pWhereClauseFilter, columns, pPreSQL
-        //                       )
-        //               );
-        //    }
-
-
-
-
-        //    int pTotalCountWithoutPagination = 0;
-        //    if (dCompleteTable != null) pTotalCountWithoutPagination = dCompleteTable.Rows.Count;
-
-
-        //    DataTable paginated = Paginate(pStart: pStart, pLength: pLength, pSQL: pSQL, pPreSQL: pPreSQL,
-        //        pOrderByColumn: pOrderByColumn, pOrderByColumnDirection: pOrderByColumnDirection,
-        //        pWhereClauseFilter: pWhereClauseFilter, OverrideOrderBy: OverrideOrderBy
-        //        );
+            return dtrf;
+        }
 
 
 
-        //    DataTableReturnFormat dtrf = new DataTableReturnFormat()
-        //    {
-        //        recordsFiltered = paginated != null && paginated.Rows.Count > 0 ? EInt.ValueOf(paginated.Rows[0]["filtered_record_count"]) : 0,
-        //        recordsTotal = pTotalCountWithoutPagination,
-        //        totalPagesSummary = dCompleteTableWithFilterSummary != null ? Controller.ToDictionary(dCompleteTableWithFilterSummary).First() : null
-        //    };
-
-
-
-        //    dtrf.data = Controller.ToDictionary(paginated);
-
-
-        //    return dtrf;
-
-        //}
-
-
-
-        //#endregion
+        #endregion
 
 
 

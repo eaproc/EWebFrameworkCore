@@ -13,10 +13,7 @@ namespace EWebFrameworkCore.Vendor.JsonReplies
             this.totalPagesSummary = pData.totalPagesSummary;
         }
 
-        
-        public int draw, recordsTotal, recordsFiltered;
-        public object totalPagesSummary;
-
-
+        public int? draw, recordsTotal, recordsFiltered;
+        public object? totalPagesSummary;
     }
 }

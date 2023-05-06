@@ -1,17 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace EWebFrameworkCore.Vendor.Configurations
+﻿namespace EWebFrameworkCore.Vendor.Configurations
 {
 
     // -----------------------------------------------------
     //  In later version, this class can allow dynamic
     //  access to properties that are not strongly typed
     // -----------------------------------------------------
-
 
     /// <summary>
     /// It must be properties for it to work
@@ -26,24 +19,19 @@ namespace EWebFrameworkCore.Vendor.Configurations
 
         public string ASPNETCORE_ENVIRONMENT { get; set; } = "Development";
 
-
         /// <summary>
         /// Get application environment
         /// </summary>
         /// <returns></returns>
         public ENVIRONMENT GetEnvironment()
         {
-            switch (ASPNETCORE_ENVIRONMENT.ToUpper())
+            return ASPNETCORE_ENVIRONMENT.ToUpper() switch
             {
-                case "DEVELOPMENT":
-                    return ENVIRONMENT.DEVELOPMENT;
-                case "PRODUCTION":
-                    return ENVIRONMENT.PRODUCTION;
-                case "STAGING":
-                    return ENVIRONMENT.STAGING;
-                default:
-                    return ENVIRONMENT.UNKNOWN;
-            }
+                "DEVELOPMENT" => ENVIRONMENT.DEVELOPMENT,
+                "PRODUCTION" => ENVIRONMENT.PRODUCTION,
+                "STAGING" => ENVIRONMENT.STAGING,
+                _ => ENVIRONMENT.UNKNOWN,
+            };
         }
     }
 }

@@ -29,7 +29,7 @@ namespace EWebFrameworkCore.Vendor
 
             this.DEFAULT_MSSQL = EWebFrameworkCoreConfigurations.DATABASE_CONNECTION;
             this.Provider = Provider;
-            this.Log = Bootstrap.Log;
+            this.Log = HttpContext.Logger();
             RequestInputs = Provider.GetService(typeof(IRequestHelper)) as IRequestHelper?? throw new InvalidOperationException("It seems we can not initialize IRequestHelper service");
             InputValidator = new RequestValidator(RequestInputs);
         }

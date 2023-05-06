@@ -1,6 +1,7 @@
 ﻿using EWebFrameworkCore.Vendor.Configurations;
 using EWebFrameworkCore.Vendor.Requests;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Serilog;
@@ -20,11 +21,11 @@ namespace EWebFrameworkCore.Vendor
         /// <summary>
         /// App Wide Domain Serilog Logger
         /// </summary>
-        public static Logger Log { private set; get; }
+        public static Logger? Log { private set; get; }
 
         public static ConfigurationOptions GetEWebFrameworkCoreOptions(this IServiceProvider provider)
         {
-            return ((OptionsManager<ConfigurationOptions>)provider.GetService(typeof(IOptionsSnapshot<ConfigurationOptions>))).Value;
+            return provider.GetService(typeof(IOptionsSnapshot<ConfigurationOptions>)) is not OptionsManager<ConfigurationOptions> v ? throw new InvalidProgramException("Please, configure options first in the Service Provider!") : v.Value;
         }
 
         public static WebApplicationBuilder ConfigureEwebFrameworkCoreServices(this WebApplicationBuilder builder)
@@ -37,8 +38,6 @@ namespace EWebFrameworkCore.Vendor
             //configuration.Bind(Options);
 
             builder.Services.Configure<ConfigurationOptions>(builder.Configuration);
-
-
 
             // https://github.com/serilog/serilog/wiki/Writing-Log-Events
             // Log Event Levels
@@ -67,6 +66,36 @@ namespace EWebFrameworkCore.Vendor
             Log = c.CreateLogger();
 
             return builder;
+        }
+
+        public static ConfigurationOptions ConfigurationOptions(this HttpContext httpContext)
+        {
+            return httpContext.RequestServices.GetEWebFrameworkCoreOptions();
+        }
+
+        public static bool IsAppInDebugMode(this HttpContext httpContext)
+        {
+            return httpContext.ConfigurationOptions().GENERAL.APP_DEBUG;
+        }
+              
+        public static ConfigurationOptions.ENVIRONMENT GetAppEnvironment(this HttpContext httpContext)
+        {
+            return httpContext.ConfigurationOptions().GetEnvironment();
+        }
+
+        public static bool IsInDevelopmentEnvironment(this HttpContext httpContext)
+        {
+            return httpContext.GetAppEnvironment() == Configurations.ConfigurationOptions.ENVIRONMENT.DEVELOPMENT;
+        }
+        
+        public static bool IsInProductionEnvironment(this HttpContext httpContext)
+        {
+            return httpContext.GetAppEnvironment() == Configurations.ConfigurationOptions.ENVIRONMENT.PRODUCTION;
+        }        
+
+        public static Logger Logger(this HttpContext _)
+        {
+            return Log ?? throw new InvalidProgramException("Logger is not configured!");
         }
 
         ///// <summary>
