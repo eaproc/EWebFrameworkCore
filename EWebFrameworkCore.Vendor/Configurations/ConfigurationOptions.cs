@@ -1,4 +1,6 @@
-﻿namespace EWebFrameworkCore.Vendor.Configurations
+﻿using System.Text.Json.Serialization;
+
+namespace EWebFrameworkCore.Vendor.Configurations
 {
 
     // -----------------------------------------------------
@@ -16,6 +18,9 @@
         public GeneralOption GENERAL { get; set; } = new GeneralOption();
         public LoggingOption LoggingOption { get; set; } = new LoggingOption();
         public MSSQLConnectionOption DATABASE_CONNECTION { get; set; } = new MSSQLConnectionOption();
+
+        [JsonPropertyName("JWT")]
+        public JWTOption JWT { get; set; } = new JWTOption();
 
         public string ASPNETCORE_ENVIRONMENT { get; set; } = "Development";
 

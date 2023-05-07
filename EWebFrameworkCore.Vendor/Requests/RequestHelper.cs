@@ -28,7 +28,7 @@ namespace EWebFrameworkCore.Vendor.Requests
         /// <summary>
         /// The string body of the post as string
         /// </summary>
-        public string RequestBodyContent { private set; get; }
+        public string RequestBodyContent { private set; get; } = string.Empty;
 
         public string Id { private set; get; }
 
@@ -38,7 +38,6 @@ namespace EWebFrameworkCore.Vendor.Requests
         /// </summary>
         public Dictionary<string, object> RequestVariables { private set; get; }
         public Dictionary<string, object> ProcessedRequestVariables { private set; get; }
-
 
         public RequestHelper(IServiceProvider provider)
         {
@@ -57,6 +56,32 @@ namespace EWebFrameworkCore.Vendor.Requests
 
         }
 
+        /// <summary>
+        /// Returns path value like this [ /auth/me ] without params or host info
+        /// </summary>
+        /// <returns></returns>
+        public string UrlPath()
+        {
+            return this.Request.Path.Value?? string.Empty;
+        }
+
+        /// <summary>
+        /// Returns just the host path
+        /// </summary>
+        /// <returns></returns>
+        public string UrlHost()
+        {
+           return $"{Request.Scheme}://{Request.Host}";
+        }
+
+        /// <summary>
+        /// Returns the Url without Parameter, you can use GetDisplayUrl() on Request for that
+        /// </summary>
+        /// <returns></returns>
+        public string Url()
+        {
+            return UrlHost() + UrlPath();
+        }
 
         /// <summary>
         /// This can be done only once
@@ -66,7 +91,6 @@ namespace EWebFrameworkCore.Vendor.Requests
             Stream req = this.Request.BodyReader.AsStream(true);
              this.RequestBodyContent = new StreamReader(req, Encoding.UTF8, true, 1024, true).ReadToEnd();
         }
-
 
         /// <summary>
         /// Done only once
@@ -115,15 +139,12 @@ namespace EWebFrameworkCore.Vendor.Requests
                 throw;
             }
         }
-     
 
         private void AddToRequestVariables(KeyValuePair<String, Object> p)
         {
             if (!this.RequestVariables.ContainsKey(p.Key))
                 this.RequestVariables.Add(p.Key, p.Value);
         }
-
-
 
         /// <summary>
         /// Checks if a key exists in the request sent. Only check value keys, use HasFile for files
@@ -219,7 +240,6 @@ namespace EWebFrameworkCore.Vendor.Requests
             return JsonConvert.DeserializeObject<T>(b.ToJson());
         }
 
-
         /// <summary>
         /// Get all arrayable parameters
         /// </summary>
@@ -282,7 +302,6 @@ namespace EWebFrameworkCore.Vendor.Requests
             if (v == null || !(v is string)) return false;
             return (v.ToString() == "null" || v.ToString() == "undefined");
         }
-
 
         /// <summary>
         /// Return Variables as Object

@@ -14,6 +14,24 @@ namespace EWebFrameworkCore.Vendor.Requests
 
         Dictionary<string, object> ProcessedRequestVariables { get; }
 
+        /// <summary>
+        /// like /auth/me
+        /// </summary>
+        /// <returns></returns>
+        string UrlPath();
+
+        /// <summary>
+        /// like http://localhost:26090 it includes the port if different from normal.
+        /// </summary>
+        /// <returns></returns>
+        string UrlHost();
+
+        /// <summary>
+        /// like "http://localhost:26090/instructor/class-evaluations/evaluate-group/fetch-grid" without params
+        /// </summary>
+        /// <returns></returns>
+        string Url();
+
         HttpRequest Request { get; }
         IServiceProvider ServiceProvider { get; }
 
