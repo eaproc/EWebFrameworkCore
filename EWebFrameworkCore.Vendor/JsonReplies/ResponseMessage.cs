@@ -46,7 +46,10 @@ namespace EWebFrameworkCore.Vendor.JsonReplies
             Response.Headers["Content-Type"] = MediaTypeNames.Application.Json;
             using (var sw = new StreamWriter(Response.Body, System.Text.Encoding.UTF8))
             {
-                sw.WriteAsync(this.ToJson());
+                sw.Write(this.ToJson());
+                // this generates error if the response is huge around 200KB
+                // The stream is currently in use by a previous operation on the stream .net core
+                // sw.WriteAsync(this.ToJson());
             }
             return Task.CompletedTask;
         }

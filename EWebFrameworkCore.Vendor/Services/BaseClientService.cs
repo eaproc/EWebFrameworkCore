@@ -16,9 +16,20 @@ namespace EWebFrameworkCore.Vendor.Services
     /// </summary>
     public class BaseClientService
     {
-
+        /// <summary>
+        /// Not working with SQL Server yet
+        /// </summary>
         public const string SQL_DB_GMT_TIMEZONED_DATE_TIME_STRING = "yyyy-MM-dd HH:mm:ss \"GMT\"zzz";
+        /// <summary>
+        /// Works with SQL Server
+        /// </summary>
+        public const string SQL_DB_DATE_TIME_STRING = "yyyy-MM-dd HH:mm:ss";
+        /// <summary>
+        /// Works with SQL Server
+        /// </summary>
         public const string SQL_DB_DATE_STRING = "yyyy-MM-dd";
+
+        public const string SQL_DB_HOUR_MINUTE_STRING = "HH:mm";
 
         protected MSSQLConnectionOption ConnectionOption;
 
@@ -67,8 +78,56 @@ namespace EWebFrameworkCore.Vendor.Services
             return new DBTransaction(this.GetDBConn().GetSQLConnection());
         }
 
+        /// <summary>
+        /// For more than one run call, set immediateDisposal to false or atleast set AllowDispose to false
+        /// Differrence is, you will have to call ForceDispose if you set AllowDispose to false.
+        /// 
+        /// Be careful to make sure the tables don't depend on each other in a transaction else you will have Deadlock
+        /// </summary>
+        /// <param name="allowDispose">If true, Dispose method will work fine on Garbage Collection and on normal call else you will need to call ForceDispose()</param>
+        /// <param name="immediateDisposal">If true and allowDispose is true, it will dispose immediately on the first call of Run</param>
+        /// <returns></returns>
         public TransactionRunner CreateTransactionRunner(bool allowDispose = true, bool immediateDisposal = true)
         {
+            // LEARN DEALING WITH TRANSACTION RUNNER
+            // ------------------------------------
+            //int ClassID, TermID;
+
+            // AllowDispose to false, immediateDisposal can't work since AllowDispose is false.
+
+            ////var runner = CreateTransactionRunner(false);
+            //// T___PRTermTopic topic = T___PRTermTopic.GetRowWhereIDUsingSQL(ID, runner);
+            ////    ClassID = topic.ClassID;
+            ////    TermID = topic.TermID;
+            ////    T___PRTermTopic.DeleteItemRow(runner, pID: ID);
+
+            ////runner.ForceDispose();
+
+            // AllowDispose = true, immediateDisposal = false. This is perfect when using "using" command
+            // as it will auto dispose once you are totally done
+
+            //using (var runner = CreateTransactionRunner(true, immediateDisposal: false)) {
+            //    T___PRTermTopic topic = T___PRTermTopic.GetRowWhereIDUsingSQL(ID, runner);
+            //    ClassID = topic.ClassID;
+            //    TermID = topic.TermID;
+            //    T___PRTermTopic.DeleteItemRow(runner, pID: ID);
+            //}
+
+
+            // Also, you can use this 2 approaches when using the keyword "using"
+
+            //using (var runner = CreateTransactionRunner(true, immediateDisposal: false))
+            //{
+            //    // This is only best if immediateDisposal is true and allowDispose is true
+            //    runner.Run((trans) => trans.ExecuteTransactionQuery(string.Format("delete from academic.StudentCBTExam where EvaluationCBTExamID={0}", ID)));
+            //    runner.Run((trans) => trans.ExecuteTransactionQuery(string.Format("delete from  academic.EvaluationCBTExam where ID={0}", ID)));
+
+            //    OR THIS because in our case, Run doesn't do anything different since immediateDisposal is false.
+
+            //    runner.Transaction.ExecuteTransactionQuery(string.Format("delete from academic.StudentCBTExam where EvaluationCBTExamID={0}", ID));
+            //    runner.Transaction.ExecuteTransactionQuery(string.Format("delete from  academic.EvaluationCBTExam where ID={0}", ID));
+            //}
+
             return new TransactionRunner(CreateTransaction(), allowDispose: allowDispose, immediateDisposal: immediateDisposal);
         }
 
@@ -77,11 +136,14 @@ namespace EWebFrameworkCore.Vendor.Services
             return new MsSQLDB(ConnectionOption.HOST, ConnectionOption.PORT, ConnectionOption.DATABASE_USER_NAME, ConnectionOption.DATABASE_USER_PASSWORD, ConnectionOption.DATABASE_NAME);
         }
 
+        /// <summary>
+        /// The current time on the system. Server
+        /// </summary>
         public DateTime ServerNowDateTime
         {
             get
             {
-                return DateTime.Now.FromServerTimeZone(DBTimeZoneUtils);
+                return DateTime.Now;
             }
         }
 

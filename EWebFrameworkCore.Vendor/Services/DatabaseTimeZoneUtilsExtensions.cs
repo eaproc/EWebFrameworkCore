@@ -10,7 +10,8 @@ namespace EWebFrameworkCore.Vendor.Services
             /// <summary>
             /// This is the time zone of dates and Time received from Clients Input
             /// </summary>
-            public readonly TimeZoneManager ClientTimeZone;
+            [Obsolete("Client TimeZone is considered same as database timezone for now so no conversion needed")]
+            public readonly TimeZoneManager? ClientTimeZone;
             /// <summary>
             /// This is the TimeZone of the Server This application is running On
             /// </summary>
@@ -41,7 +42,7 @@ namespace EWebFrameworkCore.Vendor.Services
                 // So, time in ClientTimeZone is save exactly like that to database
                 //ClientTimeZone = new TimeZoneManager("+01:00");
 
-                ClientTimeZone = DatabaseTimeZone;
+                // ClientTimeZone = DatabaseTimeZone;
 
                 //var p = from v in request.Headers.AllKeys
                 //        where v.ToLower() == "client-time-zone"
@@ -62,6 +63,7 @@ namespace EWebFrameworkCore.Vendor.Services
         /// </summary>
         /// <param name="dateTime"></param>
         /// <returns></returns>
+        [Obsolete("Client TimeZone is considered same as database timezone for now so no conversion needed")]
         public static DateTime FromClientTimeZone(this DateTime dateTime, DatabaseTimeZoneUtils utils)
         {
             if (utils.ClientTimeZone == null) throw new InvalidTimeZoneException("Please, set the ClientTimeZone in the HTTPRequestHeader!");
@@ -87,6 +89,7 @@ namespace EWebFrameworkCore.Vendor.Services
         /// </summary>
         /// <param name="dateTime"></param>
         /// <returns></returns>
+        [Obsolete("Client TimeZone is considered same as database timezone for now so no conversion needed")]
         public static DateTime ToClientTimeZone(this DateTime dateTime, DatabaseTimeZoneUtils utils)
         {
             if (utils.ClientTimeZone == null) throw new InvalidTimeZoneException("Please, set the ClientTimeZone in the HTTPRequestHeader!");
@@ -103,8 +106,6 @@ namespace EWebFrameworkCore.Vendor.Services
         {
             return dateTime.ToTimezone(utils.DatabaseTimeZone, utils.ServerTimeZone);
         }
-
-
     }
 
 }
