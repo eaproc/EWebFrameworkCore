@@ -10,7 +10,7 @@ namespace EWebFrameworkCore.Vendor
     [ApiController]
     public class Controller: ControllerBase
     {
-        protected readonly IRequestHelper RequestInputs;
+        protected readonly RequestHelper RequestInputs;
 
         protected RequestValidator InputValidator { get; }
 
@@ -30,7 +30,7 @@ namespace EWebFrameworkCore.Vendor
             this.DEFAULT_MSSQL = EWebFrameworkCoreConfigurations.DATABASE_CONNECTION;
             this.Provider = Provider;
             this.Log = HttpContext.Logger();
-            RequestInputs = Provider.GetService(typeof(IRequestHelper)) as IRequestHelper?? throw new InvalidOperationException("It seems we can not initialize IRequestHelper service");
+            RequestInputs = (RequestHelper)(Provider.GetService(typeof(IRequestHelper)) as IRequestHelper?? throw new InvalidOperationException("It seems we can not initialize IRequestHelper service"));
             InputValidator = new RequestValidator(RequestInputs);
         }
     }
