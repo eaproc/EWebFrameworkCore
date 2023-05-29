@@ -10,6 +10,9 @@ using ELibrary.Standard.VB.InputsParsing;
 using EWebFrameworkCore.Vendor.Services.DataTablesNET;
 using ELibrary.Standard.VB;
 using EWebFrameworkCore.Vendor.Configurations;
+using System.Data.SqlTypes;
+using EWebFrameworkCore.Vendor.Utils.DataExports.Excel;
+using Microsoft.AspNetCore.Http;
 
 namespace EWebFrameworkCore.Vendor.Requests
 {
@@ -131,7 +134,7 @@ namespace EWebFrameworkCore.Vendor.Requests
                                 r.paramName, r.paramMinSize, r.paramMaxSize)
                                 );
 
-                        if (s.Where(x=> !TextParsing.IsNumber(x)).Count()>0)
+                        if (s.Where(x => !TextParsing.IsNumber(x)).Any())
                             this.errors.Add(r.paramName, string.Format("The content  {0} must be numbers only [0 to 9]", r.paramName) );
 
                         return;
@@ -187,12 +190,14 @@ namespace EWebFrameworkCore.Vendor.Requests
                                );
                         return;
                     }
+#pragma warning disable CS8602 // Dereference of a possibly null reference. It already checked if it has file
                     if (RequestHelper.HasFile(r.paramName) && RequestHelper.File(r.paramName).Length > (r.paramMaxSize * 1024))
                     {
                         this.errors.Add(r.paramName, string.Format("The size of  {0} must be maximum of {2}kb. You uploaded {1}!",
                             r.paramName, EMaths.getReadableByteValue(RequestHelper.File(r.paramName).Length), r.paramMaxSize)
                             );
                     }
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
 
 
                     break;
@@ -323,76 +328,230 @@ namespace EWebFrameworkCore.Vendor.Requests
 
         }
 
+        /// <summary>
+        /// Note that this is not validating, it is only reading the values based on the rules
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="pParamName"></param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        public T? GetNullableValue<T>(string pParamName) where T:struct {
+            if(!ValidatedRules.ContainsKey(key: pParamName)) return default;
 
+            Rule r = ValidatedRules[key: pParamName];
 
-        public T GetValue<T>(String pParamName){
-            if(!this.ValidatedRules.ContainsKey(key: pParamName)) return default(T);
+            if (!RequestHelper.ContainsKey(pParamName) && !RequestHelper.HasFile(paramName: pParamName) ) return null;
 
-            Rule r = this.ValidatedRules[key: pParamName];
+            string? s = r.paramType != Rule.ParamTypes.FILE ?  EStrings.ValueOf(RequestHelper.Get(pParamName)) : null;
+            if (s == null) return null;
 
-            if (!RequestHelper.ContainsKey(pParamName) && !RequestHelper.HasFile(paramName: pParamName) ) return default(T);
+            switch (r.paramType)
+            {
+                case Rule.ParamTypes.BOOLEAN:
+                    if (r.IsNullable && s == string.Empty) return null;
+                    return (T)(object)EBoolean.ValueOf(s);
 
+                case Rule.ParamTypes.DECIMAL:
+                    if (r.IsNullable && s == string.Empty) return null;
+                    return (T)(object)EDecimal.ValueOf(s);
 
-            String s = r.paramType != Rule.ParamTypes.FILE ?  EStrings.ValueOf(RequestHelper.Get(pParamName)) : null;
+               
+                case Rule.ParamTypes.INTEGER:
+                    if (r.IsNullable && s == string.Empty) return null;
+                    return (T)(object)EInt.ValueOf(s);
+
+                case Rule.ParamTypes.DATE:
+                    if (r.IsNullable && s == string.Empty) return null;
+                    DateTime? v = DataTableRequestFields.ParseDate(s);
+                    return v == null ? null : (T)(object)v.Value;
+
+                case Rule.ParamTypes.TIME:
+                    if (r.IsNullable && s == string.Empty) return null;
+                    DateTime? t = DataTableRequestFields.ParseTime(s);
+                    return  t == null ? null : (T)(object)t.Value;
+            }
+
+            throw new NotImplementedException("This type [" + r.paramType.ToString() + "] is not yet supported!");
+        }
+        /// <summary>
+        /// Note that this is not validating, it is only reading the values based on the rules
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="pParamName"></param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        public T? GetNullableClassValue<T>(string pParamName) where T : class
+        {
+            if (!ValidatedRules.ContainsKey(key: pParamName)) return default;
+
+            Rule r = ValidatedRules[key: pParamName];
+
+            if (!RequestHelper.ContainsKey(pParamName) && !RequestHelper.HasFile(paramName: pParamName)) return null;
+
+            string? s = r.paramType != Rule.ParamTypes.FILE ? EStrings.ValueOf(RequestHelper.Get(pParamName)) : null;
+            if (s == null) return null;
 
             switch (r.paramType)
             {
                 case Rule.ParamTypes.EMAIL:
                 case Rule.ParamTypes.UNESCAPED_STRING:
                 case Rule.ParamTypes.STRING:
-                    if (r.IsNullable && s == String.Empty)
+                    if (
+                        (r.IsNullable && s == string.Empty)
+                        ||
+                        (r.IsNullable && RequestHelper.IsQueryStringNullDefinition(s))
+                        )
                     {
-                        //it is empty string not null
-                        if (!RequestHelper.IsQueryStringNullDefinition(s))
-                            return (T)(object)String.Empty;
-                        
                         //it is null
-                        return (T)(object)(String)null;
+                        return null;
                     }
 
+                    //// this is wrong because we are getting nullable here
+                    ////it is empty string not null
+                    //if (!r.IsNullable && RequestHelper.IsQueryStringNullDefinition(s))
+                    //    return (T)(object)string.Empty;
+
                     if (r.paramType == Rule.ParamTypes.UNESCAPED_STRING) return (T)(object)Uri.UnescapeDataString(s);
+
                     return (T)(object)s;
 
                 case Rule.ParamTypes.NUMERIC_STRING:
-                    if (r.IsNullable && s == String.Empty) return (T)(object)(String)null;
-                    return (T)(object)s;
-
-                case Rule.ParamTypes.BOOLEAN:
-                    if (r.IsNullable && s == String.Empty) return default(T);
-                    return (T)(object)EBoolean.ValueOf(s);
-
-                case Rule.ParamTypes.DECIMAL:
-                    if (r.IsNullable && s == String.Empty) return default(T);
-                    return (T)(object)EDecimal.ValueOf(s);
-
-               
-                case Rule.ParamTypes.INTEGER:
-                    if (r.IsNullable && s == String.Empty) return default(T);
-                    return (T)(object)EInt.ValueOf(s);
-
-                case Rule.ParamTypes.DATE:
-                    if (r.IsNullable && s == String.Empty) return default(T);
-                    return (T)(object)DataTableRequestFields.ParseDate(s).Value;
-
-                case Rule.ParamTypes.TIME:
-                    if (r.IsNullable && s == String.Empty) return default(T);
-                    return (T)(object)DataTableRequestFields.ParseTime(s).Value;
-
+                    if (r.IsNullable && s == string.Empty) return null;
+                    return s == null ? null : (T)(object)s;
+                
                 case Rule.ParamTypes.JSON:
-                    if (r.IsNullable && s == String.Empty) return default(T);
-                    return (T)(object) s;
+                    if (r.IsNullable && s == string.Empty) return null;
+                    return (T)(object)s;
 
                 case Rule.ParamTypes.FILE:
                     // it won't reach here if it is not nullable
-                    if (r.IsNullable && !RequestHelper.HasFile(paramName: pParamName)) return default(T);
-                    return (T)(object)RequestHelper.File(pParamName);
+                    if (r.IsNullable && !RequestHelper.HasFile(paramName: pParamName)) return null;
+                    Microsoft.AspNetCore.Http.IFormFile? f = RequestHelper.File(pParamName);
+                    return f == null ? null : (T)(object)f;
             }
 
 
             throw new NotImplementedException("This type [" + r.paramType.ToString() + "] is not yet supported!");
-
         }
 
+        /// <summary>
+        /// Using this means you need a default value if null is found
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="pParamName"></param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        public T GetValue<T>(string pParamName) where T: notnull
+        {
+            // https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/generics/constraints-on-type-parameters
+            if (!this.ValidatedRules.ContainsKey(key: pParamName)) throw new InvalidOperationException($"Param {pParamName} does not exists in rules!"); ;
 
+            Rule r = this.ValidatedRules[key: pParamName];
+            try
+            {
+                switch (r.paramType)
+                {
+                    case Rule.ParamTypes.EMAIL:
+                    case Rule.ParamTypes.UNESCAPED_STRING:
+                    case Rule.ParamTypes.STRING:
+                    case Rule.ParamTypes.NUMERIC_STRING:
+                    case Rule.ParamTypes.JSON:
+                        string? s = GetNullableClassValue<string>(pParamName);
+                        return s == null ? (T)(object)string.Empty : (T)(object)s;
+
+                    case Rule.ParamTypes.BOOLEAN:
+                        bool? b = GetNullableValue<bool>(pParamName);
+                        return (T)(object)(b == null ? false : b);
+
+                    case Rule.ParamTypes.DECIMAL:
+                        decimal? d = GetNullableValue<decimal>(pParamName);
+                        return (T)(object)(d == null ? 0 : d);
+
+                    case Rule.ParamTypes.INTEGER:
+                        int? i = GetNullableValue<int>(pParamName);
+                        return (T)(object)(i == null ? 0 : i);
+
+                    case Rule.ParamTypes.DATE:
+                    case Rule.ParamTypes.TIME:
+                        return (T)(object)(GetNullableValue<DateTime>(pParamName) ?? throw new InvalidOperationException($"There is no default value for Dates, please use GetNullableValue function for parameter {pParamName}"));
+                    case Rule.ParamTypes.FILE:
+                        return (T)(object)(GetNullableClassValue<IFormFile>(pParamName) ?? throw new InvalidOperationException($"There is no default value for IFormFile, please use GetNullableClassValue function for parameter {pParamName}"));
+                }
+            }
+            catch (System.InvalidCastException ex)
+            {
+
+                throw new InvalidProgramException($"Param Setting is wrong. Validation Rule and Get Type are different for [ {pParamName} ]. {ex.Message}");
+            }
+
+            throw new NotImplementedException("This type [" + r.paramType.ToString() + "] is not yet supported!");
+
+
+            //if (!this.ValidatedRules.ContainsKey(key: pParamName)) return default(T);
+
+            //Rule r = this.ValidatedRules[key: pParamName];
+
+            //if (!RequestHelper.ContainsKey(pParamName) && !RequestHelper.HasFile(paramName: pParamName)) return default(T);
+
+
+            //string? s = r.paramType != Rule.ParamTypes.FILE ? EStrings.ValueOf(RequestHelper.Get(pParamName)) : null;
+
+            //switch (r.paramType)
+            //{
+            //    case Rule.ParamTypes.EMAIL:
+            //    case Rule.ParamTypes.UNESCAPED_STRING:
+            //    case Rule.ParamTypes.STRING:
+            //        if (r.IsNullable && s == String.Empty)
+            //        {
+            //            //it is empty string not null
+            //            if (!RequestHelper.IsQueryStringNullDefinition(s))
+            //                return (T)(object)String.Empty;
+
+            //            //it is null
+            //            return (T)(object)(String)null;
+            //        }
+
+            //        if (r.paramType == Rule.ParamTypes.UNESCAPED_STRING) return (T)(object)Uri.UnescapeDataString(s);
+            //        return (T)(object)s;
+
+            //    case Rule.ParamTypes.NUMERIC_STRING:
+            //        if (r.IsNullable && s == String.Empty) return (T)(object)(String)null;
+            //        return (T)(object)s;
+
+            //    case Rule.ParamTypes.BOOLEAN:
+            //        if (r.IsNullable && s == String.Empty) return default; // literally you control the output regarding null.
+            //        return (T)(object)EBoolean.ValueOf(s);
+
+            //    case Rule.ParamTypes.DECIMAL:
+            //        if (r.IsNullable && s == String.Empty) return default(T);
+            //        return (T)(object)EDecimal.ValueOf(s);
+
+
+            //    case Rule.ParamTypes.INTEGER:
+            //        if (r.IsNullable && s == String.Empty) return default(T);
+            //        return (T)(object)EInt.ValueOf(s);
+
+            //    case Rule.ParamTypes.DATE:
+            //        if (r.IsNullable && s == String.Empty) return default(T);
+            //        return (T)(object)DataTableRequestFields.ParseDate(s).Value;
+
+            //    case Rule.ParamTypes.TIME:
+            //        if (r.IsNullable && s == String.Empty) return default(T);
+            //        return (T)(object)DataTableRequestFields.ParseTime(s).Value;
+
+            //    case Rule.ParamTypes.JSON:
+            //        if (r.IsNullable && s == String.Empty) return default(T);
+            //        return (T)(object)s;
+
+            //    case Rule.ParamTypes.FILE:
+            //        // it won't reach here if it is not nullable
+            //        if (r.IsNullable && !RequestHelper.HasFile(paramName: pParamName)) return default(T);
+            //        return (T)(object)RequestHelper.File(pParamName);
+            //}
+
+
+            //throw new NotImplementedException("This type [" + r.paramType.ToString() + "] is not yet supported!");
+
+        }
     }
 }
