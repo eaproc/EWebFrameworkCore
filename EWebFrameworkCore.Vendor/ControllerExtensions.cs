@@ -17,7 +17,7 @@ namespace EWebFrameworkCore.Vendor
         public static IEnumerable<T> AddRange<T>(this IEnumerable<T> p, params T[] x)
         {
             List<T> y = p.ToList();
-            if (x.Count() > 0) y.AddRange(x);
+            if (x.Any()) y.AddRange(x);
             return y;
         }
 

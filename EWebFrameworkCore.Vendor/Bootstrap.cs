@@ -2,6 +2,7 @@
 using EWebFrameworkCore.Vendor.Requests;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Serilog;
@@ -30,7 +31,7 @@ namespace EWebFrameworkCore.Vendor
 
         public static WebApplicationBuilder ConfigureEwebFrameworkCoreServices(this WebApplicationBuilder builder)
         {
-            builder.Services.AddScoped<IRequestHelper, RequestHelper>();
+            builder.Services.AddScoped<RequestHelper, RequestHelper>();
             //Services = services;
 
             // Not updating
@@ -96,6 +97,22 @@ namespace EWebFrameworkCore.Vendor
         public static Logger Logger(this HttpContext _)
         {
             return Log ?? throw new InvalidProgramException("Logger is not configured!");
+        }
+
+        public static RequestHelper GetRequestHelper(this IServiceProvider provider)
+        {
+            return provider.GetService(typeof(RequestHelper)) as RequestHelper ?? throw new InvalidOperationException("It seems we can not initialize RequestHelper service");
+        }   
+        
+        public static IConfiguration GetConfigurations(this IServiceProvider provider)
+        {
+            return provider.GetService<IConfiguration>() ?? throw new InvalidOperationException("It seems we can not initialize IConfiguration service"); ;
+        }   
+        
+        public static HttpContext GetHttpContext(this IServiceProvider provider)
+        {
+            IHttpContextAccessor httpContextAccessor = provider.GetService<IHttpContextAccessor>() ?? throw new InvalidOperationException("IHttpContextAccessor: Services must be used via http request calls. All depends on HttpContext!");
+            return httpContextAccessor.HttpContext ?? throw new InvalidOperationException("HttpContext: Services must be used via http request calls. All depends on HttpContext!");
         }
 
         ///// <summary>

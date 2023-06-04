@@ -2,6 +2,7 @@
 using EEntityCore.DB.MSSQL;
 using ELibrary.Standard.VB.Objects;
 using EWebFrameworkCore.Vendor.Configurations;
+using EWebFrameworkCore.Vendor.Requests;
 using EWebFrameworkCore.Vendor.Services.DataTablesNET;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
@@ -35,10 +36,11 @@ namespace EWebFrameworkCore.Vendor.Services
 
         public IServiceProvider Provider { get; }
         public HttpContext HttpContext { get; }
-        public IConfiguration? Configurations { get; private set; }
+        public IConfiguration Configurations { get; private set; }
 
         public readonly ConfigurationOptions EWebFrameworkCoreConfigurations;
 
+        protected readonly RequestHelper RequestInputs;
         public Logger Log { get; }
         public DatabaseTimeZoneUtilsExtensions.DatabaseTimeZoneUtils DBTimeZoneUtils { get; }
 
@@ -51,14 +53,14 @@ namespace EWebFrameworkCore.Vendor.Services
         public BaseClientService(IServiceProvider provider, MSSQLConnectionOption connectionOption)
         {
             this.Provider = provider;
+            RequestInputs = provider.GetRequestHelper();
 
-            IHttpContextAccessor httpContextAccessor = provider.GetService<IHttpContextAccessor>() ?? throw new InvalidOperationException("IHttpContextAccessor: Services must be used via http request calls. All depends on HttpContext!");
-            HttpContext = httpContextAccessor.HttpContext ?? throw new InvalidOperationException("HttpContext: Services must be used via http request calls. All depends on HttpContext!");
+            HttpContext = provider.GetHttpContext();
 
-            this.Configurations = provider.GetService<IConfiguration>();
+            this.Configurations = provider.GetConfigurations();
 
             this.EWebFrameworkCoreConfigurations = Provider.GetEWebFrameworkCoreOptions();
-            this.Log = Bootstrap.Log?? throw new InvalidProgramException("Please, set a logger!");
+            this.Log = HttpContext.Logger();
 
             this.DBTimeZoneUtils = new DatabaseTimeZoneUtilsExtensions.DatabaseTimeZoneUtils(EWebFrameworkCoreConfigurations.GENERAL.DATABASE_TIMEZONE);
 
@@ -139,7 +141,7 @@ namespace EWebFrameworkCore.Vendor.Services
         /// <summary>
         /// The current time on the system. Server
         /// </summary>
-        public DateTime ServerNowDateTime
+        public static DateTime ServerNowDateTime
         {
             get
             {

@@ -18,14 +18,14 @@ namespace EWebFrameworkCore.Vendor.Requests
 {
     public partial class RequestValidator
     {
-        public IRequestHelper RequestHelper { private set; get; }
+        public RequestHelper RequestHelper { private set; get; }
         public EWebFrameworkCoreENV ENV { get; }
 
         private readonly Dictionary<String, Rule> ValidatedRules;
 
         public SortedList<string, string> errors;
 
-        public RequestValidator(IRequestHelper helper)
+        public RequestValidator(RequestHelper helper)
         {
             this.errors = new SortedList<string, string>();
             this.ValidatedRules = new Dictionary<string, Rule>();

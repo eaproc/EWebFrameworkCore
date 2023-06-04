@@ -97,7 +97,7 @@ namespace EWebFrameworkCore.Vendor.Services.DataTablesNET
 
 
 
-        public static DataTableRequestFields ProcessDataTableRequestFields(IRequestHelper requestHelper)
+        public static DataTableRequestFields ProcessDataTableRequestFields(RequestHelper requestHelper)
         {
             return new DataTableRequestFields
             {

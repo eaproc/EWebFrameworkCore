@@ -2,7 +2,6 @@
 using EWebFrameworkCore.Vendor.Requests;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using Serilog.Core;
 
 namespace EWebFrameworkCore.Vendor
@@ -25,12 +24,12 @@ namespace EWebFrameworkCore.Vendor
         public Controller(IServiceProvider Provider)
         {
             this.EWebFrameworkCoreConfigurations = Provider.GetEWebFrameworkCoreOptions();
-            this.Configurations = Provider.GetService<IConfiguration>()?? throw new InvalidOperationException("It seems we can not initialize IConfiguration service");
+            this.Configurations = Provider.GetConfigurations();
 
             this.DEFAULT_MSSQL = EWebFrameworkCoreConfigurations.DATABASE_CONNECTION;
             this.Provider = Provider;
             this.Log = HttpContext.Logger();
-            RequestInputs = (RequestHelper)(Provider.GetService(typeof(IRequestHelper)) as IRequestHelper?? throw new InvalidOperationException("It seems we can not initialize IRequestHelper service"));
+            RequestInputs = Provider.GetRequestHelper();
             InputValidator = new RequestValidator(RequestInputs);
         }
     }
