@@ -14,6 +14,9 @@ namespace EWebFrameworkCore.Vendor.Services
         /// </summary>
         public readonly string FileFullPath;
 
+        public TemporaryFile(): this(BaseClientService.GetSessionTempFileName())
+        {}
+
         /// <summary>
         /// Create a temporary file using your own file full path
         /// </summary>

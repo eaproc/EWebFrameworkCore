@@ -11,18 +11,18 @@ namespace EWebFrameworkCore.Vendor
     public static class PathHandlers
     {
 
-        /// <summary>
-        /// It is created once as static in this class and it is used within this module
-        /// EWebFramework.Vendor
-        /// </summary>
-        public static Log1 Logger { get; private set; }
+        ///// <summary>
+        ///// It is created once as static in this class and it is used within this module
+        ///// EWebFramework.Vendor
+        ///// </summary>
+        //public static Log1 Logger { get; private set; }
 
-        static PathHandlers()
-        {
-            var logFile = PathHandlers.StoragePath(String.Format("{0}__EPWebFrameworkCore.Vendor.log", DateTime.Now.ToString("yyyy_MM_dd")));
+        //static PathHandlers()
+        //{
+        //    var logFile = StoragePath(string.Format("{0}__EPWebFrameworkCore.Vendor.log", DateTime.Now.ToString("yyyy_MM_dd")));
 
-            Logger = new Log1(logFile, Log1.Modes.FILE, false);
-        }
+        //    Logger = new Log1(logFile, Log1.Modes.FILE, false);
+        //}
 
 
 
@@ -31,9 +31,9 @@ namespace EWebFrameworkCore.Vendor
         /// </summary>
         /// <param name="strFullyQualifiedName">like EWebFramework.Vendor.PathHandlers</param>
         /// <returns></returns>
-        public static object GetInstance(this string strFullyQualifiedName)
+        public static object? GetInstance(this string strFullyQualifiedName)
         {
-            Type type = Type.GetType(strFullyQualifiedName);
+            Type? type = Type.GetType(strFullyQualifiedName);
             if (type != null)
                 return Activator.CreateInstance(type);
             foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
@@ -44,7 +44,6 @@ namespace EWebFrameworkCore.Vendor
             }
             return null;
         }
-
 
 
         /// <summary>
@@ -83,18 +82,6 @@ namespace EWebFrameworkCore.Vendor
             return AppDomain.CurrentDomain.BaseDirectory + "/wwwroot/" + pPath;
         }
 
-        ///// <summary>
-        ///// Returns path relative to the value specified in 
-        ///// ENV as REDIRECTED_RESOURCE_PATH=D:/
-        ///// </summary>
-        ///// <param name="RelativePath"></param>
-        ///// <returns></returns>
-        //public static string RedirectedResourcePath(string RelativePath)
-        //{
-        //    return ENV.General("REDIRECTED_RESOURCE_PATH") + "\\" + RelativePath;
-        //}
-
-
         /// <summary>
         /// Returns path /Storage/{Path Specified}
         /// </summary>
@@ -106,7 +93,6 @@ namespace EWebFrameworkCore.Vendor
             return AppDomain.CurrentDomain.BaseDirectory + "/Storage/" + pPath;
             //return HttpContext.Current.Server.MapPath("~/App_Data/" + pPath);
         }
-
 
         /// <summary>
         /// Returns path /Storage/App/{Path Specified}
@@ -153,8 +139,5 @@ namespace EWebFrameworkCore.Vendor
             string s = appendRandom ? AlphaNumericCodeGenerator.RandomString((int)randomStringLength) : string.Empty;
             return String.Format(@"{0}_{1}{2}", AlphaNumericCodeGenerator.RandomString(16), s, pExtWithDot).AppTempStore();
         }
-
-
-
     }
 }

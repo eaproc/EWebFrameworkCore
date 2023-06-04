@@ -132,7 +132,7 @@ namespace EWebFrameworkCore.Vendor.Requests
             {
                 return this.Objects.ContainsKey(Key) 
                     || this.ArrayObjects.ContainsKey(Key) 
-                    || this.ArrayObjects.Where(x => x.Value.Has(Key)).Count()>0 ;
+                    || ArrayObjects.Where(x => x.Value.Has(Key)).Any();
             }
 
             /// <summary>

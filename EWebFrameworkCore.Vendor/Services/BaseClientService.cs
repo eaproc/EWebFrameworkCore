@@ -4,6 +4,7 @@ using ELibrary.Standard.VB.Objects;
 using EWebFrameworkCore.Vendor.Configurations;
 using EWebFrameworkCore.Vendor.Requests;
 using EWebFrameworkCore.Vendor.Services.DataTablesNET;
+using EWebFrameworkCore.Vendor.Utils;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -162,21 +163,11 @@ namespace EWebFrameworkCore.Vendor.Services
         /// <returns>DataTable or throws exception</returns>
         public virtual System.Data.DataTable GetSQLTable(String pSQL, bool AddressApostrophe = false)
         {
-
-            if (TRACE_DEBUG_SQL) PathHandlers.Logger.Print(pSQL);
-            try
-            {
-                // I don't expect table to be null if sql executes successfully
-                var db = (All__DBs)this.GetDBConn();
-                DataSet p = db.getRS(pSQL, AddressApostrophe);
-                return p.Tables[0];
-            }
-            catch (Exception ex)
-            {
-                PathHandlers.Logger.Print(ex);
-                throw;
-            }
-
+            if (TRACE_DEBUG_SQL) Log.Information (pSQL);
+            // I don't expect table to be null if sql executes successfully
+            var db = (All__DBs)GetDBConn();
+            DataSet p = db.getRS(pSQL, AddressApostrophe);
+            return p.Tables[0];
         }
 
 
@@ -188,7 +179,7 @@ namespace EWebFrameworkCore.Vendor.Services
         /// <returns>boolean</returns>
         public virtual int ExecuteQuery(String pSQL, bool AddressApostrophe = false)
         {
-            if (TRACE_DEBUG_SQL) PathHandlers.Logger.Print(pSQL);
+            if (TRACE_DEBUG_SQL) Log.Information(pSQL);
             return GetDBConn().DbExec(SQL: pSQL, Address_Apostrophe_Issue: AddressApostrophe);
         }
 
@@ -207,77 +198,6 @@ namespace EWebFrameworkCore.Vendor.Services
         }
 
         #endregion
-
-
-
-
-        //#region DBTransaction
-
-
-        //private SqlConnection DBTransactionConn = null;
-        //private SqlCommand DBTransactionCommand = null;
-        //private SqlTransaction DBTransaction = null;
-
-        ///// <summary>
-        ///// This should create the DB Connection and get it ready for Transaction
-        ///// </summary>
-        //public void BeginDBTransaction()
-        //{
-        //    if (this.DBTransactionConn != null) throw new Exception("This class has opened transaction connection.");
-        //    this.DBTransactionConn = this.credentialManager.GetDBConn().getSQLConnection();
-        //    this.DBTransactionCommand = DBTransactionConn.CreateCommand();
-        //    // Start a local transaction.
-        //    // Maximum Identifier length | Transaction Name is 32 characters
-        //    this.DBTransaction = DBTransactionConn.BeginTransaction("TRANS: " + DateTime.Now.ToString());
-
-        //    // Must assign both transaction object and connection
-        //    // to Command object for a pending local transaction
-        //    DBTransactionCommand.Connection = DBTransactionConn;
-        //    DBTransactionCommand.Transaction = DBTransaction;
-        //}
-
-        ///// <summary>
-        ///// UPDATE, INSERT, and DELETE. Returns numbers of rows affected. -1 if unsuccessful or different statement
-        ///// </summary>
-        ///// <param name="pSQL"></param>
-        ///// <returns>boolean</returns>
-        //public int ExecuteTransactionQuery(String pSQL)
-        //{
-
-        //    if (TRACE_DEBUG_SQL) PathHandlers.Logger.Print(pSQL);
-
-        //    this.DBTransactionCommand.CommandText = pSQL;
-        //    return this.DBTransactionCommand.ExecuteNonQuery();
-
-        //}
-
-        ///// <summary>
-        ///// Commit DB Transaction Query
-        ///// </summary>
-        //public void CommitDBTransaction()
-        //{
-        //    // Attempt to commit the transaction.
-        //    this.DBTransaction.Commit();
-        //    this.DBTransactionConn.Dispose();
-        //    this.DBTransactionConn = null;
-        //}
-
-        ///// <summary>
-        ///// Rollback
-        ///// </summary>
-        //public void RollBackDBTransaction()
-        //{
-        //    // Attempt to commit the transaction.
-        //    this.DBTransaction.Rollback();
-        //    this.DBTransactionConn.Dispose();
-        //    this.DBTransactionConn = null;
-        //}
-
-
-
-        //#endregion
-
-
 
 
         #region Pagination
@@ -510,30 +430,41 @@ namespace EWebFrameworkCore.Vendor.Services
         #endregion
 
 
-
-
-
         //#region FileStorages
 
+        //
+        // Summary:
+        //     Create a random file name for this session to temporary store file and delete
+        //
+        // Parameters:
+        //   pExtWithDot:
+        //     Just additional string to append
+        //
+        //   appendRandom:
+        //     If you want to generate the randomString Part with it
+        //
+        //   randomStringLength:
+        //     The length of the random string if needed
+        public static string GetSessionTempFileName(string pExtWithDot = "")
+        {
+            string arg = AlphaNumericCodeGenerator.RandomString(8);
+            return $"{arg}{pExtWithDot}".AppTempStore();
+        }
 
-        ///// <summary>
-        ///// Help remove wrong characters from file name
-        ///// </summary>
-        ///// <param name="filename"></param>
-        ///// <returns></returns>
-        //public static string GetArbitraryValidFileName(string filename)
-        //{
+        /// <summary>
+        /// Help remove wrong characters from file name
+        /// </summary>
+        /// <param name="filename"></param>
+        /// <returns></returns>
+        public static string GetArbitraryValidFileName(string filename)
+        {
+            foreach (char c in Path.GetInvalidFileNameChars())
+            {
+                filename = filename.Replace(c, '_');
+            }
 
-        //    foreach (char c in System.IO.Path.GetInvalidFileNameChars())
-        //    {
-        //        filename = filename.Replace(c, '_');
-        //    }
-
-        //    return filename;
-        //}
-
-
-
+            return filename;
+        }
 
 
         ///// <summary>

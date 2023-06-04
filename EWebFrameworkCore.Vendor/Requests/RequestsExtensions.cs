@@ -10,7 +10,7 @@ namespace EWebFrameworkCore.Vendor.Requests
     {
         public static string SaveFormFileAs(this IFormFile formFile, string FileFullPath)
         {
-            if (!Directory.Exists(Path.GetDirectoryName(FileFullPath))) Directory.CreateDirectory(Path.GetDirectoryName(FileFullPath));
+            if (!Directory.Exists(Path.GetDirectoryName(FileFullPath))) Directory.CreateDirectory(Path.GetDirectoryName(FileFullPath)?? throw new Exception("Invalid File Path"));
             using( var f = new FileStream(FileFullPath, FileMode.Create))
             {
                 formFile.CopyTo(f);

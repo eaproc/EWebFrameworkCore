@@ -15,9 +15,10 @@ namespace EWebFrameworkCore.Vendor.Configurations
     {
         public enum ENVIRONMENT { UNKNOWN, DEVELOPMENT, PRODUCTION, STAGING }
 
-        public GeneralOption GENERAL { get; set; } = new GeneralOption();
-        public LoggingOption LoggingOption { get; set; } = new LoggingOption();
-        public MSSQLConnectionOption DATABASE_CONNECTION { get; set; } = new MSSQLConnectionOption();
+        public GeneralOption GENERAL { get; set; } = new ();
+        public LoggingOption LoggingOption { get; set; } = new ();
+        public MSSQLConnectionOption DATABASE_CONNECTION { get; set; } = new ();
+        public MinioOption Minio { get; set; } = new ();
 
         [JsonPropertyName("JWT")]
         public JWTOption JWT { get; set; } = new JWTOption();

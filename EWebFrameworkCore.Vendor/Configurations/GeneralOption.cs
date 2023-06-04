@@ -15,7 +15,7 @@ namespace EWebFrameworkCore.Vendor.Configurations
         public bool REDIRECT_HTTPS { get; set; }
         public bool REDIRECT_WWW { get; set; }
         public string? DATABASE_TIMEZONE { get; set; }
-        public string? APP_URL { get; set; }
+        public string APP_URL { get; set; } = string.Empty;
 
         /// <summary>
         /// # All apps should have this for secure connection

@@ -23,24 +23,14 @@ namespace EWebFrameworkCore.Vendor.Utils
 
         private static List<char> PoolOfSource;
 
-
-
-
-        public static string getCode()
+        public static string GetCode()
         {
             // REM Shuffle
-            Random r = new Random();
+            Random r = new ();
             PoolOfSource = PoolOfSource.OrderBy(x => PoolOfSource[r.Next(PoolOfSource.Count)]).ToList();
 
             return new string(PoolOfSource.ToArray());
         }
-
-
-
-
-
-
-     
 
         /// <summary>
         ///         ''' Faster
@@ -49,18 +39,9 @@ namespace EWebFrameworkCore.Vendor.Utils
         ///         ''' <returns></returns>
         public static string RandomString(int length)
         {
-               Random random = new Random(Guid.NewGuid().GetHashCode());
+               Random random = new(Guid.NewGuid().GetHashCode());
                 const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
                 return new string(Enumerable.Repeat(chars, length).Select(s => s[random.Next(s.Length)]).ToArray());
         }
-
-
-
-
-
-
-
-
-
     }
 }

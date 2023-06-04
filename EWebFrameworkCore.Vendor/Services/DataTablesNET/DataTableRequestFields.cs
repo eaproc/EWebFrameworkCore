@@ -12,10 +12,10 @@ namespace EWebFrameworkCore.Vendor.Services.DataTablesNET
         public int Length;
         public int Draw;
         public int OrderByColumnIndex;
-        public String OrderByColumnDirection;
-        public String OrderByColumnName;
+        public String? OrderByColumnDirection;
+        public String? OrderByColumnName;
         public bool SortUsingColumnName;
-        public String SearchValue;
+        public String? SearchValue;
 
         // date will be read in this order only
         // yyyy-MM-dd
@@ -31,12 +31,11 @@ namespace EWebFrameworkCore.Vendor.Services.DataTablesNET
         // time will be accepted in 24-hrs only
         // HH:mm
 
-
-
-        public static DateTime? ParseDate(String pValue)
+        public static DateTime? ParseDate(string ?pValue)
         {
+            if (pValue == null) return null;
 
-            String[] pParts = pValue.Split('-');
+            string[] pParts = pValue.Split('-');
 
             try
             {
@@ -56,7 +55,7 @@ namespace EWebFrameworkCore.Vendor.Services.DataTablesNET
 
             }
             catch (Exception e)
-            { Logger.Print(e); }
+            { throw new Exception($"Error parsing date on DataTableRequestField: {pValue}", e); }
 
 
             // Logger.Print(String.Format("value: {0}, LengthSplit: {1}", pValue, pParts.Length));
@@ -64,12 +63,11 @@ namespace EWebFrameworkCore.Vendor.Services.DataTablesNET
 
         }
 
-        public static DateTime? ParseTime(object pValue)
+        public static DateTime? ParseTime(string? pValue)
         {
+            if (pValue == null) return null;
 
-            if (pValue == null || !(pValue is string)) return null;
-
-            String[] pParts = pValue.ToString().Split(':');
+            string[] pParts = pValue.ToString().Split(':');
 
             try
             {
@@ -87,7 +85,7 @@ namespace EWebFrameworkCore.Vendor.Services.DataTablesNET
 
             }
             catch (Exception e)
-            { Logger.Print(e); }
+            { throw new Exception($"Error parsing time on DataTableRequestField: {pValue}", e); }
 
 
             // Logger.Print(String.Format("value: {0}, LengthSplit: {1}", pValue, pParts.Length));
@@ -105,12 +103,12 @@ namespace EWebFrameworkCore.Vendor.Services.DataTablesNET
                 Length = Convert.ToInt32(requestHelper.Get("length")),
                 Draw = Convert.ToInt32(requestHelper.Get("draw")),
                 OrderByColumnIndex = Convert.ToInt32(requestHelper.Get("order[0][column]")),
-                OrderByColumnDirection = requestHelper.Get("order[0][dir]").ToString(),
-                OrderByColumnName = requestHelper.ContainsKey("order[0][name]") ? requestHelper.Get("order[0][name]").ToString() : String.Empty,
-                SortUsingColumnName = requestHelper.ContainsKey("SortUsingColumnName") ? EBoolean.ValueOf(requestHelper.Get("SortUsingColumnName")) : false,
-                SearchValue = requestHelper.ContainsKey("search[value]") ? requestHelper.Get("search[value]").ToString() : "",
-                StartDate = requestHelper.ContainsKey("start_date") ? DataTableRequestFields.ParseDate(requestHelper.Get("start_date").ToString()) : null,
-                EndDate = requestHelper.ContainsKey("end_date") ? DataTableRequestFields.ParseDate(requestHelper.Get("end_date").ToString()) : null
+                OrderByColumnDirection = requestHelper.Get("order[0][dir]")?.ToString(),
+                OrderByColumnName = requestHelper.ContainsKey("order[0][name]") ? requestHelper.Get("order[0][name]")?.ToString() : string.Empty,
+                SortUsingColumnName = requestHelper.ContainsKey("SortUsingColumnName") && EBoolean.ValueOf(requestHelper.Get("SortUsingColumnName")),
+                SearchValue = requestHelper.ContainsKey("search[value]") ? requestHelper.Get("search[value]")?.ToString() : "",
+                StartDate = requestHelper.ContainsKey("start_date") ? ParseDate(requestHelper.Get("start_date")?.ToString()) : null,
+                EndDate = requestHelper.ContainsKey("end_date") ? DataTableRequestFields.ParseDate(requestHelper.Get("end_date")?.ToString()) : null
             };
         }
 
