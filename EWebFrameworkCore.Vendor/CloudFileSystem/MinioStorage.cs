@@ -1,10 +1,14 @@
-﻿using ELibrary.Standard.VB.Objects;
+﻿using ELibrary.Standard.VB;
+using ELibrary.Standard.VB.Objects;
 using EWebFrameworkCore.Vendor.Services;
+using MimeMapping;
 using Minio;
 using Minio.DataModel;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -111,6 +115,29 @@ namespace EWebFrameworkCore.Vendor.CloudFileSystem
             return Minio.BucketExistsAsync(new BucketExistsArgs().WithBucket(Bucket)).Result;
         }
 
+        public override void SaveFileContent(string ObjectPath, byte[] Contents)
+        {
+            try
+            {
+                if (StorageExist())
+                {
+                    // disadvantage of this approach is memory consumption while uploading
+                    using MemoryStream fileStream = new (Contents);
+                    Minio.PutObjectAsync(
+                            new PutObjectArgs().WithBucket(Bucket).WithObject(ObjectPath)
+                        .WithStreamData(fileStream)
+                        .WithObjectSize(fileStream.Length)
+                        .WithContentType(MimeUtility.GetMimeMapping(Path.GetFileName(ObjectPath)))
+                        )
+                        .Wait();
+                }
+            }
+            catch (Exception innerException)
+            {
+                throw new InvalidOperationException("Unfortunately the file could not be uploaded!", innerException);
+            }
+        }
+
         //
         // Summary:
         //     Upload file to bucket
@@ -125,7 +152,10 @@ namespace EWebFrameworkCore.Vendor.CloudFileSystem
             {
                 if (StorageExist())
                 {
-                    Minio.PutObjectAsync(new PutObjectArgs().WithBucket( Bucket ).WithObject(ObjectPath).WithFileName(FileFullPath)).Wait();
+                    // Not using this at the moment because it is preventing the deletion of the FileFullPath after delete.
+                    // The thread keeps it open
+                    SaveFileContent(ObjectPath, File.ReadAllBytes(FileFullPath));
+                    //Minio.PutObjectAsync(new PutObjectArgs().WithBucket( Bucket ).WithObject(ObjectPath).WithFileName(FileFullPath)).Wait();
                 }
             }
             catch (Exception innerException)

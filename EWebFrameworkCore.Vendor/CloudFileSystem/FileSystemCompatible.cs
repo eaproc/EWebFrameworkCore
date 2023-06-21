@@ -136,6 +136,8 @@ namespace EWebFrameworkCore.Vendor.CloudFileSystem
                 Directory.CreateDirectory(Path.GetDirectoryName(temporaryFile.FileFullPath)?? throw new InvalidOperationException("Can not create directory of path: " + temporaryFile.FileFullPath) );
 
             File.WriteAllBytes(temporaryFile.FileFullPath, Contents);
+            
+            // if save file prevents file deletion, the file remains on the server locally
             SaveFile(ObjectPath, temporaryFile.FileFullPath);
         }
 
