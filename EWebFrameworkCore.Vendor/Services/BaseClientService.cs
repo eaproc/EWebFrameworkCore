@@ -1,7 +1,7 @@
 ﻿using EEntityCore.DB.Abstracts;
 using EEntityCore.DB.MSSQL;
 using ELibrary.Standard.VB.Objects;
-using EWebFrameworkCore.Vendor.Configurations;
+using EWebFrameworkCore.Vendor.ConfigurationTypedClasses;
 using EWebFrameworkCore.Vendor.Requests;
 using EWebFrameworkCore.Vendor.Services.DataTablesNET;
 using EWebFrameworkCore.Vendor.Utils;

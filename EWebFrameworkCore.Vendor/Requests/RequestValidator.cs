@@ -9,7 +9,7 @@ using ELibrary.Standard.VB.Objects;
 using ELibrary.Standard.VB.InputsParsing;
 using EWebFrameworkCore.Vendor.Services.DataTablesNET;
 using ELibrary.Standard.VB;
-using EWebFrameworkCore.Vendor.Configurations;
+using EWebFrameworkCore.Vendor.ConfigurationTypedClasses;
 using System.Data.SqlTypes;
 using EWebFrameworkCore.Vendor.Utils.DataExports.Excel;
 using Microsoft.AspNetCore.Http;

@@ -1,4 +1,4 @@
-﻿namespace EWebFrameworkCore.Vendor.Configurations
+﻿namespace EWebFrameworkCore.Vendor.ConfigurationTypedClasses
 {
     public class MinioOption
     {

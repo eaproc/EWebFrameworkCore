@@ -1,4 +1,4 @@
-﻿using EWebFrameworkCore.Vendor.Configurations;
+﻿using EWebFrameworkCore.Vendor.ConfigurationTypedClasses;
 using EWebFrameworkCore.Vendor.Requests;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -86,12 +86,12 @@ namespace EWebFrameworkCore.Vendor
 
         public static bool IsInDevelopmentEnvironment(this HttpContext httpContext)
         {
-            return httpContext.GetAppEnvironment() == Configurations.ConfigurationOptions.ENVIRONMENT.DEVELOPMENT;
+            return httpContext.GetAppEnvironment() == ConfigurationTypedClasses.ConfigurationOptions.ENVIRONMENT.DEVELOPMENT;
         }
         
         public static bool IsInProductionEnvironment(this HttpContext httpContext)
         {
-            return httpContext.GetAppEnvironment() == Configurations.ConfigurationOptions.ENVIRONMENT.PRODUCTION;
+            return httpContext.GetAppEnvironment() == ConfigurationTypedClasses.ConfigurationOptions.ENVIRONMENT.PRODUCTION;
         }        
 
         public static Logger Logger(this HttpContext _)

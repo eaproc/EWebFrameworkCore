@@ -84,9 +84,9 @@ namespace EWebFrameworkCore.Vendor.CloudFileSystem
         //   ObjectPath:
         //
         //   cleanUp:
-        public virtual string GetFileAsString(string ObjectPath, bool cleanUp = true)
+        public virtual string GetFileAsString(string ObjectPath)
         {
-            byte[] fileAsBinary = GetFileAsBinary(ObjectPath, cleanUp);
+            byte[] fileAsBinary = GetFileAsBinary(ObjectPath);
             return Encoding.UTF8.GetString(fileAsBinary, 0, fileAsBinary.Length);
         }
 
@@ -95,17 +95,12 @@ namespace EWebFrameworkCore.Vendor.CloudFileSystem
         //   ObjectPath:
         //
         //   cleanUp:
-        public virtual byte[] GetFileAsBinary(string ObjectPath, bool cleanUp = true)
+        public virtual byte[] GetFileAsBinary(string ObjectPath)
         {
             try
             {
-                TemporaryFile fileAsDownloaded = GetFileAsDownloaded(ObjectPath);
+                using TemporaryFile fileAsDownloaded = GetFileAsDownloaded(ObjectPath);
                 byte[] result = File.ReadAllBytes(fileAsDownloaded.FileFullPath);
-                if (cleanUp)
-                {
-                    fileAsDownloaded.Dispose();
-                }
-
                 return result;
             }
             catch (Exception innerException)
@@ -137,6 +132,9 @@ namespace EWebFrameworkCore.Vendor.CloudFileSystem
         public virtual void SaveFileContent(string ObjectPath, byte[] Contents)
         {
             using TemporaryFile temporaryFile = new();
+            if(!Directory.Exists(Path.GetDirectoryName(temporaryFile.FileFullPath)))
+                Directory.CreateDirectory(Path.GetDirectoryName(temporaryFile.FileFullPath)?? throw new InvalidOperationException("Can not create directory of path: " + temporaryFile.FileFullPath) );
+
             File.WriteAllBytes(temporaryFile.FileFullPath, Contents);
             SaveFile(ObjectPath, temporaryFile.FileFullPath);
         }

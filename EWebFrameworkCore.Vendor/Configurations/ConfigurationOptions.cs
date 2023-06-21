@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace EWebFrameworkCore.Vendor.Configurations
+namespace EWebFrameworkCore.Vendor.ConfigurationTypedClasses
 {
 
     // -----------------------------------------------------

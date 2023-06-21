@@ -1,8 +1,8 @@
 ﻿using EWebFrameworkCore.Vendor.Middlewares;
 using System;
-using static EWebFrameworkCore.Vendor.Configurations.ConfigurationOptions;
+using static EWebFrameworkCore.Vendor.ConfigurationTypedClasses.ConfigurationOptions;
 
-namespace EWebFrameworkCore.Vendor.Configurations
+namespace EWebFrameworkCore.Vendor.ConfigurationTypedClasses
 {
     public class EWebFrameworkCoreENV
     {
