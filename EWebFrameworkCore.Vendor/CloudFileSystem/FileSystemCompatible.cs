@@ -158,7 +158,7 @@ namespace EWebFrameworkCore.Vendor.CloudFileSystem
         //   Contents:
         public virtual void SaveFileContent(string ObjectPath, Stream Contents)
         {
-            using BinaryReader binaryReader = new BinaryReader(Contents);
+            using BinaryReader binaryReader = new(Contents);
             SaveFileContent(ObjectPath, binaryReader.ReadBytes((int)Contents.Length));
         }
 

@@ -91,7 +91,7 @@ namespace EWebFrameworkCore.Vendor.CloudFileSystem
         {
             try
             {
-                Dictionary<string, string> reqParams = new Dictionary<string, string>
+                Dictionary<string, string> reqParams = new()
                 {
                     { "response-content-type", ContentType },
                     {
@@ -174,7 +174,7 @@ namespace EWebFrameworkCore.Vendor.CloudFileSystem
         {
             try
             {
-                TemporaryFile temporaryFile = new TemporaryFile();
+                TemporaryFile temporaryFile = new();
                 Minio.GetObjectAsync(new GetObjectArgs().WithBucket( Bucket).WithObject( ObjectPath ).WithFile(temporaryFile.FileFullPath)).Wait();
                 return temporaryFile;
             }
