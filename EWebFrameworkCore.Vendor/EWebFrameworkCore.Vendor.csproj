@@ -38,6 +38,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<Compile Include="Services\JobCompatibleService.cs" />
 		<Compile Include="Services\BaseClientService.cs" />
 		<Compile Include="Services\DatabaseTimeZoneUtilsExtensions.cs" />
 		<Compile Include="Services\DataTablesNET\DataTableRequestFields.cs" />

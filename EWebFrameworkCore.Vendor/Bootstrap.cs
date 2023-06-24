@@ -96,6 +96,11 @@ namespace EWebFrameworkCore.Vendor
 
         public static Logger Logger(this HttpContext _)
         {
+            return GetLogger();
+        }
+
+        public static Logger GetLogger()
+        {
             return Log ?? throw new InvalidProgramException("Logger is not configured!");
         }
 
