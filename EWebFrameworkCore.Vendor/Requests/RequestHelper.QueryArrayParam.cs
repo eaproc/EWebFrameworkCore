@@ -115,7 +115,7 @@ namespace EWebFrameworkCore.Vendor.Requests
             /// </summary>
             /// <param name="Key">Dot notation like Arrayable.0</param>
             /// <returns>Null if not found</returns>
-            public QueryArrayParam FindContainer(string Key)
+            public QueryArrayParam? FindContainer(string Key)
             {
                 if (this.Objects.ContainsKey(Key) || this.ArrayObjects.ContainsKey(Key)) return this;
 
@@ -195,9 +195,10 @@ namespace EWebFrameworkCore.Vendor.Requests
             {
                 dynamic pairs = ToDynamicObjectsArray();
 
-                var x = pairs as IDictionary<string, Object>;
+                IDictionary<string, object>? x = pairs as IDictionary<string, Object>;
 
-                foreach (var v in this.ArrayObjects)
+                if (x != null)
+                    foreach (var v in this.ArrayObjects)
                     x.Add(v.Key.Split('.').Last(), v.Value.ToDynamicArray());
 
                 return pairs;
@@ -211,20 +212,21 @@ namespace EWebFrameworkCore.Vendor.Requests
             {
                 dynamic pairs = new System.Dynamic.ExpandoObject();
 
-                var x = pairs as IDictionary<string, Object>;
+                IDictionary<string, object>? x = pairs as IDictionary<string, Object>;
 
-                foreach (var v in this.Objects)
+                if (x != null)
+                    foreach (var v in this.Objects)
                     x.Add(v.Key.Split('.').Last(), v.Value);
 
                 return pairs;
             }
 
-            private List<object> PackArrayObject()
+            private List<object?> PackArrayObject()
             {
-                var x = new List<object>();
+                var x = new List<object?>();
                 foreach (var v in this.ArrayObjects)
                 {
-                    var z = (object)v.Value.ToPackagableForJson();
+                    var z = (object?)v.Value.ToPackagableForJson();
                     x.Add(z);
                 }
 
@@ -235,11 +237,12 @@ namespace EWebFrameworkCore.Vendor.Requests
             {
                 dynamic pairs = new System.Dynamic.ExpandoObject();
 
-                var xx = pairs as IDictionary<string, Object>;
+                IDictionary<string, object?>? xx = pairs as IDictionary<string, object?>;
 
+                if( xx != null )
                 foreach (var v in this.ArrayObjects)
                 {
-                    var z = (object)v.Value.ToPackagableForJson();
+                    var z = v.Value.ToPackagableForJson();
                     xx.Add(v.Key.Split('.').Last(), z);
                 }
 
@@ -250,7 +253,7 @@ namespace EWebFrameworkCore.Vendor.Requests
             /// Returns ExpandoObject or List of Objects
             /// </summary>
             /// <returns></returns>
-            public object ToPackagableForJson()
+            public object? ToPackagableForJson()
             {
                 var l = new List<object>();
 
