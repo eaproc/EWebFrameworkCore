@@ -1,5 +1,4 @@
 ﻿using ELibrary.Standard.VB;
-using System;
 using static EWebFrameworkCore.Vendor.PathHandlers;
 
 namespace EWebFrameworkCore.Vendor.Services
@@ -7,15 +6,15 @@ namespace EWebFrameworkCore.Vendor.Services
     /// <summary>
     /// Allow to create a disposable temporary file
     /// </summary>
-    public class TemporaryFile:IDisposable
+    public class TemporaryFile : IDisposable
     {
         /// <summary>
         /// The file full path that was simulated. Not created on constructor
         /// </summary>
         public readonly string FileFullPath;
 
-        public TemporaryFile(): this(BaseClientService.GetSessionTempFileName())
-        {}
+        public TemporaryFile() : this(JobCompatibleService.GetSessionTempFileName())
+        { }
 
         /// <summary>
         /// Create a temporary file using your own file full path
@@ -31,9 +30,20 @@ namespace EWebFrameworkCore.Vendor.Services
         /// </summary>
         /// <param name="ExtWithDot">Just additional string to append</param>
         /// <param name="appendRandom">If you want to generate the randomString Part with it</param>
-        public TemporaryFile( string ExtWithDot, bool appendRandom):this(GetRandomTempFileName(pExtWithDot: ExtWithDot, appendRandom: appendRandom) )
-        {}
+        public TemporaryFile(string ExtWithDot, bool appendRandom) : this(GetRandomTempFileName(pExtWithDot: ExtWithDot, appendRandom: appendRandom))
+        { }
 
+        /// <summary>
+        /// This will create the directory path if it doesn't exists
+        /// </summary>
+        /// <returns></returns>
+        public TemporaryFile CreatePath()
+        {
+            if (!Directory.Exists(DirectoryPath)) Directory.CreateDirectory(DirectoryPath);
+            return this;
+        }
+
+        public string DirectoryPath => EIO.GetDirectoryFullPath(FileFullPath);
 
         /// <summary>
         /// Delete the file if it exists
@@ -41,6 +51,9 @@ namespace EWebFrameworkCore.Vendor.Services
         public void Dispose()
         {
             EIO.DeleteFileIfExists(this.FileFullPath);
+
+            // https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/quality-rules/ca1816
+            GC.SuppressFinalize(this);
         }
     }
 }

@@ -91,7 +91,7 @@ namespace EWebFrameworkCore.Vendor.Utils.DataExports.Excel
             string FilePath = GetRandomTempFileName(pExtWithDot: IsXLS ? ".xls" : ".xlsx");
 
             EIO.DeleteFileIfExists(_FileName: FilePath);
-            if (!Directory.Exists(EIO.getDirectoryFullPath(FilePath))) System.IO.Directory.CreateDirectory(EIO.getDirectoryFullPath(FilePath));
+            if (!Directory.Exists(EIO.GetDirectoryFullPath(FilePath))) System.IO.Directory.CreateDirectory(EIO.GetDirectoryFullPath(FilePath));
 
 
             IWorkbook workbook;
@@ -148,7 +148,7 @@ namespace EWebFrameworkCore.Vendor.Utils.DataExports.Excel
 
             using (var fs = new FileStream(FilePath, FileMode.Create, FileAccess.Write))
             {
-                workbook.Write(fs);
+                workbook.Write(fs, false);
 
             }
 

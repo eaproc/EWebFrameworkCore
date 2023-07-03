@@ -45,7 +45,7 @@ namespace EWebFrameworkCore.Vendor.CloudFileSystem
         //     If attachment, downloadable else inline disposition
         //
         //   DownloadAsFileName:
-        public virtual string CreateTemporaryURL(string ObjectPath, bool Attachment, string DownloadAsFileName) => CreateTemporaryURL(ObjectPath, Attachment, DownloadAsFileName, MimeUtility.GetMimeMapping(EIO.getFileName(ObjectPath)), 3600);
+        public virtual string CreateTemporaryURL(string ObjectPath, bool Attachment, string DownloadAsFileName) => CreateTemporaryURL(ObjectPath, Attachment, DownloadAsFileName, MimeUtility.GetMimeMapping(EIO.GetFileName(ObjectPath)), 3600);
 
         //
         // Summary:
@@ -59,7 +59,7 @@ namespace EWebFrameworkCore.Vendor.CloudFileSystem
         //     If attachment, downloadable else inline disposition
         public virtual string CreateTemporaryURL(string ObjectPath, bool Attachment)
         {
-            return CreateTemporaryURL(ObjectPath, Attachment, BaseClientService.GetArbitraryValidFileName(EIO.getFileName(ObjectPath)));
+            return CreateTemporaryURL(ObjectPath, Attachment, BaseClientService.GetArbitraryValidFileName(EIO.GetFileName(ObjectPath)));
         }
 
         //

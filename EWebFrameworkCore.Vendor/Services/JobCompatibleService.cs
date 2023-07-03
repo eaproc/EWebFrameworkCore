@@ -157,7 +157,7 @@ namespace EWebFrameworkCore.Vendor.Services
         /// <param name="pSQL"></param>
         /// <param name="AddressApostrophe"></param>
         /// <returns>DataTable or throws exception</returns>
-        public virtual System.Data.DataTable GetSQLTable(String pSQL, bool AddressApostrophe = false)
+        public virtual DataTable GetSQLTable(String pSQL, bool AddressApostrophe = false)
         {
             if (TRACE_DEBUG_SQL) Log.Information (pSQL);
             // I don't expect table to be null if sql executes successfully
@@ -476,182 +476,48 @@ namespace EWebFrameworkCore.Vendor.Services
             }
         }
 
-        ///// <summary>
-        ///// Get Resized Image
-        ///// </summary>
-        ///// <param name="Contents"></param>
-        ///// <param name="pResizeWidth"></param>
-        ///// <param name="pResizeHeight"></param>
-        ///// <returns></returns>
-        //public byte[] GetResizedImage(byte[] Contents, uint pResizeWidth = 0, uint pResizeHeight = 0)
-        //{
-        //    using (TemporaryFile tf = new TemporaryFile(".jpg"))
-        //    {
+        /// <summary>
+        /// // This may not be compatible with my app because the pacakge is written in .NET 4.6.2
+        /// Get Resized Image
+        /// </summary>
+        /// <param name="Contents"></param>
+        /// <param name="pResizeWidth"></param>
+        /// <param name="pResizeHeight"></param>
+        /// <returns></returns>
+        public static byte[] GetResizedImage(byte[] Contents, uint pResizeWidth = 0, uint pResizeHeight = 0)
+        {
+            Console.WriteLine($"Parameters [ pResizeWidth: {pResizeWidth}, pResizeHeight: {pResizeHeight} ]are unused because Simple.ImageResizer 2.1.0 was not installed because of its version depends on .NETFramework instead of .NET Core ");
+            return Contents;
 
-        //        File.WriteAllBytes(tf.FileFullPath, Contents);
-
-
-        //        //Resize
-        //        //
-        //        if (pResizeWidth != 0 && pResizeHeight != 0)
-        //        {
-        //            using (Simple.ImageResizer.ImageResizer resizer = new Simple.ImageResizer.ImageResizer(Contents))
-        //            {
-        //                resizer.Resize(width: (int)pResizeWidth, height: (int)pResizeHeight, encoding: Simple.ImageResizer.ImageEncoding.Jpg100);
-        //                resizer.SaveToFile(tf.FileFullPath);
-        //            }
-        //        }
+            // Severity	Code	Description	Project	File	Line	Suppression State
+            // Warning NU1701  Package 'Simple.ImageResizer 2.1.0' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' instead of the project target framework 'net6.0'.This package may not be fully compatible with your project
 
 
-        //        return File.ReadAllBytes(tf.FileFullPath);
-        //    }
+            //if (pResizeWidth != 0 || pResizeHeight != 0) return Contents;
+            //using TemporaryFile tf = new();
 
-        //}
+            //File.WriteAllBytes(tf.FileFullPath, Contents);
 
+            ////Resize
+            ////
+            //using (Simple.ImageResizer.ImageResizer resizer = new(Contents))
+            //{
+            //    resizer.Resize(width: (int)pResizeWidth, height: (int)pResizeHeight, encoding: Simple.ImageResizer.ImageEncoding.Jpg100);
+            //    resizer.SaveToFile(tf.FileFullPath);
+            //}
 
-        ///// <summary>
-        ///// Get Resized Image
-        ///// </summary>
-        ///// <param name="Contents"></param>
-        ///// <param name="pResizeWidth"></param>
-        ///// <param name="pResizeHeight"></param>
-        ///// <returns></returns>
-        //public byte[] GetResizedImage(Stream Contents, uint pResizeWidth = 0, uint pResizeHeight = 0)
-        //{
+            //return File.ReadAllBytes(tf.FileFullPath);
+        }
 
-        //    Contents.Seek(0, System.IO.SeekOrigin.Begin);
-        //    // Read it without closing the stream. Because once the stream is closed, it is gone.
-        //    // 
-        //    return GetResizedImage(new BinaryReader(Contents, Encoding.UTF8, leaveOpen: true).ReadBytes((int)Contents.Length), pResizeWidth, pResizeHeight);
+        public void StoreImageOnCloud(string destinationRelativePath, TemporaryFile pUploadedFile, uint pResizeWidth = 0, uint pResizeHeight = 0)
+        {
+            CloudStore.SaveFileContent(ObjectPath: destinationRelativePath, Contents: GetResizedImage(File.ReadAllBytes(pUploadedFile.FileFullPath), pResizeHeight: pResizeHeight, pResizeWidth: pResizeWidth));
+        }
 
-        //}
-
-
-
-        ///// <summary>
-        ///// Store image in directory given
-        ///// </summary>
-        ///// <param name="pDstFileFullPath"></param>
-        ///// <param name="pUploadedFile"></param>
-        ///// <param name="pResizeWidth"></param>
-        ///// <param name="pResizeHeight"></param>
-        ///// <returns></returns>
-        //public bool StoreImage(String pDstFileFullPath, HttpPostedFile pUploadedFile, uint pResizeWidth = 0, uint pResizeHeight = 0)
-        //{
-        //    try
-        //    {
-
-        //        if (!Directory.Exists(EIO.getDirectoryFullPath(pDstFileFullPath))) EIO.DeleteAndRecreateDirectory(EIO.getDirectoryFullPath(pDstFileFullPath));
-
-        //        File.WriteAllBytes(pDstFileFullPath, this.GetResizedImage(pUploadedFile.InputStream, pResizeHeight: pResizeHeight, pResizeWidth: pResizeWidth));
-
-
-
-        //        //using (TemporaryFile tf = new TemporaryFile(".jpg"))
-        //        //{
-
-        //        //    pUploadedFile.SaveAs(tf.FileFullPath);
-
-
-        //        //    //Resize
-        //        //    //
-        //        //    if (pResizeWidth != 0 && pResizeHeight != 0)
-        //        //    {
-        //        //        using (Simple.ImageResizer.ImageResizer resizer = new Simple.ImageResizer.ImageResizer(tf.FileFullPath ))
-        //        //        {
-        //        //            resizer.Resize(width: (int)pResizeWidth, height: (int)pResizeHeight, encoding: Simple.ImageResizer.ImageEncoding.Jpg100);
-        //        //            resizer.SaveToFile(pDstFileFullPath);
-
-        //        //        }
-        //        //    }
-        //        //    else
-        //        //    {
-        //        //        // Just save the original file as it is
-        //        //        EIO.CopyFile(tf.FileFullPath , pDstFileFullPath);
-        //        //    }
-
-        //        //}
-
-        //            //// Create destination Path if it doesn't exist
-        //            //if (!System.IO.Directory.Exists(EIO.getDirectoryFullPath(pDstFileFullPath))) EIO.DeleteAndRecreateDirectory(EIO.getDirectoryFullPath(pDstFileFullPath));
-
-        //        //// 
-        //        //// Save File in Temp Location
-        //        //// Use it and delete it
-        //        ////
-        //        //var pDstTemp = GetSessionTempFileName(".jpg");
-        //        //if (!System.IO.Directory.Exists(EIO.getDirectoryFullPath(pDstTemp))) EIO.DeleteAndRecreateDirectory(EIO.getDirectoryFullPath(pDstTemp));
-        //        //pUploadedFile.SaveAs(pDstTemp);
-
-        //        ////Resize
-        //        ////
-        //        //if (pResizeWidth != 0 && pResizeHeight != 0)
-        //        //{
-        //        //    using (Simple.ImageResizer.ImageResizer resizer = new Simple.ImageResizer.ImageResizer(pDstTemp))
-        //        //    {
-        //        //        resizer.Resize(width: (int)pResizeWidth, height: (int)pResizeHeight, encoding: Simple.ImageResizer.ImageEncoding.Jpg100);
-        //        //        resizer.SaveToFile(pDstFileFullPath);
-
-        //        //    }
-        //        //}
-        //        //else
-        //        //{
-        //        //    // Just save the original file as it is
-        //        //    EIO.CopyFile(pDstTemp, pDstFileFullPath);
-        //        //}
-
-
-        //        ////Clean Up
-        //        //// delete the temp file
-        //        //EIO.DeleteFileIfExists(pDstTemp);
-
-
-        //        return true;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        PathHandlers.Logger.Print(ex);
-        //        return false;
-        //    }
-
-        //}
-
-
-        ///// <summary>
-        ///// Store file in directory given
-        ///// </summary>
-        ///// <param name="pDstFileFullPath"></param>
-        ///// <param name="pUploadedFile"></param>
-        ///// <returns></returns>
-        //public bool StoreFile(String pDstFileFullPath, HttpPostedFile pUploadedFile)
-        //{
-        //    try
-        //    {
-
-        //        // Create destination Path if it doesn't exist
-        //        if (!System.IO.Directory.Exists(EIO.getDirectoryFullPath(pDstFileFullPath))) EIO.DeleteAndRecreateDirectory(EIO.getDirectoryFullPath(pDstFileFullPath));
-
-        //        // 
-        //        // Save File in Location
-        //        //
-        //        pUploadedFile.SaveAs(pDstFileFullPath);
-
-
-        //        return true;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        PathHandlers.Logger.Print(ex);
-        //        return false;
-        //    }
-
-        //}
-
-
-        //#endregion
-
-
-
+        public void StoreFileOnCloud(string destinationRelativePath, TemporaryFile pUploadedFile)
+        {
+            CloudStore.SaveFile(ObjectPath: destinationRelativePath, FileFullPath: pUploadedFile.FileFullPath);
+        }
 
         /// <summary>
         /// Checks if the query returns any row. It just checks the count(), no record is fetched

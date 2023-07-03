@@ -345,28 +345,35 @@ namespace EWebFrameworkCore.Vendor.Requests
             string? s = r.paramType != Rule.ParamTypes.FILE ?  EStrings.ValueOf(RequestHelper.Get(pParamName)) : null;
             if (s == null) return null;
 
+            if (
+                s == null
+                ||
+                (r.IsNullable && s == string.Empty)
+                ||
+                (r.IsNullable && RequestHelper.IsQueryStringNullDefinition(s))
+            )
+            {
+                //it is null
+                return null;
+            }
+
             switch (r.paramType)
             {
                 case Rule.ParamTypes.BOOLEAN:
-                    if (r.IsNullable && s == string.Empty) return null;
                     return (T)(object)EBoolean.ValueOf(s);
 
                 case Rule.ParamTypes.DECIMAL:
-                    if (r.IsNullable && s == string.Empty) return null;
                     return (T)(object)EDecimal.ValueOf(s);
 
                
                 case Rule.ParamTypes.INTEGER:
-                    if (r.IsNullable && s == string.Empty) return null;
                     return (T)(object)EInt.ValueOf(s);
 
                 case Rule.ParamTypes.DATE:
-                    if (r.IsNullable && s == string.Empty) return null;
                     DateTime? v = DataTableRequestFields.ParseDate(s);
                     return v == null ? null : (T)(object)v.Value;
 
                 case Rule.ParamTypes.TIME:
-                    if (r.IsNullable && s == string.Empty) return null;
                     DateTime? t = DataTableRequestFields.ParseTime(s);
                     return  t == null ? null : (T)(object)t.Value;
             }
@@ -391,22 +398,27 @@ namespace EWebFrameworkCore.Vendor.Requests
             string? s = r.paramType != Rule.ParamTypes.FILE ? EStrings.ValueOf(RequestHelper.Get(pParamName)) : null;
             if (s == null && r.paramType != Rule.ParamTypes.FILE) return null;
 
+            if( r.paramType != Rule.ParamTypes.FILE )
+            {
+                if (
+                       s == null
+                       ||
+                       (r.IsNullable && s == string.Empty)
+                       ||
+                       (r.IsNullable && RequestHelper.IsQueryStringNullDefinition(s))
+                       )
+                {
+                    //it is null
+                    return null;
+                }
+            }
+
             switch (r.paramType)
             {
                 case Rule.ParamTypes.EMAIL:
                 case Rule.ParamTypes.UNESCAPED_STRING:
                 case Rule.ParamTypes.STRING:
-                    if (
-                        s == null 
-                        ||
-                        (r.IsNullable && s == string.Empty)
-                        ||
-                        (r.IsNullable && RequestHelper.IsQueryStringNullDefinition(s))
-                        )
-                    {
-                        //it is null
-                        return null;
-                    }
+                    if (s == null) return null;// just for syntax check sake. It is already covered above
 
                     //// this is wrong because we are getting nullable here
                     ////it is empty string not null
@@ -418,17 +430,11 @@ namespace EWebFrameworkCore.Vendor.Requests
                     return (T)(object)s;
 
                 case Rule.ParamTypes.NUMERIC_STRING:
-                    if (
-                        s == null ||
-                        (r.IsNullable && s == string.Empty)
-                        ) return null;
+                    if (s == null) return null;// just for syntax check sake. It is already covered above
                     return s == null ? null : (T)(object)s;
                 
                 case Rule.ParamTypes.JSON:
-                    if (
-                        s == null ||
-                        (r.IsNullable && s == string.Empty)
-                        ) return null;
+                    if (s == null) return null;// just for syntax check sake. It is already covered above
                     return (T)(object)s;
 
                 case Rule.ParamTypes.FILE:

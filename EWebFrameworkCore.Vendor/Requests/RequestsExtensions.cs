@@ -1,7 +1,5 @@
-﻿using ELibrary.Standard.VB;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
-using System.IO;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace EWebFrameworkCore.Vendor.Requests
 {

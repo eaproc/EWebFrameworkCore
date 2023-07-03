@@ -81,11 +81,11 @@ namespace EWebFrameworkCore.Vendor.Utils.DataExports.Excel
         {
 
             EIO.DeleteFileIfExists(_FileName: FilePath);
-            if (!Directory.Exists(EIO.getDirectoryFullPath(FilePath))) System.IO.Directory.CreateDirectory(EIO.getDirectoryFullPath(FilePath));
+            if (!Directory.Exists(EIO.GetDirectoryFullPath(FilePath))) System.IO.Directory.CreateDirectory(EIO.GetDirectoryFullPath(FilePath));
 
 
 
-            String InnerTempFilePath = String.Format("{0}/2{1}", EIO.getDirectoryFullPath(FilePath), EIO.getFileName(FilePath));
+            String InnerTempFilePath = String.Format("{0}/2{1}", EIO.GetDirectoryFullPath(FilePath), EIO.GetFileName(FilePath));
             //Take a copy of the Template FIle
             File.Copy(this.TemplateFileFullPath, InnerTempFilePath, true);
 
@@ -95,12 +95,12 @@ namespace EWebFrameworkCore.Vendor.Utils.DataExports.Excel
             IWorkbook workbook;
 
             // Use it for generating the file
-            using (FileStream file = new FileStream(InnerTempFilePath, FileMode.Open, FileAccess.Read))
+            using (FileStream file = new(InnerTempFilePath, FileMode.Open, FileAccess.Read))
             {
                 if (IsXLS)
                     workbook = new NPOI.HSSF.UserModel.HSSFWorkbook(file); // HSSFWorkbook is for .xls file while XSSFWorkbook is for .xlsx file
                 else
-                    workbook = new NPOI.XSSF.UserModel.XSSFWorkbook(file); // HSSFWorkbook is for .xls file while XSSFWorkbook is for .xlsx file
+                    workbook = new XSSFWorkbook(file); // HSSFWorkbook is for .xls file while XSSFWorkbook is for .xlsx file
             }
 
 
@@ -142,11 +142,8 @@ namespace EWebFrameworkCore.Vendor.Utils.DataExports.Excel
 
             this.DoSomeCustomization(sheet1); // after all entries, Send the sheet to the user to do any last customization.
 
-            using (var fs = new FileStream(FilePath, FileMode.Create, FileAccess.Write))
-            {
-                workbook.Write(fs);
-
-            }
+            using var fs = new FileStream(FilePath, FileMode.Create, FileAccess.Write);
+            workbook.Write(fs, false);
         }
 
     }

@@ -371,7 +371,9 @@ namespace EWebFrameworkCore.Vendor.Requests
             foreach (var v in this.RequestVariables)
             {
                 if (v.Value is QueryArrayParam param)
+#pragma warning disable CS8604 // Possible null reference argument.
                     x.Add(v.Key, param.ToPackagableForJson());
+#pragma warning restore CS8604 // Possible null reference argument.
                 else
 #pragma warning disable CS8604 // Possible null reference argument.
                     x.Add(v.Key, v.Value?.ToString());

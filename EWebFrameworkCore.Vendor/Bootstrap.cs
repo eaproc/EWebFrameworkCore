@@ -14,6 +14,8 @@ namespace EWebFrameworkCore.Vendor
 {
     public static class Bootstrap
     {
+        public const string RawAuthTokenKeyName = "access_token";
+
         // Static variables are bad in Web App because they will persist accross the app domain
         // if the resource is suppose to be Per Request Scope, don't use STATIC
 
