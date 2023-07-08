@@ -119,6 +119,11 @@ namespace EWebFrameworkCore.Vendor
         public static HttpContext GetHttpContext(this IServiceProvider provider)
         {
             IHttpContextAccessor httpContextAccessor = provider.GetService<IHttpContextAccessor>() ?? throw new InvalidOperationException("IHttpContextAccessor: Services must be used via http request calls. All depends on HttpContext!");
+            return httpContextAccessor.GetHttpContext();
+        }
+        
+        public static HttpContext GetHttpContext(this IHttpContextAccessor httpContextAccessor)
+        {
             return httpContextAccessor.HttpContext ?? throw new InvalidOperationException("HttpContext: Services must be used via http request calls. All depends on HttpContext!");
         }
 
