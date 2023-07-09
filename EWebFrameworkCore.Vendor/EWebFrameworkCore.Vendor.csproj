@@ -43,6 +43,9 @@
 		<Compile Include="Services\DatabaseTimeZoneUtilsExtensions.cs" />
 		<Compile Include="Services\DataTablesNET\DataTableRequestFields.cs" />
 		<Compile Include="Services\DataTablesNET\DataTableReturnFormat.cs" />
+		<Compile Include="Services\Mailing\IMailable.cs" />
+		<Compile Include="Services\Mailing\ISMTP.cs" />
+		<Compile Include="Services\Mailing\Mailable.cs" />
 		<Compile Include="Services\TemporaryFile.cs" />
 		<Compile Include="Services\TemporaryFolder.cs" />
 		<Compile Include="Utils\DateTimeHelper\DateTimeZoneConverter.cs" />

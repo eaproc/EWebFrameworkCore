@@ -13,6 +13,11 @@ namespace EWebFrameworkCore.Vendor.Services
         /// </summary>
         public readonly string FileFullPath;
 
+        /// <summary>
+        /// Set to leave the file undeleted even if it exists
+        /// </summary>
+        private bool _leaveUnDisposed = false;
+
         public TemporaryFile() : this(JobCompatibleService.GetSessionTempFileName())
         { }
 
@@ -42,6 +47,12 @@ namespace EWebFrameworkCore.Vendor.Services
             if (!Directory.Exists(DirectoryPath)) Directory.CreateDirectory(DirectoryPath);
             return this;
         }
+        
+        public TemporaryFile SetLeaveAsUndisposed(bool leaveUnDisposed = true)
+        {
+            _leaveUnDisposed = leaveUnDisposed;
+            return this;
+        }
 
         public string DirectoryPath => EIO.GetDirectoryFullPath(FileFullPath);
 
@@ -50,7 +61,7 @@ namespace EWebFrameworkCore.Vendor.Services
         /// </summary>
         public void Dispose()
         {
-            EIO.DeleteFileIfExists(this.FileFullPath);
+            if(!_leaveUnDisposed) EIO.DeleteFileIfExists(this.FileFullPath);
 
             // https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/quality-rules/ca1816
             GC.SuppressFinalize(this);

@@ -63,6 +63,10 @@ namespace EWebFrameworkCore.Vendor.Requests
             }
         }
 
+        public static bool IsValidEmail(string email)
+        {
+            return TextParsing.IsValidEmail(email);
+        }
 
         private void Check( Rule r)
         {
@@ -305,7 +309,6 @@ namespace EWebFrameworkCore.Vendor.Requests
                 throw new InputValidationFailedException(this.OutputErrors());
             return true;
         }
-
 
 
         /// <summary>
