@@ -13,7 +13,7 @@
 
             public enum ParamTypes
             {
-                STRING, UNESCAPED_STRING, NUMERIC_STRING,  EMAIL,
+                STRING, UNESCAPED_STRING, NUMERIC_STRING,  EMAIL, INTERNATIONAL_PHONE_NUMBER,
                 FILE, INTEGER, DECIMAL, BOOLEAN, JSON, DATE, DATE_TIME, TIME
             }
 

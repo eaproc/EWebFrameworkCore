@@ -13,6 +13,7 @@ using EWebFrameworkCore.Vendor.ConfigurationTypedClasses;
 using System.Data.SqlTypes;
 using EWebFrameworkCore.Vendor.Utils.DataExports.Excel;
 using Microsoft.AspNetCore.Http;
+using System.Text.RegularExpressions;
 
 namespace EWebFrameworkCore.Vendor.Requests
 {
@@ -68,6 +69,12 @@ namespace EWebFrameworkCore.Vendor.Requests
             return TextParsing.IsValidEmail(email);
         }
 
+        public static bool IsValidInternationalPhoneNumber(string phone)
+        {
+            // don't add the / / in regex for starting and ending. It will add it, itself else it won't work.
+            return Regex.IsMatch(phone, "[+][0-9]{8,15}", RegexOptions.IgnoreCase);
+        }
+
         private void Check( Rule r)
         {
             // Logger.Print(r.paramName);
@@ -121,8 +128,22 @@ namespace EWebFrameworkCore.Vendor.Requests
                                 r.paramName, r.paramMinSize, r.paramMaxSize)
                                 );
                         
-                        if (!TextParsing.IsValidEmail( s) )
+                        if (!IsValidEmail( s) )
                             this.errors.Add(r.paramName, string.Format("The value of {0} must be a valid Email Address", r.paramName));
+                        return;
+                    }
+                    break;         
+                case Rule.ParamTypes.INTERNATIONAL_PHONE_NUMBER:
+                    if (RequestHelper.ContainsKey(r.paramName))
+                    {
+                        var s = EStrings.ValueOf(RequestHelper.Get(r.paramName));
+                        if (s.Length > r.paramMaxSize || s.Length < r.paramMinSize)
+                            this.errors.Add(r.paramName, string.Format("The size of  {0} must be minimum of {1} and maximum of {2}",
+                                r.paramName, r.paramMinSize, r.paramMaxSize)
+                                );
+                        
+                        if (!IsValidInternationalPhoneNumber( s) )
+                            this.errors.Add(r.paramName, string.Format("The value of {0} must be a valid International Phone Number like +23411112222 with minimum of 8 and max of 15 characters", r.paramName));
                         return;
                     }
                     break;
@@ -418,6 +439,7 @@ namespace EWebFrameworkCore.Vendor.Requests
 
             switch (r.paramType)
             {
+                case Rule.ParamTypes.INTERNATIONAL_PHONE_NUMBER:
                 case Rule.ParamTypes.EMAIL:
                 case Rule.ParamTypes.UNESCAPED_STRING:
                 case Rule.ParamTypes.STRING:
@@ -469,6 +491,7 @@ namespace EWebFrameworkCore.Vendor.Requests
                 switch (r.paramType)
                 {
                     case Rule.ParamTypes.EMAIL:
+                    case Rule.ParamTypes.INTERNATIONAL_PHONE_NUMBER:
                     case Rule.ParamTypes.UNESCAPED_STRING:
                     case Rule.ParamTypes.STRING:
                     case Rule.ParamTypes.NUMERIC_STRING:
