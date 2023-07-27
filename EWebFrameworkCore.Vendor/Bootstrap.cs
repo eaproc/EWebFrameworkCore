@@ -9,6 +9,7 @@ using Serilog;
 using Serilog.Core;
 using Serilog.Events;
 using Serilog.Sinks.Slack;
+using System.Net;
 
 namespace EWebFrameworkCore.Vendor
 {
@@ -104,6 +105,18 @@ namespace EWebFrameworkCore.Vendor
         public static Logger GetLogger()
         {
             return Log ?? throw new InvalidProgramException("Logger is not configured!");
+        }
+
+        public static Logger ReportException(this Logger logger, Exception exception, string? customTitle = null)
+        {
+            logger.Error(exception, messageTemplate: customTitle?? exception.Message );
+            return logger;
+        }
+
+        public static Logger ReportRestResponse(this Logger logger, HttpStatusCode StatusCode, string? ResponseContent,  string? customTitle = null)
+        {
+            logger.Error( (customTitle ?? "Error Executing Rest Request." ) + $" | Content: {ResponseContent} | Status Code: {StatusCode}");
+            return logger;
         }
 
         public static RequestHelper GetRequestHelper(this IServiceProvider provider)

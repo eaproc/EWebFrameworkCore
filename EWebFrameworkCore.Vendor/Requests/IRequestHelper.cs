@@ -27,7 +27,7 @@ namespace EWebFrameworkCore.Vendor.Requests
         string UrlHost();
 
         /// <summary>
-        /// like "http://localhost:26090/instructor/class-evaluations/evaluate-group/fetch-grid" without params
+        /// like "http://localhost:26090/instructor/class-evaluations/evaluate-group/fetch/grid" without params
         /// </summary>
         /// <returns></returns>
         string Url();

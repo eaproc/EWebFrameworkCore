@@ -22,7 +22,7 @@ namespace EWebFrameworkCore.Vendor.ConfigurationTypedClasses
         /// # This is the app security door for inbound connections
         /// </summary>
         public List<string> ALLOWED_API_IPS { get; set; } = new List<string>();
-        public string? ALLOWED_API_TOKEN { get; set; }
+        public List<string> AllowedGuestApiTokens { get; set; } = new List<string>();
 
         /// <summary>
         /// # This is just use for decryption of secure data (like password)

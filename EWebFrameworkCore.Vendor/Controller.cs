@@ -75,7 +75,7 @@ namespace EWebFrameworkCore.Vendor
                 }
                 catch (Exception e)
                 {
-                    Bootstrap.Log?.Error($"Error occurred while running background task. [{TaskIdentifier}]", e);
+                    Bootstrap.GetLogger().ReportException(e, $"Error occurred while running background task. [{TaskIdentifier}]");
                 }
             });
         }

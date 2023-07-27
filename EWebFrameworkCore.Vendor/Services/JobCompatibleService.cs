@@ -95,10 +95,10 @@ namespace EWebFrameworkCore.Vendor.Services
             // AllowDispose to false, immediateDisposal can't work since AllowDispose is false.
 
             ////var runner = CreateTransactionRunner(false);
-            //// T___PRTermTopic topic = T___PRTermTopic.GetRowWhereIDUsingSQL(ID, runner);
+            //// TEapPRTermTopic topic = TEapPRTermTopic.GetRowWhereIDUsingSQL(ID, runner);
             ////    ClassID = topic.ClassID;
             ////    TermID = topic.TermID;
-            ////    T___PRTermTopic.DeleteItemRow(runner, pID: ID);
+            ////    TEapPRTermTopic.DeleteItemRow(runner, pID: ID);
 
             ////runner.ForceDispose();
 
@@ -106,10 +106,10 @@ namespace EWebFrameworkCore.Vendor.Services
             // as it will auto dispose once you are totally done
 
             //using (var runner = CreateTransactionRunner(true, immediateDisposal: false)) {
-            //    T___PRTermTopic topic = T___PRTermTopic.GetRowWhereIDUsingSQL(ID, runner);
+            //    TEapPRTermTopic topic = TEapPRTermTopic.GetRowWhereIDUsingSQL(ID, runner);
             //    ClassID = topic.ClassID;
             //    TermID = topic.TermID;
-            //    T___PRTermTopic.DeleteItemRow(runner, pID: ID);
+            //    TEapPRTermTopic.DeleteItemRow(runner, pID: ID);
             //}
 
 
