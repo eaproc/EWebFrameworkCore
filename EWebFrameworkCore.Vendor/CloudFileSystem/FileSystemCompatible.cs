@@ -1,11 +1,7 @@
 ﻿using ELibrary.Standard.VB;
 using EWebFrameworkCore.Vendor.Services;
 using MimeMapping;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace EWebFrameworkCore.Vendor.CloudFileSystem
 {
@@ -59,7 +55,7 @@ namespace EWebFrameworkCore.Vendor.CloudFileSystem
         //     If attachment, downloadable else inline disposition
         public virtual string CreateTemporaryURL(string ObjectPath, bool Attachment)
         {
-            return CreateTemporaryURL(ObjectPath, Attachment, BaseClientService.GetArbitraryValidFileName(EIO.GetFileName(ObjectPath)));
+            return CreateTemporaryURL(ObjectPath, Attachment, JobCompatibleService.GetArbitraryValidFileName(EIO.GetFileName(ObjectPath)));
         }
 
         //
@@ -177,5 +173,23 @@ namespace EWebFrameworkCore.Vendor.CloudFileSystem
         // Parameters:
         //   ObjectPath:
         public abstract void DeleteObject(string ObjectPath);
+    }
+
+    public static class FileSystemCompatibleExtensions
+    {
+        public static string ToCloudPathCompatible(this string objectPath)
+        {
+            return objectPath.Replace(@"\", @"/").Replace(@"//", @"/");
+        }
+
+        public static string ToWindowsPathCompatible(this string objectPath)
+        {
+            return objectPath.Replace(@"/", @"\").Replace(@"\\", @"\");
+        }
+
+        public static string ToUnixPathCompatible(this string objectPath)
+        {
+            return objectPath.ToCloudPathCompatible();
+        }
     }
 }

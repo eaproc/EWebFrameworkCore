@@ -99,7 +99,7 @@ namespace EWebFrameworkCore.Vendor.CloudFileSystem
                         string.Format("{0}{1}", Attachment ? "attachment" : "inline", $"; filename=\"{DownloadAsFileName}\"")
                     }
                 };
-                return Minio.PresignedGetObjectAsync(new PresignedGetObjectArgs().WithObject(ObjectPath).WithBucket(Bucket).WithExpiry( ExpiryTimeInSeconds ).WithHeaders(reqParams)).Result;
+                return Minio.PresignedGetObjectAsync(new PresignedGetObjectArgs().WithObject(ObjectPath.ToCloudPathCompatible()).WithBucket(Bucket).WithExpiry( ExpiryTimeInSeconds ).WithHeaders(reqParams)).Result;
             }
             catch (Exception innerException)
             {
@@ -119,6 +119,7 @@ namespace EWebFrameworkCore.Vendor.CloudFileSystem
         {
             try
             {
+                ObjectPath = ObjectPath.ToCloudPathCompatible();
                 if (StorageExist())
                 {
                     // disadvantage of this approach is memory consumption while uploading
@@ -175,7 +176,7 @@ namespace EWebFrameworkCore.Vendor.CloudFileSystem
             try
             {
                 TemporaryFile temporaryFile = new();
-                Minio.GetObjectAsync(new GetObjectArgs().WithBucket( Bucket).WithObject( ObjectPath ).WithFile(temporaryFile.FileFullPath)).Wait();
+                Minio.GetObjectAsync(new GetObjectArgs().WithBucket( Bucket).WithObject( ObjectPath.ToCloudPathCompatible() ).WithFile(temporaryFile.FileFullPath)).Wait();
                 return temporaryFile;
             }
             catch (Exception innerException)
@@ -212,7 +213,7 @@ namespace EWebFrameworkCore.Vendor.CloudFileSystem
         {
             try
             {
-                return Minio.StatObjectAsync(new StatObjectArgs().WithBucket( Bucket ).WithObject( ObjectPath ) ).Result;
+                return Minio.StatObjectAsync(new StatObjectArgs().WithBucket( Bucket ).WithObject( ObjectPath.ToCloudPathCompatible()) ).Result;
             }
             catch (Exception)
             {
@@ -230,7 +231,7 @@ namespace EWebFrameworkCore.Vendor.CloudFileSystem
         {
             try
             {
-                Minio.RemoveObjectAsync(new RemoveObjectArgs().WithBucket(Bucket).WithObject(ObjectPath)).Wait();
+                Minio.RemoveObjectAsync(new RemoveObjectArgs().WithBucket(Bucket).WithObject(ObjectPath.ToCloudPathCompatible())).Wait();
             }
             catch (Exception innerException)
             {
