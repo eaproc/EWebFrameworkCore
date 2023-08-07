@@ -5,6 +5,9 @@ using System.Text;
 
 namespace EWebFrameworkCore.Vendor.CloudFileSystem
 {
+    /// <summary>
+    /// FileSystem Compatible Implementations are expected to handle path corrections
+    /// </summary>
     public abstract class FileSystemCompatible
     {
         //
