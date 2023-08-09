@@ -81,7 +81,7 @@ namespace EWebFrameworkCore.Vendor.Requests
             if (r.isRequired && (
                      (!RequestHelper.ContainsKey(r.paramName) && !RequestHelper.HasFile(r.paramName))
                         ||
-                        (RequestHelper.ContainsKey(r.paramName) && EStrings.ValueOf(RequestHelper.Get(r.paramName)) == String.Empty)
+                        (RequestHelper.ContainsKey(r.paramName) && EStrings.ValueOf(RequestHelper.Get(r.paramName)) == string.Empty)
                     )
                 )
             {
@@ -541,11 +541,11 @@ namespace EWebFrameworkCore.Vendor.Requests
             //    case Rule.ParamTypes.EMAIL:
             //    case Rule.ParamTypes.UNESCAPED_STRING:
             //    case Rule.ParamTypes.STRING:
-            //        if (r.IsNullable && s == String.Empty)
+            //        if (r.IsNullable && s == string.Empty)
             //        {
             //            //it is empty string not null
             //            if (!RequestHelper.IsQueryStringNullDefinition(s))
-            //                return (T)(object)String.Empty;
+            //                return (T)(object)string.Empty;
 
             //            //it is null
             //            return (T)(object)(String)null;
@@ -555,32 +555,32 @@ namespace EWebFrameworkCore.Vendor.Requests
             //        return (T)(object)s;
 
             //    case Rule.ParamTypes.NUMERIC_STRING:
-            //        if (r.IsNullable && s == String.Empty) return (T)(object)(String)null;
+            //        if (r.IsNullable && s == string.Empty) return (T)(object)(String)null;
             //        return (T)(object)s;
 
             //    case Rule.ParamTypes.BOOLEAN:
-            //        if (r.IsNullable && s == String.Empty) return default; // literally you control the output regarding null.
+            //        if (r.IsNullable && s == string.Empty) return default; // literally you control the output regarding null.
             //        return (T)(object)EBoolean.ValueOf(s);
 
             //    case Rule.ParamTypes.DECIMAL:
-            //        if (r.IsNullable && s == String.Empty) return default(T);
+            //        if (r.IsNullable && s == string.Empty) return default(T);
             //        return (T)(object)EDecimal.ValueOf(s);
 
 
             //    case Rule.ParamTypes.INTEGER:
-            //        if (r.IsNullable && s == String.Empty) return default(T);
+            //        if (r.IsNullable && s == string.Empty) return default(T);
             //        return (T)(object)EInt.ValueOf(s);
 
             //    case Rule.ParamTypes.DATE:
-            //        if (r.IsNullable && s == String.Empty) return default(T);
+            //        if (r.IsNullable && s == string.Empty) return default(T);
             //        return (T)(object)DataTableRequestFields.ParseDate(s).Value;
 
             //    case Rule.ParamTypes.TIME:
-            //        if (r.IsNullable && s == String.Empty) return default(T);
+            //        if (r.IsNullable && s == string.Empty) return default(T);
             //        return (T)(object)DataTableRequestFields.ParseTime(s).Value;
 
             //    case Rule.ParamTypes.JSON:
-            //        if (r.IsNullable && s == String.Empty) return default(T);
+            //        if (r.IsNullable && s == string.Empty) return default(T);
             //        return (T)(object)s;
 
             //    case Rule.ParamTypes.FILE:

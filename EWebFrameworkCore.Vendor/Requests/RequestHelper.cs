@@ -215,7 +215,7 @@ namespace EWebFrameworkCore.Vendor.Requests
                 if (pIsNullable)
                     return null;
                 else
-                    throw new KeyNotFoundException(String.Format("The parameter name [ {0} ] is not found!", paramName));
+                    throw new KeyNotFoundException(string.Format("The parameter name [ {0} ] is not found!", paramName));
 
             if (this.RequestVariables.ContainsKey(paramName)) return this.RequestVariables[paramName];
             if (this.ProcessedRequestVariables.ContainsKey(paramName)) return this.ProcessedRequestVariables[paramName];
@@ -289,7 +289,7 @@ namespace EWebFrameworkCore.Vendor.Requests
         ///// <returns></returns>
         //public object GetOriginalSentValueOf(string paramName)
         //{
-        //    if (!this.RequestVariables.ContainsKey(paramName)) throw new KeyNotFoundException(String.Format("The parameter name [ {0} ] is not found!", paramName));
+        //    if (!this.RequestVariables.ContainsKey(paramName)) throw new KeyNotFoundException(string.Format("The parameter name [ {0} ] is not found!", paramName));
 
         //    return this.RequestVariables[paramName];
         //}

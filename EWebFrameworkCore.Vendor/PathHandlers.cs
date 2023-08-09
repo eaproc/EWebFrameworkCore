@@ -137,7 +137,7 @@ namespace EWebFrameworkCore.Vendor
         public static string GetRandomTempFileName(string pExtWithDot = "", bool appendRandom = true, uint randomStringLength = 6)
         {
             string s = appendRandom ? AlphaNumericCodeGenerator.RandomString((int)randomStringLength) : string.Empty;
-            return String.Format(@"{0}_{1}{2}", AlphaNumericCodeGenerator.RandomString(16), s, pExtWithDot).AppTempStore();
+            return string.Format(@"{0}_{1}{2}", AlphaNumericCodeGenerator.RandomString(16), s, pExtWithDot).AppTempStore();
         }
     }
 }

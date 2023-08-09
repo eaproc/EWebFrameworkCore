@@ -1,4 +1,5 @@
 ﻿using EWebFrameworkCore.Vendor.Utils.DateTimeHelper;
+using Minio;
 
 namespace EWebFrameworkCore.Vendor.Services
 {
@@ -105,6 +106,11 @@ namespace EWebFrameworkCore.Vendor.Services
         public static DateTime ToServerTimeZone(this DateTime dateTime, DatabaseTimeZoneUtils utils)
         {
             return dateTime.ToTimezone(utils.DatabaseTimeZone, utils.ServerTimeZone);
+        }
+
+        public static DateTime FromDatabaseTimeZoneToUTC(this DateTime dateTime, DatabaseTimeZoneUtils utils)
+        {
+            return dateTime.ToTimezone(utils.DatabaseTimeZone, new TimeZoneManager("00:00"));
         }
     }
 

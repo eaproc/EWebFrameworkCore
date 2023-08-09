@@ -28,6 +28,10 @@ namespace EWebFrameworkCore.Vendor.Services
         /// <summary>
         /// Works with SQL Server
         /// </summary>
+        public const string SQL_DB_DATE_TIME_NO_SECS_STRING = "yyyy-MM-dd HH:mm";
+        /// <summary>
+        /// Works with SQL Server
+        /// </summary>
         public const string SQL_DB_DATE_STRING = "yyyy-MM-dd";
 
         public const string SQL_DB_HOUR_MINUTE_STRING = "HH:mm";
@@ -42,6 +46,10 @@ namespace EWebFrameworkCore.Vendor.Services
         public readonly ConfigurationOptions EWebFrameworkCoreConfigurations;
 
         public Logger Log { get; }
+
+        /// <summary>
+        /// The timezone of the database set from the Configurations
+        /// </summary>
         public DatabaseTimeZoneUtilsExtensions.DatabaseTimeZoneUtils DBTimeZoneUtils { get; }
 
         /// <summary>
@@ -147,6 +155,18 @@ namespace EWebFrameworkCore.Vendor.Services
         }
 
         /// <summary>
+        /// The current time on the system. Server
+        /// </summary>
+        public DateTime DatabaseNowDateTime
+        {
+            get
+            {
+                return ServerNowDateTime.FromServerTimeZone(DBTimeZoneUtils);
+            }
+        }
+
+
+        /// <summary>
         /// Turn this on if you want to trace sql query
         /// </summary>
         protected bool TRACE_DEBUG_SQL { get; set; } = false;
@@ -217,9 +237,9 @@ namespace EWebFrameworkCore.Vendor.Services
             // Injected filtered_record_count
             //
             string bSQL;
-            if (OverrideOrderBy == null || OverrideOrderBy == String.Empty)
+            if (OverrideOrderBy == null || OverrideOrderBy == string.Empty)
             {
-                bSQL = String.Format(
+                bSQL = string.Format(
                                         pPreSQL + Environment.NewLine +
                                         "SELECT TOP {2} * FROM (                  " + Environment.NewLine +
                                         "     SELECT *                                                                                " + Environment.NewLine +
@@ -245,7 +265,7 @@ namespace EWebFrameworkCore.Vendor.Services
             }
             else
             {
-                bSQL = String.Format(
+                bSQL = string.Format(
                                 pPreSQL + Environment.NewLine +
                                         "SELECT TOP {2} * FROM (                  " + Environment.NewLine +
                                         "     SELECT *                                                                                " + Environment.NewLine +
@@ -288,7 +308,7 @@ namespace EWebFrameworkCore.Vendor.Services
             //
 
             return GetSQLTable(pSQL:
-                String.Format("     SELECT *                                                              " + Environment.NewLine +
+                string.Format("     SELECT *                                                              " + Environment.NewLine +
                                 "     FROM (                                                                " + Environment.NewLine +
                                 "               SELECT *                                                   " + Environment.NewLine +
                                 "               FROM (                                                      " + Environment.NewLine +

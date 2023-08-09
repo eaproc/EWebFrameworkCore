@@ -18,7 +18,7 @@ namespace EWebFrameworkCore.Vendor.Utils.DateTimeHelper
 
         public TimeZoneManager(String timeZone)
         {
-            if (timeZone == null || timeZone == String.Empty) throw new InvalidTimeZoneSettingsException();
+            if (timeZone == null || timeZone == string.Empty) throw new InvalidTimeZoneSettingsException();
 
             String pSign = timeZone.Substring(0, 1);
             if (pSign != "+" && pSign != "-" && !TextParsing.IsNumber(pSign.First())) throw new InvalidTimeZoneSettingsException();

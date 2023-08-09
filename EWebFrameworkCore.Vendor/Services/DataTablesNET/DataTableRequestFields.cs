@@ -58,7 +58,7 @@ namespace EWebFrameworkCore.Vendor.Services.DataTablesNET
             { throw new Exception($"Error parsing date on DataTableRequestField: {pValue}", e); }
 
 
-            // Logger.Print(String.Format("value: {0}, LengthSplit: {1}", pValue, pParts.Length));
+            // Logger.Print(string.Format("value: {0}, LengthSplit: {1}", pValue, pParts.Length));
             return null;    //Invalid Date
 
         }
@@ -88,7 +88,7 @@ namespace EWebFrameworkCore.Vendor.Services.DataTablesNET
             { throw new Exception($"Error parsing time on DataTableRequestField: {pValue}", e); }
 
 
-            // Logger.Print(String.Format("value: {0}, LengthSplit: {1}", pValue, pParts.Length));
+            // Logger.Print(string.Format("value: {0}, LengthSplit: {1}", pValue, pParts.Length));
             return null;    //Invalid Time
 
         }

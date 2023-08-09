@@ -85,7 +85,7 @@ namespace EWebFrameworkCore.Vendor.Utils.DataExports.Excel
 
 
 
-            String InnerTempFilePath = String.Format("{0}/2{1}", EIO.GetDirectoryFullPath(FilePath), EIO.GetFileName(FilePath));
+            String InnerTempFilePath = string.Format("{0}/2{1}", EIO.GetDirectoryFullPath(FilePath), EIO.GetFileName(FilePath));
             //Take a copy of the Template FIle
             File.Copy(this.TemplateFileFullPath, InnerTempFilePath, true);
 

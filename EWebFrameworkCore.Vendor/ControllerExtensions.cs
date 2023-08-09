@@ -96,7 +96,7 @@ namespace EWebFrameworkCore.Vendor
         //public static bool WantJSON(this HttpRequest v)
         //{
         //    //RequestHelper rh = new RequestHelper(v);
-        //    //String url = rh.ContainsKey("p") ? EStrings.valueOf(rh.Get("p")) : String.Empty;
+        //    //String url = rh.ContainsKey("p") ? EStrings.valueOf(rh.Get("p")) : string.Empty;
 
         //    //Logger.Print(v.Url.AbsoluteUri);
         //    //Logger.Print(v.Url.Host);
