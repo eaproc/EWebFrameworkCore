@@ -7,6 +7,7 @@
         public string DATABASE_NAME { get; set; } = string.Empty;
         public string DATABASE_USER_NAME { get; set; } = "sa";
         public string DATABASE_USER_PASSWORD { get; set; } = string.Empty;
+        public bool TraceQueries { get; set; } = false;
 
     }
 }

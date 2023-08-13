@@ -59,8 +59,8 @@ namespace EWebFrameworkCore.Vendor
             // https://github.com/serilog-contrib/serilog-sinks-slack
             .WriteTo.Console(restrictedToMinimumLevel: LogEventLevel.Verbose)
             .WriteTo.File(PathHandlers.AppLogStore("EWebFrameworkCore.Vendor.txt"),
-                rollingInterval: RollingInterval.Day, retainedFileCountLimit: 14, restrictedToMinimumLevel: LogEventLevel.Warning,
-                outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj} {NewLine}{Exception}"
+                rollingInterval: RollingInterval.Day, retainedFileCountLimit: 14, restrictedToMinimumLevel: LogEventLevel.Information,
+                outputTemplate: "{NewLine}{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj} {NewLine}{Exception}"
                 );
 
             // https://github.com/serilog-contrib/serilog-sinks-slack

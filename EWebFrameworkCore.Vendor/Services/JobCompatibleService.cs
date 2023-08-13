@@ -1,5 +1,6 @@
 ﻿using EEntityCore.DB.Abstracts;
 using EEntityCore.DB.MSSQL;
+using EEntityCore.DB.MSSQL.Interfaces;
 using ELibrary.Standard.VB.Objects;
 using EWebFrameworkCore.Vendor.CloudFileSystem;
 using EWebFrameworkCore.Vendor.ConfigurationTypedClasses;
@@ -15,7 +16,7 @@ namespace EWebFrameworkCore.Vendor.Services
     /// <summary>
     /// Extend for Client Service
     /// </summary>
-    public class JobCompatibleService
+    public class JobCompatibleService : IQueryTracer
     {
         /// <summary>
         /// Not working with SQL Server yet
@@ -82,7 +83,7 @@ namespace EWebFrameworkCore.Vendor.Services
 
         private DBTransaction CreateTransaction()
         {
-            return new DBTransaction(this.GetDBConn().GetSQLConnection());
+            return new DBTransaction(this.GetDBConn().GetSQLConnection(), this, EWebFrameworkCoreConfigurations.DATABASE_CONNECTION.TraceQueries);
         }
 
         /// <summary>
@@ -140,7 +141,11 @@ namespace EWebFrameworkCore.Vendor.Services
 
         public MsSQLDB GetDBConn()
         {
-            return new MsSQLDB(ConnectionOption.HOST, ConnectionOption.PORT, ConnectionOption.DATABASE_USER_NAME, ConnectionOption.DATABASE_USER_PASSWORD, ConnectionOption.DATABASE_NAME);
+            return new MsSQLDB(
+                ConnectionOption.HOST, ConnectionOption.PORT, ConnectionOption.DATABASE_USER_NAME,
+                ConnectionOption.DATABASE_USER_PASSWORD, ConnectionOption.DATABASE_NAME,
+                tracer: this, EWebFrameworkCoreConfigurations.DATABASE_CONNECTION.TraceQueries
+                );
         }
 
         /// <summary>
@@ -165,12 +170,6 @@ namespace EWebFrameworkCore.Vendor.Services
             }
         }
 
-
-        /// <summary>
-        /// Turn this on if you want to trace sql query
-        /// </summary>
-        protected bool TRACE_DEBUG_SQL { get; set; } = false;
-
         /// <summary>
         /// Addressing apostrophe means you will pass string value with this \'{0}\'
         /// </summary>
@@ -179,7 +178,6 @@ namespace EWebFrameworkCore.Vendor.Services
         /// <returns>DataTable or throws exception</returns>
         public virtual DataTable GetSQLTable(String pSQL, bool AddressApostrophe = false)
         {
-            if (TRACE_DEBUG_SQL) Log.Information (pSQL);
             // I don't expect table to be null if sql executes successfully
             var db = (All__DBs)GetDBConn();
             DataSet p = db.getRS(pSQL, AddressApostrophe);
@@ -195,11 +193,8 @@ namespace EWebFrameworkCore.Vendor.Services
         /// <returns>boolean</returns>
         public virtual int ExecuteQuery(String pSQL, bool AddressApostrophe = false)
         {
-            if (TRACE_DEBUG_SQL) Log.Information(pSQL);
             return GetDBConn().DbExec(SQL: pSQL, Address_Apostrophe_Issue: AddressApostrophe);
         }
-
-
 
         #region "Utilities"
 
@@ -214,7 +209,6 @@ namespace EWebFrameworkCore.Vendor.Services
         }
 
         #endregion
-
 
         #region Pagination
 
@@ -585,6 +579,9 @@ namespace EWebFrameworkCore.Vendor.Services
             return (result != null && result.Rows.Count > 0) ? EStrings.ValueOf(result.Rows[0][0]) : string.Empty;
         }
 
-
+        public void TraceSqlQuery(QueryTimeReport[] timeReports)
+        {
+            Bootstrap.GetLogger().Information("\n" +  string.Join("\n", timeReports.Select(x => x.ToString()).ToArray()));
+        }
     }
 }
