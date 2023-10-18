@@ -95,10 +95,8 @@ namespace EWebFrameworkCore.Vendor.Requests
             //
             if (RequestHelper.ContainsKey(r.paramName))
             {
-                var t = EStrings.ValueOf(RequestHelper.Get(r.paramName));
-
-                if ((t == "null" || t == string.Empty) && r.IsNullable) return;
-
+                string t = EStrings.ValueOf(RequestHelper.Get(r.paramName));
+                if ((RequestHelper.IsQueryStringNullDefinition(t) || t == string.Empty) && r.IsNullable) return;
             }
 
 

@@ -15,6 +15,7 @@ namespace EWebFrameworkCore.Vendor
 
         protected readonly IServiceProvider Provider;
         protected readonly ConfigurationOptions EWebFrameworkCoreConfigurations;
+
         public IConfiguration Configurations { get; private set; }
 
         public MSSQLConnectionOption DEFAULT_MSSQL { get; }
