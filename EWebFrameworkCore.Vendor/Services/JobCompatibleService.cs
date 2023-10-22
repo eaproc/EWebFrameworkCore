@@ -160,7 +160,7 @@ namespace EWebFrameworkCore.Vendor.Services
         }
 
         /// <summary>
-        /// The current time on the system. Server
+        /// The current time in DatabaseTimezone as configured in settings. Default is +01:00
         /// </summary>
         public DateTime DatabaseNowDateTime
         {

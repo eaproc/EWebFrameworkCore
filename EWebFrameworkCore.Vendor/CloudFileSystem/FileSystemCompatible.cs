@@ -1,5 +1,6 @@
 ﻿using ELibrary.Standard.VB;
 using EWebFrameworkCore.Vendor.Services;
+using Microsoft.AspNetCore.Http;
 using MimeMapping;
 using System.Text;
 
@@ -122,6 +123,12 @@ namespace EWebFrameworkCore.Vendor.CloudFileSystem
         //
         //   FileFullPath:
         public abstract void SaveFile(string ObjectPath, string FileFullPath);
+
+        public virtual void SaveFile(string ObjectPath, IFormFile UploadedFile)
+        {
+            using var r = new BinaryReader(UploadedFile.OpenReadStream());
+            SaveFileContent(ObjectPath, Contents: r.ReadBytes((int)UploadedFile.Length));
+        }
 
         //
         // Parameters:
