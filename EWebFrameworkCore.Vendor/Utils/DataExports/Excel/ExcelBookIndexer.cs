@@ -55,7 +55,7 @@ namespace EWebFrameworkCore.Vendor.Utils.DataExports.Excel
             try
             {
                 var intPart = TextParsing.parseOutDoubleAsString(ExcelFormat);
-                var strPart = ExcelFormat.Substring(0, ExcelFormat.Length - intPart.Length).ToLower();
+                var strPart = ExcelFormat[..^intPart.Length].ToLower();
                 if (!Pool.Contains(strPart)) throw new Exception("Can't locate this part in the pool: " + strPart);
                 int row = int.Parse(intPart);
                 int column = Pool.IndexOf(strPart) + 1;
@@ -81,11 +81,11 @@ namespace EWebFrameworkCore.Vendor.Utils.DataExports.Excel
         /// <param name="sheet"></param>
         /// <param name="ExcelFormat"></param>
         /// <returns></returns>
-        public static NPOI.SS.UserModel.ICell CellV(this NPOI.SS.UserModel.ISheet sheet, String ExcelFormat)
+        public static NPOI.SS.UserModel.ICell? CellV(this NPOI.SS.UserModel.ISheet sheet, String ExcelFormat)
         {
             Location location = Cell(ExcelFormat: ExcelFormat);
             var r = sheet.GetRow(location.Row);
-            return r!=null ? r.GetCell(location.Column) : null;
+            return r?.GetCell(location.Column);
         }
 
 
@@ -98,8 +98,7 @@ namespace EWebFrameworkCore.Vendor.Utils.DataExports.Excel
         /// <exception cref="InvalidOperationException"></exception>
         public static void SetCellValue(this NPOI.SS.UserModel.ISheet sheet, String ExcelFormat, string value)
         {
-            var c = sheet.CellV(ExcelFormat);
-            if (c == null) throw new InvalidOperationException(string.Format("The excel sheet provided doesn't have this cell [{0}] as writable cell!!", ExcelFormat));
+            var c = sheet.CellV(ExcelFormat) ?? throw new InvalidOperationException(string.Format("The excel sheet provided doesn't have this cell [{0}] as writable cell!!", ExcelFormat));
             c.SetCellValue(value);
         }
 

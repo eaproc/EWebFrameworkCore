@@ -32,7 +32,6 @@
 		<Compile Remove="Middlewares\CheckServiceProviderMiddleware.cs" />
 		<Compile Remove="PageHandlers.cs" />
 		<Compile Remove="Utils\DataExports\Excel\ExcelFileGenerator.cs" />
-		<Compile Remove="Utils\DataExports\Excel\IEPPlusExcelExportCustomizer.cs" />
 		<Compile Remove="Utils\JsonDeserializer.cs" />
 		<Compile Remove="Utils\SessionHelper.cs" />
 	</ItemGroup>
@@ -48,6 +47,7 @@
 		<Compile Include="Services\Mailing\Mailable.cs" />
 		<Compile Include="Services\TemporaryFile.cs" />
 		<Compile Include="Services\TemporaryFolder.cs" />
+		<Compile Include="Utils\DateTimeHelper\DateTimeManipulations.cs" />
 		<Compile Include="Utils\DateTimeHelper\DateTimeZoneConverter.cs" />
 		<Compile Include="Utils\DateTimeHelper\InvalidTimeZoneSettingsException.cs" />
 		<Compile Include="Utils\DateTimeHelper\TimeZoneManager.cs" />

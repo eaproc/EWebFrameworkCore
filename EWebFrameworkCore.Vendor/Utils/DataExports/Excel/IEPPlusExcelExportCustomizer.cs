@@ -1,16 +1,8 @@
-﻿using EPRO.Library.Objects;
-using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using EPRO.Library;
+﻿using ELibrary.Standard.VB.Objects;
+using EWebFrameworkCore.Vendor.Services;
 using NPOI.SS.UserModel;
 using NPOI.XSSF.UserModel;
-using EWebFramework.Vendor.api.utils.DataExports.Excel;
-using System.IO;
-using EWebFramework.Vendor.api.services;
+using System.Data;
 
 namespace EWebFrameworkCore.Vendor.Utils.DataExports.Excel
 {
@@ -18,57 +10,49 @@ namespace EWebFrameworkCore.Vendor.Utils.DataExports.Excel
     {
 
         //Indicate where data rows should begin writing
-        protected abstract int startAtIndex { get; }
+        protected abstract int StartAtIndex { get; }
 
-        protected abstract string templateFileFullPath { get;  }
+        protected abstract string TemplateFileFullPath { get;  }
 
         public IEPPlusExcelExportCustomizer(DataTable dataTable) : base(data: dataTable) { }
 
 
-        public abstract void doSomeCustomization(ISheet sheet1);
+        public abstract void DoSomeCustomization(ISheet sheet1);
 
 
         public virtual void SetCellValue(ICell cell, ushort columnIndex,  object v)
         {
             // Default just sets it as string
-            cell.SetCellValue(EStrings.valueOf(v));
+            cell.SetCellValue(EStrings.ValueOf(v));
         }
 
 
-        public bool ExportListUsingNPOI(out String pFilePath)
+        public bool ExportListUsingNPOI(out string pFilePath)
         {
-            pFilePath = BaseClientService.GetSessionTempFileName();
+            
+            using TemporaryFile returnResultFile = new ();
+            returnResultFile.CreatePath().SetLeaveAsUndisposed(true);
+            pFilePath = returnResultFile.FileFullPath;
 
+            if (!File.Exists(TemplateFileFullPath)) throw new FileNotFoundException("Template File Does not Exists - " + this.TemplateFileFullPath);
 
-            //EIO.DeleteFileIfExists(pFilePath);
-            if (!Directory.Exists(EIO.getDirectoryFullPath(pFilePath))) System.IO.Directory.CreateDirectory(EIO.getDirectoryFullPath(pFilePath));
-            if (!System.IO.File.Exists(this.templateFileFullPath)) throw new FileNotFoundException("Template File Does not Exists - " + this.templateFileFullPath);
-
-
-
-
-            String pFilePath2 = String.Format("{0}/2{1}", EIO.getDirectoryFullPath(pFilePath), EIO.getFileName(pFilePath));
+            using TemporaryFile tmpFile = new();
             //Take a copy of the Template FIle
-            File.Copy(this.templateFileFullPath, pFilePath2, true);
-
+            File.Copy(this.TemplateFileFullPath, tmpFile.FileFullPath, true);
 
 
             IWorkbook workbook;
             // Use it for generating the file
-            workbook = new XSSFWorkbook(pFilePath2);
+            workbook = new XSSFWorkbook(tmpFile.FileFullPath);
 
 
-
-            int currentRowIndex = this.startAtIndex; // currentRowIndex
-
-
+            int currentRowIndex = this.StartAtIndex; // currentRowIndex
 
             ISheet sheet1 = workbook.GetSheetAt(0); //First Sheet
 
 
             //If you need to work on the sheet
-            this.doSomeCustomization(sheet1);
-
+            this.DoSomeCustomization(sheet1);
 
 
             //loops through data
@@ -88,30 +72,18 @@ namespace EWebFrameworkCore.Vendor.Utils.DataExports.Excel
             }
 
 
-
-
             //It doesn't write if you don't call this
             // #BUG
-            using (var fs = new FileStream(pFilePath, FileMode.OpenOrCreate, FileAccess.Write))
+            using (var fs = new FileStream(returnResultFile.FileFullPath, FileMode.OpenOrCreate, FileAccess.Write))
             {
-                workbook.Write(fs);
-
+                workbook.Write(fs, false);
             }
 
             workbook.Close();
-            //Clean Up
-            EIO.DeleteFileIfExists(pFilePath2);
 
-
-            return File.Exists(pFilePath);
+            return File.Exists(returnResultFile.FileFullPath);
 
         }
-
-
-
-
-
-
 
     }
 }

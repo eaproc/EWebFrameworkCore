@@ -1,4 +1,6 @@
-﻿namespace EWebFrameworkCore.Vendor.Utils
+﻿using System.Globalization;
+
+namespace EWebFrameworkCore.Vendor.Utils
 {
     public static class DateOutputExtension
     {

@@ -7,12 +7,12 @@ namespace EWebFrameworkCore.Vendor
         public static readonly string MIME_TYPE_JPG = "image/jpg";
 
 
-        public static IEnumerable<T> Append<T>(this IEnumerable<T> p, T x)
-        {
-            List<T> y = p.ToList();
-            y.Add(x);
-            return y;
-        }
+        //public static IEnumerable<T> Append<T>(this IEnumerable<T> p, T x)
+        //{
+        //    List<T> y = p.ToList();
+        //    y.Add(x);
+        //    return y;
+        //}
 
         public static IEnumerable<T> AddRange<T>(this IEnumerable<T> p, params T[] x)
         {

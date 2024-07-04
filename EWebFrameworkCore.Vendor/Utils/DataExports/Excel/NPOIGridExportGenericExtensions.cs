@@ -1,14 +1,12 @@
 ﻿using ELibrary.Standard.VB.Objects;
 using NPOI.SS.UserModel;
-using System;
-using System.Linq;
 
 namespace EWebFrameworkCore.Vendor.Utils.DataExports.Excel
 {
     public static class NPOIGridExportGenericExtensions
     {
 
-        public static ICell SetCellValueX(this IRow row, int ColumnZeroIndex, object value, string DataFormat = null)
+        public static ICell SetCellValueX(this IRow row, int ColumnZeroIndex, object? value, string? DataFormat = null)
         {
 
             ICell cell = row.GetOrCreate(ColumnZeroIndex);
@@ -29,18 +27,13 @@ namespace EWebFrameworkCore.Vendor.Utils.DataExports.Excel
             else cell.SetCellValue(EDouble.ValueOf(value));
 
 
-
-
-
             if (DataFormat != null)
             {
                 ICellStyle p = cell.Sheet.Workbook.CreateCellStyle();
                 cell.CellStyle.DataFormat = cell.Sheet.Workbook.CreateDataFormat().GetFormat(DataFormat);
             }
 
-
             return cell;
-
         }
 
 
@@ -54,18 +47,16 @@ namespace EWebFrameworkCore.Vendor.Utils.DataExports.Excel
         }
 
 
-
-
-        public static RT GetValue<TO, RT>(this TO obj, string propName) where TO : class
+        public static RT? GetValue<TO, RT>(this TO obj, string propName) where TO : class
         {
             // not found
-            if (obj == null) return default(RT);
+            if (obj == null) return default;
 
             if (obj.GetType().GetProperties().Where(x => x.Name == propName).Count() == 1)
-                return (RT)obj.GetType().GetProperty(propName).GetValue(obj, null);
+                return (RT?)obj.GetType().GetProperty(propName)?.GetValue(obj, null);
 
             if (obj.GetType().GetFields().Where(x => x.Name == propName).Count() == 1)
-                return (RT)obj.GetType().GetField(propName).GetValue(obj);
+                return (RT?)obj.GetType().GetField(propName)?.GetValue(obj);
 
             return default(RT);
         }
