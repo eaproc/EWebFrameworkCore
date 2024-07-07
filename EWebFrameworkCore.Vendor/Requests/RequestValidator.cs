@@ -465,6 +465,11 @@ namespace EWebFrameworkCore.Vendor.Requests
                     if (r.IsNullable && !RequestHelper.HasFile(paramName: pParamName)) return null;
                     IFormFile? f = RequestHelper.File(pParamName);
                     return f == null ? null : (T)(object)f;
+                
+                default:
+                    if (typeof(T) == typeof(object)) 
+                        return (T?)(object?)s;
+                    break;
             }
 
 
