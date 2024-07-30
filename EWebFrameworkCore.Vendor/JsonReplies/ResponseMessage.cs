@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using System.Net;
 using System.Net.Mime;
+using System.Text;
 
 namespace EWebFrameworkCore.Vendor.JsonReplies
 {
@@ -43,8 +44,10 @@ namespace EWebFrameworkCore.Vendor.JsonReplies
 
             var Response = context.HttpContext.Response;
             Response.StatusCode = this.StatusCode;
-            Response.Headers["Content-Type"] = MediaTypeNames.Application.Json;
-            using (var sw = new StreamWriter(Response.Body, System.Text.Encoding.UTF8))
+            Response.Headers["Content-Type"] = MediaTypeNames.Application.Json + "; charset=utf-8";
+
+            // Use StreamWriter with UTF8 encoding without BOM
+            using (var sw = new StreamWriter(Response.Body, new UTF8Encoding(false)))
             {
                 sw.Write(this.ToJson());
                 // this generates error if the response is huge around 200KB
@@ -70,7 +73,8 @@ namespace EWebFrameworkCore.Vendor.JsonReplies
             //return System.Text.Json.JsonSerializer.Serialize(this, new JsonSerializerOptions() { WriteIndented = true } );
 
             // USING Newtonsoft
-            return JsonConvert.SerializeObject(this);
+            return JsonConvert.SerializeObject(this); // contains /r/n
+            // return JsonConvert.SerializeObject(this, Formatting.None);
         }
 
 
