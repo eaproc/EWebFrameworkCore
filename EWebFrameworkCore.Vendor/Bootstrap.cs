@@ -79,13 +79,8 @@ namespace EWebFrameworkCore.Vendor
                     .MinimumLevel.Verbose()
                     .Enrich.FromLogContext()
 
-                    .WriteTo.Console(restrictedToMinimumLevel: LogEventLevel.Information)
+                    .WriteTo.Console(restrictedToMinimumLevel: LogEventLevel.Information);
 
-                // Seq
-                .WriteTo.Seq(
-                    builder.Configuration["Logging:Seq:ServerUrl"], 
-                    apiKey: builder.Configuration["Logging:Seq:Token"]
-                );  // URL for your Seq instance
 
                 // Files
                 loggerConfiguration.WriteTo.File(new SerilogPrettyJsonFormatter(), PathHandlers.AppLogStore("Verbose.EWebFrameworkCore.json"),
@@ -105,6 +100,7 @@ namespace EWebFrameworkCore.Vendor
                     outputTemplate: "{NewLine}{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj} {NewLine}{Exception}"
                     );
 
+
                 // Adding Slack logging based on configuration settings
                 if (hostingContext.Configuration.GetValue<bool>("Logging:Slack:Enabled"))
                 {
@@ -115,8 +111,18 @@ namespace EWebFrameworkCore.Vendor
                         customUsername: hostingContext.Configuration["GENERAL:APP_URL"]
                     );
                 }
-            });
 
+                // Adding SEQ logging based on configuration settings
+                if (hostingContext.Configuration.GetValue<bool>("Logging:Seq:Enabled"))
+                {
+                    // Seq
+                    loggerConfiguration
+                     .WriteTo.Seq(
+                        builder.Configuration["Logging:Seq:ServerUrl"],
+                        apiKey: builder.Configuration["Logging:Seq:Token"]
+                     );  // URL for your Seq instance
+                }
+            });
 
             return builder;
         }
