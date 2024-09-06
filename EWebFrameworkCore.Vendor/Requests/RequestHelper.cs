@@ -1,13 +1,8 @@
-﻿using ELibrary.Standard.VB.Objects;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
 using System.Dynamic;
-using System.IO;
-using System.Linq;
 using System.Text;
 
 namespace EWebFrameworkCore.Vendor.Requests
@@ -363,7 +358,7 @@ namespace EWebFrameworkCore.Vendor.Requests
 
         public ExpandoObject ToPackagableForJson()
         {
-            dynamic pairs = new System.Dynamic.ExpandoObject();
+            dynamic pairs = new ExpandoObject();
 
 
             if (pairs is not IDictionary<string, Object> x) return pairs;
@@ -378,6 +373,20 @@ namespace EWebFrameworkCore.Vendor.Requests
 #pragma warning disable CS8604 // Possible null reference argument.
                     x.Add(v.Key, v.Value?.ToString());
 #pragma warning restore CS8604 // Possible null reference argument.
+            }
+
+            // Add Files info
+            // Check if the request contains form data
+            if (Request.HasFormContentType && Request.Form != null)
+            {
+                // Log file details if present
+                foreach (var file in Request.Form.Files)
+                {
+                    x.Add(
+                        $"File: {file.FileName}",
+                        $"Size = {file.Length} bytes"
+                        );
+                }
             }
 
             return pairs;

@@ -1,4 +1,5 @@
 ﻿using EWebFrameworkCore.Vendor.ConfigurationTypedClasses;
+using EWebFrameworkCore.Vendor.Logging;
 using EWebFrameworkCore.Vendor.Requests;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -58,7 +59,7 @@ namespace EWebFrameworkCore.Vendor
             //.Enrich.FromLogContext()
             // https://github.com/serilog-contrib/serilog-sinks-slack
             .WriteTo.Console(restrictedToMinimumLevel: LogEventLevel.Verbose)
-            .WriteTo.File(PathHandlers.AppLogStore("EWebFrameworkCore.Vendor.txt"),
+            .WriteTo.File(PathHandlers.AppLogStore("Background.log"),
                 rollingInterval: RollingInterval.Day, retainedFileCountLimit: 14, restrictedToMinimumLevel: LogEventLevel.Information,
                 outputTemplate: "{NewLine}{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj} {NewLine}{Exception}"
                 );
@@ -68,6 +69,54 @@ namespace EWebFrameworkCore.Vendor
                 c.WriteTo.Slack(builder.Configuration["Logging:Slack:Url"], restrictedToMinimumLevel: LogEventLevel.Warning, customChannel: builder.Configuration["Logging:Slack:Channel"], customUsername: builder.Configuration["GENERAL:APP_URL"]);
 
             Log = c.CreateLogger();
+
+
+
+
+            // Initialize Serilog using the configuration from appsettings.json or other sources
+            builder.Host.UseSerilog((hostingContext, services, loggerConfiguration) => {
+                loggerConfiguration
+                    .MinimumLevel.Verbose()
+                    .Enrich.FromLogContext()
+
+                    .WriteTo.Console(restrictedToMinimumLevel: LogEventLevel.Information)
+
+                // Seq
+                .WriteTo.Seq(
+                    builder.Configuration["Logging:Seq:ServerUrl"], 
+                    apiKey: builder.Configuration["Logging:Seq:Token"]
+                );  // URL for your Seq instance
+
+                // Files
+                loggerConfiguration.WriteTo.File(new SerilogPrettyJsonFormatter(), PathHandlers.AppLogStore("Verbose.EWebFrameworkCore.json"),
+                    rollingInterval: RollingInterval.Day, retainedFileCountLimit: 2, 
+                    restrictedToMinimumLevel: LogEventLevel.Verbose
+                );
+
+                loggerConfiguration.WriteTo.File(PathHandlers.AppLogStore("Information.EWebFrameworkCore.log"),
+                    rollingInterval: RollingInterval.Day, retainedFileCountLimit: 6, 
+                    restrictedToMinimumLevel: LogEventLevel.Information,
+                    outputTemplate: "{NewLine}{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj} {NewLine}{Exception}"
+                    );
+
+                loggerConfiguration.WriteTo.File(PathHandlers.AppLogStore("Warning.EWebFrameworkCore.log"),
+                    rollingInterval: RollingInterval.Day, retainedFileCountLimit: 14, 
+                    restrictedToMinimumLevel: LogEventLevel.Warning,
+                    outputTemplate: "{NewLine}{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj} {NewLine}{Exception}"
+                    );
+
+                // Adding Slack logging based on configuration settings
+                if (hostingContext.Configuration.GetValue<bool>("Logging:Slack:Enabled"))
+                {
+                    loggerConfiguration.WriteTo.Slack(
+                        hostingContext.Configuration["Logging:Slack:Url"],
+                        restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Warning,
+                        customChannel: hostingContext.Configuration["Logging:Slack:Channel"],
+                        customUsername: hostingContext.Configuration["GENERAL:APP_URL"]
+                    );
+                }
+            });
+
 
             return builder;
         }
