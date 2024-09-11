@@ -37,6 +37,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<Compile Include="Services\ChunkFileReceiverService.cs" />
 		<Compile Include="Services\JobCompatibleService.cs" />
 		<Compile Include="Services\BaseClientService.cs" />
 		<Compile Include="Services\DatabaseTimeZoneUtilsExtensions.cs" />

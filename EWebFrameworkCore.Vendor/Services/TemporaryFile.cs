@@ -39,6 +39,15 @@ namespace EWebFrameworkCore.Vendor.Services
         { }
 
         /// <summary>
+        /// Returns size in bytes
+        /// </summary>
+        /// <returns></returns>
+        public long Size()
+        {
+            return File.Exists(FileFullPath)? new FileInfo(FileFullPath).Length : -1;
+        }
+
+        /// <summary>
         /// This will create the directory path if it doesn't exists
         /// </summary>
         /// <returns></returns>

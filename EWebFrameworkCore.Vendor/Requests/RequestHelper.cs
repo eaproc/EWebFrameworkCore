@@ -10,7 +10,7 @@ namespace EWebFrameworkCore.Vendor.Requests
     /// <summary>
     /// Request Helper helps to get request posted
     /// </summary>
-    public partial class RequestHelper : IRequestHelper
+    public class RequestHelper : IRequestHelper
     {
         /// <summary>
         /// Current HttpRequest Object

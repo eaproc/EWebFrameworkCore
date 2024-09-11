@@ -2,9 +2,11 @@
 using EWebFrameworkCore.Vendor.Logging;
 using EWebFrameworkCore.Vendor.Requests;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Serilog;
 using Serilog.Core;
@@ -58,7 +60,7 @@ namespace EWebFrameworkCore.Vendor
             //.Enrich.WithProperty(ThreadNameEnricher.ThreadNamePropertyName, "MyDefault")
             //.Enrich.FromLogContext()
             // https://github.com/serilog-contrib/serilog-sinks-slack
-            .WriteTo.Console(restrictedToMinimumLevel: LogEventLevel.Verbose)
+            .WriteTo.Console(restrictedToMinimumLevel: LogEventLevel.Information)
             .WriteTo.File(PathHandlers.AppLogStore("Background.log"),
                 rollingInterval: RollingInterval.Day, retainedFileCountLimit: 14, restrictedToMinimumLevel: LogEventLevel.Information,
                 outputTemplate: "{NewLine}{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj} {NewLine}{Exception}"
@@ -77,29 +79,45 @@ namespace EWebFrameworkCore.Vendor
             builder.Host.UseSerilog((hostingContext, services, loggerConfiguration) => {
                 loggerConfiguration
                     .MinimumLevel.Verbose()
+
                     .Enrich.FromLogContext()
 
                     .WriteTo.Console(restrictedToMinimumLevel: LogEventLevel.Information);
 
+                
+                // restrict certain logs if it is production
+                if(builder.Environment.IsProduction())
+                {
+                    loggerConfiguration
+                   .MinimumLevel.Override("Microsoft", LogEventLevel.Information) // General override for all Microsoft namespaces
+                   .MinimumLevel.Override("Microsoft.AspNetCore.Routing.EndpointMiddleware", LogEventLevel.Warning)
+                   .MinimumLevel.Override("Microsoft.AspNetCore.Hosting.Diagnostics", LogEventLevel.Warning)
+                   .MinimumLevel.Override("Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker", LogEventLevel.Warning)
+                   .MinimumLevel.Override("Microsoft.AspNetCore.Mvc.Infrastructure.ObjectResultExecutor", LogEventLevel.Warning);
+                }
+
 
                 // Files
-                loggerConfiguration.WriteTo.File(new SerilogPrettyJsonFormatter(), PathHandlers.AppLogStore("Verbose.EWebFrameworkCore.json"),
-                    rollingInterval: RollingInterval.Day, retainedFileCountLimit: 2, 
-                    restrictedToMinimumLevel: LogEventLevel.Verbose
-                );
-
-                loggerConfiguration.WriteTo.File(PathHandlers.AppLogStore("Information.EWebFrameworkCore.log"),
-                    rollingInterval: RollingInterval.Day, retainedFileCountLimit: 6, 
-                    restrictedToMinimumLevel: LogEventLevel.Information,
-                    outputTemplate: "{NewLine}{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj} {NewLine}{Exception}"
+                if (hostingContext.Configuration.GetValue<bool>("Logging:File:Enabled"))
+                {
+                    // Seq
+                    loggerConfiguration.WriteTo.File(new SerilogPrettyJsonFormatter(), PathHandlers.AppLogStore("Verbose.EWebFrameworkCore.json"),
+                        rollingInterval: RollingInterval.Day, retainedFileCountLimit: 2,
+                        restrictedToMinimumLevel: LogEventLevel.Verbose
                     );
 
-                loggerConfiguration.WriteTo.File(PathHandlers.AppLogStore("Warning.EWebFrameworkCore.log"),
-                    rollingInterval: RollingInterval.Day, retainedFileCountLimit: 14, 
-                    restrictedToMinimumLevel: LogEventLevel.Warning,
-                    outputTemplate: "{NewLine}{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj} {NewLine}{Exception}"
-                    );
+                    loggerConfiguration.WriteTo.File(PathHandlers.AppLogStore("Information.EWebFrameworkCore.log"),
+                        rollingInterval: RollingInterval.Day, retainedFileCountLimit: 6,
+                        restrictedToMinimumLevel: LogEventLevel.Information,
+                        outputTemplate: "{NewLine}{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj} {NewLine}{Exception}"
+                        );
 
+                    loggerConfiguration.WriteTo.File(PathHandlers.AppLogStore("Warning.EWebFrameworkCore.log"),
+                        rollingInterval: RollingInterval.Day, retainedFileCountLimit: 14,
+                        restrictedToMinimumLevel: LogEventLevel.Warning,
+                        outputTemplate: "{NewLine}{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj} {NewLine}{Exception}"
+                        );
+                }
 
                 // Adding Slack logging based on configuration settings
                 if (hostingContext.Configuration.GetValue<bool>("Logging:Slack:Enabled"))
@@ -118,8 +136,9 @@ namespace EWebFrameworkCore.Vendor
                     // Seq
                     loggerConfiguration
                      .WriteTo.Seq(
-                        builder.Configuration["Logging:Seq:ServerUrl"],
-                        apiKey: builder.Configuration["Logging:Seq:Token"]
+                         restrictedToMinimumLevel: LogEventLevel.Information,
+                         serverUrl: builder.Configuration["Logging:Seq:ServerUrl"],
+                         apiKey: builder.Configuration["Logging:Seq:Token"]
                      );  // URL for your Seq instance
                 }
             });
