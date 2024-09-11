@@ -60,7 +60,7 @@ namespace EWebFrameworkCore.Vendor
             //.Enrich.WithProperty(ThreadNameEnricher.ThreadNamePropertyName, "MyDefault")
             //.Enrich.FromLogContext()
             // https://github.com/serilog-contrib/serilog-sinks-slack
-            .WriteTo.Console(restrictedToMinimumLevel: LogEventLevel.Information)
+            .WriteTo.Console(restrictedToMinimumLevel: LogEventLevel.Debug)
             .WriteTo.File(PathHandlers.AppLogStore("Background.log"),
                 rollingInterval: RollingInterval.Day, retainedFileCountLimit: 14, restrictedToMinimumLevel: LogEventLevel.Information,
                 outputTemplate: "{NewLine}{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj} {NewLine}{Exception}"
@@ -82,7 +82,7 @@ namespace EWebFrameworkCore.Vendor
 
                     .Enrich.FromLogContext()
 
-                    .WriteTo.Console(restrictedToMinimumLevel: LogEventLevel.Information);
+                    .WriteTo.Console(restrictedToMinimumLevel: LogEventLevel.Debug);
 
                 
                 // restrict certain logs if it is production
