@@ -147,6 +147,8 @@ namespace EWebFrameworkCore.Vendor.CloudFileSystem
             SaveFile(ObjectPath, temporaryFile.FileFullPath);
         }
 
+        public abstract Task SaveFileContentAsync(string objectPath, Stream contentStream, string contentType);
+
         //
         // Parameters:
         //   ObjectPath:

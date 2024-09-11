@@ -139,15 +139,41 @@ namespace EWebFrameworkCore.Vendor.CloudFileSystem
             }
         }
 
-        //
-        // Summary:
-        //     Upload file to bucket
-        //
-        // Parameters:
-        //   ObjectPath:
-        //
-        //   FileFullPath:
-        public override void SaveFile(string ObjectPath, string FileFullPath)
+        public override async Task SaveFileContentAsync(string objectPath, Stream contentStream, string contentType)
+         {
+            try
+            {
+                objectPath = objectPath.ToCloudPathCompatible();
+                if (!StorageExist())
+                {
+                    throw new InvalidOperationException("Storage does not exist.");
+                }
+
+                long contentLength = contentStream.Length; // Ensure the stream supports seeking to get Length
+                await Minio.PutObjectAsync(
+                    new PutObjectArgs()
+                        .WithBucket(Bucket)
+                        .WithObject(objectPath)
+                        .WithStreamData(contentStream)
+                        .WithObjectSize(contentLength)
+                        .WithContentType(contentType)
+                );
+            }
+            catch (Exception innerException)
+            {
+                throw new InvalidOperationException("Unfortunately, the file could not be uploaded!", innerException);
+            }
+        }
+
+    //
+    // Summary:
+    //     Upload file to bucket
+    //
+    // Parameters:
+    //   ObjectPath:
+    //
+    //   FileFullPath:
+    public override void SaveFile(string ObjectPath, string FileFullPath)
         {
             try
             {
