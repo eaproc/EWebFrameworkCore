@@ -78,9 +78,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Reference Include="CODERiT.Logger.Standard.VB">
-		  <HintPath>..\..\..\..\..\..\DATA-DRIVE\Repos\github\eaproc\EEntityCore\EEntityCore.DB\EEntityCore.DB.MSSQL\bin\Debug\net5.0\CODERiT.Logger.Standard.VB.dll</HintPath>
-		</Reference>
+	  <Reference Include="CODERiT.Logger.Standard.VB">
+	    <HintPath>..\..\..\epro-libraries-for-vs\coderit-logger\CODERiT.Logger.Standard.VB\bin\Debug\netstandard2.0\CODERiT.Logger.Standard.VB.dll</HintPath>
+	  </Reference>
 	</ItemGroup>
 
 

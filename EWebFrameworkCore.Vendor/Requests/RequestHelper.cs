@@ -44,6 +44,8 @@ namespace EWebFrameworkCore.Vendor.Requests
 
             this.Request = this.HttpContext.Request;
 
+            IPAddress = Request.HttpContext.Connection?.RemoteIpAddress?.ToString();
+
             this.ServiceProvider = provider;
 
             this.IsJsonRequest = this.Request.HasJsonContentType();
@@ -78,25 +80,20 @@ namespace EWebFrameworkCore.Vendor.Requests
         /// Gets The IP Address behind proxy
         /// </summary>
         /// <returns></returns>
-        public string RemoteIpAddress()
+        public string RemoteIpAddressOverProxy()
         {
-            if( IPAddress == null )
-            {
-                string[] keysToSearch = new string[] {
+            string[] keysToSearch = new string[] {
                     "HTTP_CLIENT_IP", "HTTP_X_FORWARDED_FOR", "HTTP_X_FORWARDED",
                     "HTTP_X_CLUSTER_CLIENT_IP", "HTTP_FORWARDED_FOR", "HTTP_FORWARDED", "REMOTE_ADDR",
                     "X-Forwarded-For", "X-Coming-From"
                 };
 
-                string[] matchedKeys = this.Request.Headers.Keys.Intersect(keysToSearch).ToArray();
+            string[] matchedKeys = this.Request.Headers.Keys.Intersect(keysToSearch).ToArray();
 
-                if (matchedKeys.Length == 0)
-                    IPAddress = this.HttpContext.Connection.RemoteIpAddress != null ? this.HttpContext.Connection.RemoteIpAddress.ToString() : "Unknown IP";
-                else
-                    IPAddress = Request.Headers[matchedKeys[0]];
-            }
-
-            return IPAddress;
+            if (matchedKeys.Length == 0)
+                return IPAddress ?? "Unknown IP";
+            else
+                return Request.Headers[matchedKeys[0]].FirstOrDefault() ?? "Unknown IP";
         }
 
         /// <summary>

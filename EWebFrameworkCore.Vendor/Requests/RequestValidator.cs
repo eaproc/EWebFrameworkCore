@@ -14,6 +14,7 @@ using System.Data.SqlTypes;
 using EWebFrameworkCore.Vendor.Utils.DataExports.Excel;
 using Microsoft.AspNetCore.Http;
 using System.Text.RegularExpressions;
+using Microsoft.AspNetCore.Mvc;
 
 namespace EWebFrameworkCore.Vendor.Requests
 {
@@ -292,13 +293,26 @@ namespace EWebFrameworkCore.Vendor.Requests
                     }
                     break;
 
-
+                case Rule.ParamTypes.DATE_TIME:
+                    if (RequestHelper.ContainsKey(r.paramName))
+                    {
+                        var s = EStrings.ValueOf(RequestHelper.Get(r.paramName));
+                        if (!
+                            DateTime.TryParseExact(
+                             s: s,
+                                    format: DATE_TIME_FORMAT,
+                                    provider: System.Globalization.CultureInfo.InvariantCulture, // Culture info
+                                    style: System.Globalization.DateTimeStyles.None, // No special parsing styles
+                                    result: out DateTime dateTimeResult // Output variable
+                          ))
+                        {
+                            errors.Add(r.paramName, $"Invalid value passed in for {r.paramName}. It must be a valid date with format ({DATE_TIME_FORMAT}).");
+                            return;
+                        }
+                    }
+                    break;
             }
-
-
         }
-
-
 
 
         public bool ValidateRulesQuitely(params Rule[] rules)
@@ -393,7 +407,17 @@ namespace EWebFrameworkCore.Vendor.Requests
 
                 case Rule.ParamTypes.DATE:
                     DateTime? v = DataTableRequestFields.ParseDate(s);
-                    return v == null ? null : (T)(object)v.Value;
+                    return v == null ? null : (T)(object)v.Value;     
+                
+                case Rule.ParamTypes.DATE_TIME:
+                   bool parsed = DateTime.TryParseExact(
+                           s: s,
+                                  format: DATE_TIME_FORMAT,
+                                  provider: System.Globalization.CultureInfo.InvariantCulture, // Culture info
+                                  style: System.Globalization.DateTimeStyles.None, // No special parsing styles
+                                  result: out DateTime dateTimeResult // Output variable
+                        );
+                    return parsed? (T)(object)dateTimeResult : null;
 
                 case Rule.ParamTypes.TIME:
                     DateTime? t = DataTableRequestFields.ParseTime(s);
@@ -515,6 +539,7 @@ namespace EWebFrameworkCore.Vendor.Requests
                         return (T)(object)(i == null ? 0 : i);
 
                     case Rule.ParamTypes.DATE:
+                    case Rule.ParamTypes.DATE_TIME:
                     case Rule.ParamTypes.TIME:
                         return (T)(object)(GetNullableValue<DateTime>(pParamName) ?? throw new InvalidOperationException($"There is no default value for Dates, please use GetNullableValue function for parameter {pParamName}"));
                     case Rule.ParamTypes.FILE:

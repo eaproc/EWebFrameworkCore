@@ -2,6 +2,12 @@
 {
     public partial class RequestValidator
     {
+
+        /// <summary>
+        /// "yyyy-MM-dd HH:mm"
+        /// </summary>
+       public const string DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm";
+
         public struct Rule
         {
             public string paramName;
@@ -14,7 +20,22 @@
             public enum ParamTypes
             {
                 STRING, UNESCAPED_STRING, NUMERIC_STRING,  EMAIL, INTERNATIONAL_PHONE_NUMBER,
-                FILE, INTEGER, DECIMAL, BOOLEAN, JSON, DATE, DATE_TIME, TIME
+                FILE, INTEGER, DECIMAL, BOOLEAN, JSON,
+
+                /// <summary>
+                /// yyyy-MM-dd
+                /// </summary>
+                DATE,
+
+                /// <summary>
+                /// yyyy-MM-dd HH:mm
+                /// </summary>
+                DATE_TIME,
+
+                /// <summary>
+                /// HH:mm
+                /// </summary>
+                TIME
             }
 
             public Rule(string pName, bool pIsRequired, long pParamMinSize = 1, long pParamMaxSize = 50, ParamTypes pParamType = ParamTypes.STRING, bool pIsNullable = false)

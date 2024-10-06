@@ -12,6 +12,11 @@ namespace EWebFrameworkCore.Vendor.Utils
         public static string ToServerDateString(this DateTime date)
         {
             return date.ToString("yyyy-MM-dd");
+        }        
+        
+        public static string ToIso8601Format(this DateTime date)
+        {
+            return date.ToString("yyyy-MM-ddTHH:mm:ssZ");
         }
 
         public static string ToSQLQuotedServerDateString(this DateTime date)
