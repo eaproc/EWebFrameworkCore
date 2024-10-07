@@ -2,7 +2,7 @@
 using EWebFrameworkCore.Vendor.Requests;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
-using Serilog.Core;
+using Microsoft.Extensions.Logging;
 
 namespace EWebFrameworkCore.Vendor
 {
@@ -20,17 +20,20 @@ namespace EWebFrameworkCore.Vendor
 
         public MSSQLConnectionOption DEFAULT_MSSQL { get; }
 
-        protected Logger Log { private set; get; }
+        protected ILogger<Controller> Log { private set; get; }
 
-        public Controller(IServiceProvider Provider)
+        public Controller(IServiceProvider provider)
         {
-            this.EWebFrameworkCoreConfigurations = Provider.GetEWebFrameworkCoreOptions();
-            this.Configurations = Provider.GetConfigurations();
+            Provider = provider;
 
-            this.DEFAULT_MSSQL = EWebFrameworkCoreConfigurations.DATABASE_CONNECTION;
-            this.Provider = Provider;
-            this.Log = HttpContext.Logger();
-            RequestInputs = Provider.GetRequestHelper();
+            EWebFrameworkCoreConfigurations = provider.GetEWebFrameworkCoreOptions();
+            Configurations = provider.GetConfigurations();
+
+            DEFAULT_MSSQL = EWebFrameworkCoreConfigurations.DATABASE_CONNECTION;
+            
+            Log = Bootstrap.CreateLoggerFromFactory<Controller>(provider);
+
+            RequestInputs = provider.GetRequestHelper();
             InputValidator = new RequestValidator(RequestInputs);
         }
 
@@ -76,7 +79,7 @@ namespace EWebFrameworkCore.Vendor
                 }
                 catch (Exception e)
                 {
-                    Bootstrap.GetLogger().ReportException(e, $"Error occurred while running background task. [{TaskIdentifier}]");
+                    Bootstrap.GetAsyncNoServiceProviderLogger().Error(e, $"Error occurred while running background task. [{TaskIdentifier}]");
                 }
             });
         }

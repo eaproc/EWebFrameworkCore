@@ -7,6 +7,7 @@ using EWebFrameworkCore.Vendor.ConfigurationTypedClasses;
 using EWebFrameworkCore.Vendor.Services.DataTablesNET;
 using EWebFrameworkCore.Vendor.Utils;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Serilog.Core;
 using System.Data;
 using System.Text;
@@ -46,7 +47,7 @@ namespace EWebFrameworkCore.Vendor.Services
 
         public readonly ConfigurationOptions EWebFrameworkCoreConfigurations;
 
-        public Logger Log { get; }
+        public ILogger<JobCompatibleService> Log { get; }
 
         /// <summary>
         /// The timezone of the database set from the Configurations
@@ -61,16 +62,16 @@ namespace EWebFrameworkCore.Vendor.Services
         /// <exception cref="InvalidOperationException"></exception>
         public JobCompatibleService(IServiceProvider provider, MSSQLConnectionOption connectionOption)
         {
-            this.Provider = provider;
+            Provider = provider;
 
-            this.Configurations = provider.GetConfigurations();
+            Configurations = provider.GetConfigurations();
 
-            this.EWebFrameworkCoreConfigurations = Provider.GetEWebFrameworkCoreOptions();
-            this.Log = Bootstrap.GetLogger();
+            EWebFrameworkCoreConfigurations = Provider.GetEWebFrameworkCoreOptions();
+            Log = Bootstrap.CreateLoggerFromFactory<JobCompatibleService>(provider);
 
-            this.DBTimeZoneUtils = new DatabaseTimeZoneUtilsExtensions.DatabaseTimeZoneUtils(EWebFrameworkCoreConfigurations.GENERAL.DATABASE_TIMEZONE);
+            DBTimeZoneUtils = new DatabaseTimeZoneUtilsExtensions.DatabaseTimeZoneUtils(EWebFrameworkCoreConfigurations.GENERAL.DATABASE_TIMEZONE);
 
-            this.ConnectionOption = connectionOption;
+            ConnectionOption = connectionOption;
         }
 
         public JobCompatibleService(IServiceProvider provider) : this(provider, new MSSQLConnectionOption())
@@ -78,12 +79,12 @@ namespace EWebFrameworkCore.Vendor.Services
 
         protected void SetConnection(MSSQLConnectionOption connectionOption)
         {
-            this.ConnectionOption = connectionOption;
+            ConnectionOption = connectionOption;
         }
 
         private DBTransaction CreateTransaction()
         {
-            return new DBTransaction(this.GetDBConn().GetSQLConnection(), this, EWebFrameworkCoreConfigurations.DATABASE_CONNECTION.TraceQueries);
+            return new DBTransaction(GetDBConn().GetSQLConnection(), this, EWebFrameworkCoreConfigurations.DATABASE_CONNECTION.TraceQueries);
         }
 
         /// <summary>
@@ -581,7 +582,7 @@ namespace EWebFrameworkCore.Vendor.Services
 
         public void TraceSqlQuery(QueryTimeReport[] timeReports)
         {
-            Bootstrap.GetLogger().Information("\n" +  string.Join("\n", timeReports.Select(x => x.ToString()).ToArray()));
+            Log.LogInformation($"\n{string.Join("\n", timeReports.Select(x => x.ToString()).ToArray())}");
         }
     }
 }
