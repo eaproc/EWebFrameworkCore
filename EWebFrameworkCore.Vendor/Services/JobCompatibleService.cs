@@ -3,6 +3,7 @@ using EEntityCore.DB.MSSQL;
 using EEntityCore.DB.MSSQL.Interfaces;
 using ELibrary.Standard.VB.Objects;
 using EWebFrameworkCore.Vendor.CloudFileSystem;
+using EWebFrameworkCore.Vendor.Configurations;
 using EWebFrameworkCore.Vendor.ConfigurationTypedClasses;
 using EWebFrameworkCore.Vendor.Services.DataTablesNET;
 using EWebFrameworkCore.Vendor.Utils;
@@ -48,6 +49,7 @@ namespace EWebFrameworkCore.Vendor.Services
         public readonly ConfigurationOptions EWebFrameworkCoreConfigurations;
 
         public ILogger<JobCompatibleService> Log { get; }
+        public Serilog.ILogger AsyncNoServiceProviderLogger { get; private set; }
 
         /// <summary>
         /// The timezone of the database set from the Configurations
@@ -68,6 +70,8 @@ namespace EWebFrameworkCore.Vendor.Services
 
             EWebFrameworkCoreConfigurations = Provider.GetEWebFrameworkCoreOptions();
             Log = Bootstrap.CreateLoggerFromFactory<JobCompatibleService>(provider);
+
+            AsyncNoServiceProviderLogger = Bootstrap.AsyncNoServiceProviderLogger ?? throw new InvalidProgramException("AsyncNoServiceProviderLogger was not found!");
 
             DBTimeZoneUtils = new DatabaseTimeZoneUtilsExtensions.DatabaseTimeZoneUtils(EWebFrameworkCoreConfigurations.GENERAL.DATABASE_TIMEZONE);
 

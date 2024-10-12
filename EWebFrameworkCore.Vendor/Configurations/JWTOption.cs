@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace EWebFrameworkCore.Vendor.ConfigurationTypedClasses
+namespace EWebFrameworkCore.Vendor.Configurations
 {
     public class JWTOption
     {

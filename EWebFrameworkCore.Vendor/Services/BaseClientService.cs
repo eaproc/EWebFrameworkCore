@@ -1,4 +1,4 @@
-﻿using EWebFrameworkCore.Vendor.ConfigurationTypedClasses;
+﻿using EWebFrameworkCore.Vendor.Configurations;
 using EWebFrameworkCore.Vendor.Requests;
 using Microsoft.AspNetCore.Http;
 

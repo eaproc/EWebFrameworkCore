@@ -1,4 +1,5 @@
-﻿using EWebFrameworkCore.Vendor.ConfigurationTypedClasses;
+﻿using EWebFrameworkCore.Vendor.Configurations;
+using EWebFrameworkCore.Vendor.ConfigurationTypedClasses;
 using EWebFrameworkCore.Vendor.Requests;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;

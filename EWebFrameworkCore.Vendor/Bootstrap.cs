@@ -38,6 +38,7 @@ namespace EWebFrameworkCore.Vendor
         public static WebApplicationBuilder ConfigureEwebFrameworkCoreServices(this WebApplicationBuilder builder)
         {
             builder.Services.AddScoped<RequestHelper, RequestHelper>();
+            builder.Services.AddHttpClient();
             //Services = services;
 
             // Not updating
@@ -63,7 +64,7 @@ namespace EWebFrameworkCore.Vendor
             loggerConfiguration
                 .MinimumLevel.Verbose()
                 .Enrich.FromLogContext()
-                .WriteTo.Async(a => a.Console(restrictedToMinimumLevel: LogEventLevel.Debug)); // Use async wrapper for non-blocking logging to console
+                .WriteTo.Async(a => a.Console(restrictedToMinimumLevel: LogEventLevel.Information)); // Use async wrapper for non-blocking logging to console
 
             // Apply different log levels for production environment to reduce log verbosity
             if (builder.Environment.IsProduction())

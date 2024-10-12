@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using EWebFrameworkCore.Vendor.Configurations;
+using System.Text.Json.Serialization;
 
 namespace EWebFrameworkCore.Vendor.ConfigurationTypedClasses
 {

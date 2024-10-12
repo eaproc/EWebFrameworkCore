@@ -1,8 +1,4 @@
-﻿using EWebFrameworkCore.Vendor.Middlewares;
-using System;
-using static EWebFrameworkCore.Vendor.ConfigurationTypedClasses.ConfigurationOptions;
-
-namespace EWebFrameworkCore.Vendor.ConfigurationTypedClasses
+﻿namespace EWebFrameworkCore.Vendor.Configurations
 {
     public class EWebFrameworkCoreENV
     {
@@ -24,15 +20,16 @@ namespace EWebFrameworkCore.Vendor.ConfigurationTypedClasses
         /// Indicate if app is in Debug mode ( ENVIRONMENT.DEVELOPMENT || APP_DEBUG )
         /// </summary>
         /// <returns></returns>
-        public  bool APP_DEBUG
+        public bool APP_DEBUG
         {
-            get {
+            get
+            {
                 var z = ServiceProvider.GetEWebFrameworkCoreOptions();
-                return  z.GENERAL.APP_DEBUG; 
+                return z.GENERAL.APP_DEBUG;
             }
         }
 
 
         public IServiceProvider ServiceProvider { get; }
     }
-  }
+}

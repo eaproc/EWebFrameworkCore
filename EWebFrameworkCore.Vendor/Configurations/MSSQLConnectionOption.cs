@@ -1,4 +1,4 @@
-﻿namespace EWebFrameworkCore.Vendor.ConfigurationTypedClasses
+﻿namespace EWebFrameworkCore.Vendor.Configurations
 {
     public class MSSQLConnectionOption
     {
