@@ -1,8 +1,7 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Globalization;
 
 namespace EWebFrameworkCore.Vendor.Services.LogViewer
 {
-
     public class LogViewerService
     {
         public List<LogEntry> ParseLogFile(string logFilePath, string levelFilter, int page, int size, out Dictionary<string, int> levelSummary)
@@ -17,61 +16,37 @@ namespace EWebFrameworkCore.Vendor.Services.LogViewer
                 { "Unknown", 0 }
             };
 
-            var logContent = System.IO.File.ReadAllLines(logFilePath);
+            var logContent = File.ReadAllLines(logFilePath);
             string currentLog = string.Empty;
 
             foreach (var line in logContent)
             {
-                if (Regex.IsMatch(line, @"^\d{4}-\d{2}-\d{2}")) // Matches lines starting with timestamp
+                if (IsTimestampedLine(line)) // New log entry starts here
                 {
                     if (!string.IsNullOrEmpty(currentLog))
                     {
                         var logEntry = ParseLogEntry(currentLog);
                         if (logEntry != null)
                         {
-                            if (levelFilter == "ALL" || logEntry.Level.Equals(levelFilter, StringComparison.OrdinalIgnoreCase))
-                            {
-                                parsedLogs.Add(logEntry);
-                            }
-
-                            // Update the level summary
-                            if (levelSummary.ContainsKey(logEntry.Level))
-                            {
-                                levelSummary[logEntry.Level]++;
-                            }
-                            else
-                            {
-                                levelSummary["Unknown"]++;
-                            }
+                            AddLogEntry(parsedLogs, logEntry, levelFilter, levelSummary);
                         }
                     }
                     currentLog = line; // Start a new log entry
                 }
                 else
                 {
-                    // Append multiline logs to the current log entry
+                    // Append multiline content to the current log entry
                     currentLog += "\n" + line;
                 }
             }
 
-            // Handle the last entry
+            // Handle the last log entry
             if (!string.IsNullOrEmpty(currentLog))
             {
                 var logEntry = ParseLogEntry(currentLog);
                 if (logEntry != null)
                 {
-                    if (levelFilter == "ALL" || logEntry.Level.Equals(levelFilter, StringComparison.OrdinalIgnoreCase))
-                    {
-                        parsedLogs.Add(logEntry);
-                    }
-                    if (levelSummary.ContainsKey(logEntry.Level))
-                    {
-                        levelSummary[logEntry.Level]++;
-                    }
-                    else
-                    {
-                        levelSummary["Unknown"]++;
-                    }
+                    AddLogEntry(parsedLogs, logEntry, levelFilter, levelSummary);
                 }
             }
 
@@ -79,16 +54,83 @@ namespace EWebFrameworkCore.Vendor.Services.LogViewer
             return parsedLogs.Skip((page - 1) * size).Take(size).ToList();
         }
 
-        private static LogEntry ParseLogEntry(string log)
+        private static bool IsTimestampedLine(string line)
         {
-            var logParts = Regex.Match(log, @"^(\d{4}-\d{2}-\d{2}.*? \[\w{3}\])\s(.*)$");
-            var time = logParts.Success ? logParts.Groups[1].Value : "Unknown Time";
-            var level = logParts.Success ? Regex.Match(logParts.Groups[1].Value, @"\[(.*?)\]").Groups[1].Value : "Unknown";
-            var message = logParts.Success ? logParts.Groups[2].Value : log;
+            // Detect if the line starts with a timestamp in the format "yyyy-MM-dd HH:mm:ss"
+            DateTime timestamp;
+            if (line.Length < 24) return false;
+            return DateTime.TryParseExact(line.Substring(0, 23), "yyyy-MM-dd HH:mm:ss.fff", CultureInfo.InvariantCulture, DateTimeStyles.None, out timestamp);
+        }
 
-            return new LogEntry(time, level, message);
+        private static void AddLogEntry(List<LogEntry> parsedLogs, LogEntry logEntry, string levelFilter, Dictionary<string, int> levelSummary)
+        {
+            // Normalize levelFilter and logEntry.Level to lowercase to prevent mismatches
+            if (levelFilter == "ALL" || logEntry.Level.Equals(levelFilter, StringComparison.OrdinalIgnoreCase))
+            {
+                parsedLogs.Add(logEntry);
+            }
+
+            // Normalize level for summary update
+            var normalizedLevel = NormalizeLogLevel(logEntry.Level);
+            if (levelSummary.ContainsKey(normalizedLevel))
+            {
+                levelSummary[normalizedLevel]++;
+            }
+            else
+            {
+                levelSummary["Unknown"]++;
+            }
+        }
+
+        private static LogEntry? ParseLogEntry(string log)
+        {
+            // Split the log into time, level, and message by checking the first timestamp and level brackets
+            var timestampEndIndex = log.IndexOf(" [");
+            if (timestampEndIndex == -1)
+            {
+                return null; // Prevent empty logs with no time or level
+            }
+
+            var levelStartIndex = log.IndexOf("[", timestampEndIndex) + 1;
+            var levelEndIndex = log.IndexOf("]", levelStartIndex);
+
+            if (levelStartIndex == -1 || levelEndIndex == -1)
+            {
+                return null; // Prevent logs with missing level
+            }
+
+            var time = log.Substring(0, timestampEndIndex).Trim();
+            var level = log.Substring(levelStartIndex, levelEndIndex - levelStartIndex).Trim();
+            var message = log.Substring(levelEndIndex + 1).Trim();
+
+            // Return null if message is empty
+            if (string.IsNullOrWhiteSpace(message))
+            {
+                return null;
+            }
+
+            return new LogEntry(time, NormalizeLogLevel(level), message);
+        }
+
+        // Normalize log level (e.g., INF -> info, ERR -> error)
+        private static string NormalizeLogLevel(string level)
+        {
+            switch (level.ToUpper())
+            {
+                case "INF":
+                    return "Info";
+                case "ERR":
+                    return "Error";
+                case "WRN":
+                    return "Warning";
+                case "DBG":
+                    return "Debug";
+                default:
+                    return level;
+            }
         }
     }
-    public record LogEntry(string Time, string Level, string RawMessage);
 
+    // LogEntry as a record
+    public record LogEntry(string Time, string Level, string RawMessage);
 }
