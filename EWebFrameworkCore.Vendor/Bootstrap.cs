@@ -59,7 +59,7 @@ namespace EWebFrameworkCore.Vendor
 
             // Add controllers from the 'This library' 
             builder.Services.AddControllers()
-                .AddApplicationPart(typeof(LogsController).Assembly);
+                .AddApplicationPart(typeof(LogViewerController).Assembly);
 
 
             return builder;

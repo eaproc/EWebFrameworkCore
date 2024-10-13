@@ -1,13 +1,17 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using EWebFrameworkCore.Vendor.Services.LogViewer;
+using Microsoft.AspNetCore.Mvc;
 
 namespace EWebFrameworkCore.Vendor.Controllers
 {
     [Route("log-viewer")]
-    public class LogsController : Controller
+    public class LogViewerController : Controller
     {
         private readonly string logDirectory = PathHandlers.AppLogStore("");
+        private readonly LogViewerService _logService;
 
-        public LogsController(IServiceProvider provider) : base(provider) { }
+        public LogViewerController(IServiceProvider provider) : base(provider) {
+            _logService = new LogViewerService();
+        }
 
         [HttpGet]
         [Route("")]
@@ -37,10 +41,10 @@ namespace EWebFrameworkCore.Vendor.Controllers
             return new JsonResult(fileNames);
         }
 
-        // Get content of a selected log file
+        // Get paginated and parsed log content with level summary and filtering
         [HttpGet]
         [Route("view-file")]
-        public IActionResult GetLogFileContent([FromQuery] string fileName)
+        public IActionResult GetLogFileContent([FromQuery] string fileName, [FromQuery] string level = "ALL", [FromQuery] int page = 1, [FromQuery] int size = 20)
         {
             var logFilePath = Path.Combine(logDirectory, fileName);
 
@@ -49,8 +53,16 @@ namespace EWebFrameworkCore.Vendor.Controllers
                 return NotFound("Log file not found.");
             }
 
-            var logContent = System.IO.File.ReadAllText(logFilePath);
-            return Content(logContent, "text/plain");
+            Dictionary<string, int> levelSummary;
+            var parsedLogs = _logService.ParseLogFile(logFilePath, level, page, size, out levelSummary);
+
+            return Ok(new
+            {
+                totalEntries = levelSummary,
+                currentPage = page,
+                pageSize = size,
+                logs = parsedLogs
+            });
         }
     }
 }
