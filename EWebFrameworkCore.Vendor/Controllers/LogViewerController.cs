@@ -41,7 +41,6 @@ namespace EWebFrameworkCore.Vendor.Controllers
             return new JsonResult(fileNames);
         }
 
-        // Get paginated and parsed log content with level summary and filtering
         [HttpGet]
         [Route("view-file")]
         public IActionResult GetLogFileContent([FromQuery] string fileName, [FromQuery] string level = "ALL", [FromQuery] int page = 1, [FromQuery] int size = 20)
@@ -53,12 +52,15 @@ namespace EWebFrameworkCore.Vendor.Controllers
                 return NotFound("Log file not found.");
             }
 
-            Dictionary<string, int> levelSummary;
-            var parsedLogs = _logService.ParseLogFile(logFilePath, level, page, size, out levelSummary);
+            Dictionary<string, int> levelSummary; // Overall summary
+            int filteredTotal; // Filtered total
+
+            var parsedLogs = _logService.ParseLogFile(logFilePath, level, page, size, out levelSummary, out filteredTotal);
 
             return Ok(new
             {
-                totalEntries = levelSummary,
+                totalEntries = levelSummary, // Overall summary
+                filteredTotal = filteredTotal, // Filtered total
                 currentPage = page,
                 pageSize = size,
                 logs = parsedLogs

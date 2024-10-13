@@ -4,21 +4,23 @@ namespace EWebFrameworkCore.Vendor.Services.LogViewer
 {
     public class LogViewerService
     {
-        public List<LogEntry> ParseLogFile(string logFilePath, string levelFilter, int page, int size, out Dictionary<string, int> levelSummary)
+        public List<LogEntry> ParseLogFile(string logFilePath, string levelFilter, int page, int size, out Dictionary<string, int> levelSummary, out int filteredTotal)
         {
             var parsedLogs = new List<LogEntry>();
             levelSummary = new Dictionary<string, int>
-            {
-                { "Error", 0 },
-                { "Warning", 0 },
-                { "Info", 0 },
-                { "Debug", 0 },
-                { "Unknown", 0 }
-            };
+        {
+            { "Error", 0 },
+            { "Warning", 0 },
+            { "Info", 0 },
+            { "Debug", 0 },
+            { "Unknown", 0 }
+        };
 
+            var totalFilteredLogs = new List<LogEntry>(); // Store logs matching the filter
             var logContent = File.ReadAllLines(logFilePath);
             string currentLog = string.Empty;
 
+            // Overall log processing, no filtering applied here
             foreach (var line in logContent)
             {
                 if (IsTimestampedLine(line)) // New log entry starts here
@@ -28,7 +30,14 @@ namespace EWebFrameworkCore.Vendor.Services.LogViewer
                         var logEntry = ParseLogEntry(currentLog);
                         if (logEntry != null)
                         {
-                            AddLogEntry(parsedLogs, logEntry, levelFilter, levelSummary);
+                            // Update overall summary for all logs (unfiltered)
+                            UpdateLevelSummary(levelSummary, logEntry);
+
+                            // Apply filter and collect filtered logs
+                            if (levelFilter == "ALL" || logEntry.Level.Equals(levelFilter, StringComparison.OrdinalIgnoreCase))
+                            {
+                                totalFilteredLogs.Add(logEntry); // Collect only the filtered logs
+                            }
                         }
                     }
                     currentLog = line; // Start a new log entry
@@ -46,12 +55,22 @@ namespace EWebFrameworkCore.Vendor.Services.LogViewer
                 var logEntry = ParseLogEntry(currentLog);
                 if (logEntry != null)
                 {
-                    AddLogEntry(parsedLogs, logEntry, levelFilter, levelSummary);
+                    // Update overall summary for all logs (unfiltered)
+                    UpdateLevelSummary(levelSummary, logEntry);
+
+                    // Apply filter and collect filtered logs
+                    if (levelFilter == "ALL" || logEntry.Level.Equals(levelFilter, StringComparison.OrdinalIgnoreCase))
+                    {
+                        totalFilteredLogs.Add(logEntry); // Collect only the filtered logs
+                    }
                 }
             }
 
-            // Apply pagination
-            return parsedLogs.Skip((page - 1) * size).Take(size).ToList();
+            // Set the total filtered count for pagination
+            filteredTotal = totalFilteredLogs.Count;
+
+            // Return only the logs matching the filter and apply pagination
+            return totalFilteredLogs.Skip((page - 1) * size).Take(size).ToList();
         }
 
         private static bool IsTimestampedLine(string line)
@@ -62,15 +81,9 @@ namespace EWebFrameworkCore.Vendor.Services.LogViewer
             return DateTime.TryParseExact(line.Substring(0, 23), "yyyy-MM-dd HH:mm:ss.fff", CultureInfo.InvariantCulture, DateTimeStyles.None, out timestamp);
         }
 
-        private static void AddLogEntry(List<LogEntry> parsedLogs, LogEntry logEntry, string levelFilter, Dictionary<string, int> levelSummary)
+        private static void UpdateLevelSummary(Dictionary<string, int> levelSummary, LogEntry logEntry)
         {
-            // Normalize levelFilter and logEntry.Level to lowercase to prevent mismatches
-            if (levelFilter == "ALL" || logEntry.Level.Equals(levelFilter, StringComparison.OrdinalIgnoreCase))
-            {
-                parsedLogs.Add(logEntry);
-            }
-
-            // Normalize level for summary update
+            // Normalize level and update the overall summary
             var normalizedLevel = NormalizeLogLevel(logEntry.Level);
             if (levelSummary.ContainsKey(normalizedLevel))
             {
