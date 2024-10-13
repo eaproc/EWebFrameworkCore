@@ -1,4 +1,5 @@
 ﻿using EWebFrameworkCore.Vendor.ConfigurationTypedClasses;
+using EWebFrameworkCore.Vendor.Controllers;
 using EWebFrameworkCore.Vendor.Logging;
 using EWebFrameworkCore.Vendor.Requests;
 using Microsoft.AspNetCore.Builder;
@@ -54,6 +55,12 @@ namespace EWebFrameworkCore.Vendor
             {
                 CreateScopedILoggerSerilog(builder, hostingContext, loggerConfiguration);
             });
+
+
+            // Add controllers from the 'This library' 
+            builder.Services.AddControllers()
+                .AddApplicationPart(typeof(LogsController).Assembly);
+
 
             return builder;
         }
