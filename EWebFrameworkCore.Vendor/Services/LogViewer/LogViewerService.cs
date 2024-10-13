@@ -4,24 +4,28 @@ namespace EWebFrameworkCore.Vendor.Services.LogViewer
 {
     public class LogViewerService
     {
-        public List<LogEntry> ParseLogFile(string logFilePath, string levelFilter, int page, int size, out Dictionary<string, int> levelSummary, out int filteredTotal)
-        {
-            var parsedLogs = new List<LogEntry>();
-            levelSummary = new Dictionary<string, int>
-        {
-            { "Error", 0 },
-            { "Warning", 0 },
-            { "Info", 0 },
-            { "Debug", 0 },
-            { "Unknown", 0 }
-        };
 
-            var totalFilteredLogs = new List<LogEntry>(); // Store logs matching the filter
-            var logContent = File.ReadAllLines(logFilePath);
-            string currentLog = string.Empty;
+    public List<LogEntry> ParseLogFile(string logFilePath, string levelFilter, int page, int size, out Dictionary<string, int> levelSummary, out int filteredTotal)
+    {
+        var parsedLogs = new List<LogEntry>();
+        levelSummary = new Dictionary<string, int>
+    {
+        { "Error", 0 },
+        { "Warning", 0 },
+        { "Info", 0 },
+        { "Debug", 0 },
+        { "Unknown", 0 }
+    };
 
-            // Overall log processing, no filtering applied here
-            foreach (var line in logContent)
+        var totalFilteredLogs = new List<LogEntry>(); // Store logs matching the filter
+        string currentLog = string.Empty;
+
+        // Open the log file in shared read mode to avoid locking issues
+        using (var fileStream = new FileStream(logFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+        using (var reader = new StreamReader(fileStream))
+        {
+            string? line;
+            while ((line = reader.ReadLine()) != null)
             {
                 if (IsTimestampedLine(line)) // New log entry starts here
                 {
@@ -65,15 +69,16 @@ namespace EWebFrameworkCore.Vendor.Services.LogViewer
                     }
                 }
             }
-
-            // Set the total filtered count for pagination
-            filteredTotal = totalFilteredLogs.Count;
-
-            // Return only the logs matching the filter and apply pagination
-            return totalFilteredLogs.Skip((page - 1) * size).Take(size).ToList();
         }
 
-        private static bool IsTimestampedLine(string line)
+        // Set the total filtered count for pagination
+        filteredTotal = totalFilteredLogs.Count;
+
+        // Return only the logs matching the filter and apply pagination
+        return totalFilteredLogs.Skip((page - 1) * size).Take(size).ToList();
+    }
+
+    private static bool IsTimestampedLine(string line)
         {
             // Detect if the line starts with a timestamp in the format "yyyy-MM-dd HH:mm:ss"
             DateTime timestamp;

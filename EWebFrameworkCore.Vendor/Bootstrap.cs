@@ -100,7 +100,7 @@ namespace EWebFrameworkCore.Vendor
 
                 // Verbose logs with JSON formatting (e.g., for structured logging)
                 loggerConfiguration.WriteTo.Async(a => a.File(
-                    PathHandlers.AppLogStore("Verbose.EWebCore.json"),
+                    PathHandlers.AppLogStore("Vrb.EWebCore.log"),
                     rollingInterval: RollingInterval.Day,
                     retainedFileCountLimit: 2,
                     restrictedToMinimumLevel: LogEventLevel.Verbose,
