@@ -142,6 +142,17 @@ namespace EWebFrameworkCore.Vendor.Services.LogViewer
                     return level;
             }
         }
+
+        // Helper method to format file size into human-readable form
+        public static string FormatFileSize(long bytes)
+        {
+            if (bytes >= 1024 * 1024)
+                return $"{(bytes / 1024f / 1024f):0.##} MB";
+            else if (bytes >= 1024)
+                return $"{(bytes / 1024f):0.##} KB";
+            else
+                return $"{bytes} bytes";
+        }
     }
 
     // LogEntry as a record

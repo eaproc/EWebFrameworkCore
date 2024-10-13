@@ -20,7 +20,6 @@ namespace EWebFrameworkCore.Vendor.Controllers
             return PhysicalFile(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "log-viewer.html"), "text/html");
         }
 
-        // List all log files
         [HttpGet]
         [Route("list-files")]
         public IActionResult ListLogFiles()
@@ -30,16 +29,18 @@ namespace EWebFrameworkCore.Vendor.Controllers
                 return NotFound("Log directory not found.");
             }
 
-            var logFiles = Directory.GetFiles(logDirectory, "*.log");
-            var fileNames = new List<string>();
+            var logFiles = Directory.GetFiles(logDirectory, "*.log")
+                                    .OrderByDescending(file => System.IO.File.GetLastWriteTime(file)) // Order by last modified date
+                                    .Select(file => new
+                                    {
+                                        FileName = Path.GetFileName(file),
+                                        FileSize = LogViewerService.FormatFileSize(new FileInfo(file).Length) // Get file size
+                                    })
+                                    .ToList();
 
-            foreach (var file in logFiles)
-            {
-                fileNames.Add(Path.GetFileName(file));
-            }
-
-            return new JsonResult(fileNames);
+            return new JsonResult(logFiles);
         }
+
 
         [HttpGet]
         [Route("view-file")]

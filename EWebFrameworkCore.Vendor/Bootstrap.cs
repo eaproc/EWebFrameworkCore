@@ -89,18 +89,27 @@ namespace EWebFrameworkCore.Vendor
             // Add file logging if enabled in configuration
             if (hostingContext.Configuration.GetValue<bool>("Logging:File:Enabled"))
             {
+                //// Verbose logs with JSON formatting (e.g., for structured logging)
+                //loggerConfiguration.WriteTo.Async(a => a.File(
+                //    new SerilogPrettyJsonFormatter(),
+                //    PathHandlers.AppLogStore("Verbose.EWebCore.json"),
+                //    rollingInterval: RollingInterval.Day,
+                //    retainedFileCountLimit: 2,
+                //    restrictedToMinimumLevel: LogEventLevel.Verbose
+                //));
+
                 // Verbose logs with JSON formatting (e.g., for structured logging)
                 loggerConfiguration.WriteTo.Async(a => a.File(
-                    new SerilogPrettyJsonFormatter(),
-                    PathHandlers.AppLogStore("Verbose.EWebFrameworkCore.json"),
+                    PathHandlers.AppLogStore("Verbose.EWebCore.json"),
                     rollingInterval: RollingInterval.Day,
                     retainedFileCountLimit: 2,
-                    restrictedToMinimumLevel: LogEventLevel.Verbose
+                    restrictedToMinimumLevel: LogEventLevel.Verbose,
+                    outputTemplate: "{NewLine}{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj} {NewLine}{Exception}"
                 ));
 
                 // Information-level logs with a specific text template
                 loggerConfiguration.WriteTo.Async(a => a.File(
-                    PathHandlers.AppLogStore("Information.EWebFrameworkCore.log"),
+                    PathHandlers.AppLogStore("Inf.EWebCore.log"),
                     rollingInterval: RollingInterval.Day,
                     retainedFileCountLimit: 6,
                     restrictedToMinimumLevel: LogEventLevel.Information,
@@ -109,7 +118,7 @@ namespace EWebFrameworkCore.Vendor
 
                 // Warning-level logs with a longer retention period
                 loggerConfiguration.WriteTo.Async(a => a.File(
-                    PathHandlers.AppLogStore("Warning.EWebFrameworkCore.log"),
+                    PathHandlers.AppLogStore("Wrn.EWebCore.log"),
                     rollingInterval: RollingInterval.Day,
                     retainedFileCountLimit: 14,
                     restrictedToMinimumLevel: LogEventLevel.Warning,
@@ -148,7 +157,7 @@ namespace EWebFrameworkCore.Vendor
 
                 // Adding async wrapper to the sinks to make logging non-blocking
                 .WriteTo.Async(a => a.File(
-                    PathHandlers.AppLogStore("AsyncNoServiceProviderLogger.log"),
+                    PathHandlers.AppLogStore("AsyncBackend.log"),
                     rollingInterval: RollingInterval.Day,
                     retainedFileCountLimit: 14,
                     restrictedToMinimumLevel: LogEventLevel.Information,
