@@ -1,6 +1,7 @@
 ﻿using EWebFrameworkCore.Vendor.Configurations;
 using EWebFrameworkCore.Vendor.ConfigurationTypedClasses;
 using EWebFrameworkCore.Vendor.Requests;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -23,7 +24,9 @@ namespace EWebFrameworkCore.Vendor
 
         protected ILogger<Controller> Log { private set; get; }
 
-        public Controller(IServiceProvider provider)
+        public new HttpContext HttpContext { get => Provider.GetHttpContext(); }
+
+        public Controller(IServiceProvider provider) : base()
         {
             Provider = provider;
 
@@ -31,7 +34,7 @@ namespace EWebFrameworkCore.Vendor
             Configurations = provider.GetConfigurations();
 
             DEFAULT_MSSQL = EWebFrameworkCoreConfigurations.DATABASE_CONNECTION;
-            
+
             Log = Bootstrap.CreateLoggerFromFactory<Controller>(provider);
 
             RequestInputs = provider.GetRequestHelper();
