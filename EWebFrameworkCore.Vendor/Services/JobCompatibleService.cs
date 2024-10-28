@@ -7,6 +7,7 @@ using EWebFrameworkCore.Vendor.Configurations;
 using EWebFrameworkCore.Vendor.ConfigurationTypedClasses;
 using EWebFrameworkCore.Vendor.Services.DataTablesNET;
 using EWebFrameworkCore.Vendor.Utils;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Serilog.Core;
@@ -536,6 +537,12 @@ namespace EWebFrameworkCore.Vendor.Services
         public void StoreFileOnCloud(string destinationRelativePath, TemporaryFile pUploadedFile)
         {
             CloudStore.SaveFile(ObjectPath: destinationRelativePath, FileFullPath: pUploadedFile.FileFullPath);
+        }
+        
+        public void StoreFileOnCloud(string destinationRelativePath, IFormFile formFile)
+        {
+            using var r = new BinaryReader(formFile.OpenReadStream());
+            CloudStore.SaveFileContent(destinationRelativePath, Contents: r.ReadBytes((int)formFile.Length));
         }
 
         /// <summary>
